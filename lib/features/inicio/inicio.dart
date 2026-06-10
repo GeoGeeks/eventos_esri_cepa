@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/images.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/images.dart';
+import '../../core/widgets/event_card.dart';
 
 class InicioApp extends StatelessWidget {
   const InicioApp({super.key});
@@ -10,7 +11,6 @@ class InicioApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -53,9 +53,7 @@ class InicioApp extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-
                             const SizedBox(height: 8),
-
                             const Text(
                               'María López',
                               style: TextStyle(
@@ -64,20 +62,17 @@ class InicioApp extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-
                             const SizedBox(height: 4),
-
                             Text(
                               'Ingeniera Civil · Procalculo',
                               style: TextStyle(
-                                color: AppColors.white.withOpacity(0.9),
+                                color: AppColors.white.withValues(alpha: 0.9),
                                 fontSize: 14,
                               ),
                             ),
                           ],
                         ),
                       ),
-
                       Container(
                         width: 60,
                         height: 60,
@@ -86,7 +81,7 @@ class InicioApp extends StatelessWidget {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
+                              color: AppColors.white.withValues(alpha: 0.9),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -100,7 +95,6 @@ class InicioApp extends StatelessWidget {
                               color: AppColors.primary,
                               size: 30,
                             ),
-
                             Positioned(
                               top: 14,
                               right: 14,
@@ -141,12 +135,19 @@ class InicioApp extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Aquí continúan las tarjetas de eventos.',
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: EventCard(
+                title: 'CUE 2026',
+                date: 'Oct 02 - 11:00 a.m.',
+                location: 'Ágora Bogotá',
+                image: Images.esriEventos,
+                onViewMore: () {},
+                onCredential: () {},
               ),
             ),
+
+            const SizedBox(height: 24),
           ],
         ),
       ),
