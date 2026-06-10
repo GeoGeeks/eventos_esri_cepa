@@ -1,3 +1,5 @@
+import '../../../core/constants/app_images.dart';
+
 class OnboardingModel {
   final String image;
   final String title;
@@ -12,25 +14,28 @@ class OnboardingModel {
 
 const List<OnboardingModel> onboardingItems = [
   OnboardingModel(
-    image: 'assets/images/onboarding_1.png',
+    image: AppImages.onboarding1,
     title: 'Eventos Esri',
     description:
         'Consulte próximos eventos de Esri y acceda a toda la información desde un solo lugar.',
   ),
+
   OnboardingModel(
-    image: 'assets/images/onboarding_2.png',
+    image: AppImages.onboarding2,
     title: 'Credencial digital',
     description:
         'Acceda a su credencial digital para ingresar de manera rápida y segura a sus eventos.',
   ),
+
   OnboardingModel(
-    image: 'assets/images/onboarding_3.png',
+    image: AppImages.onboarding3,
     title: 'Agenda personalizada',
     description:
         'Visualice horarios, sesiones y actividades programadas para cada evento.',
   ),
+
   OnboardingModel(
-    image: 'assets/images/onboarding_4.png',
+    image: AppImages.onboarding4,
     title: 'Información del evento',
     description:
         'Encuentre ubicación, detalles importantes y contenido relacionado con cada evento.',

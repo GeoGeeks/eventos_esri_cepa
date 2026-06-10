@@ -15,9 +15,9 @@ class AppImages {
   static const profileLogo =
       'assets/images/profile/profile_1.png';
 
-  static const profileHeader =
-      'assets/images/profile/profile_2.png';
-
   static const inicioHeader =
       'assets/images/inicio/header_inicio.png';
+  
+  static const iconHeader = 
+      'assets/images/inicio/icon_header.png';
 }

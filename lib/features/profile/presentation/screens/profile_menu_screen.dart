@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../../../core/constants/app_images.dart';
 import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/profile_section_title.dart';
@@ -87,7 +87,7 @@ class ProfileMenuScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           Image.asset(
-            'assets/images/profile_1.png',
+            AppImages.profileLogo,
             height: 24,
           ),
 

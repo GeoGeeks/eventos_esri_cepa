@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_images.dart';
 
 class InicioApp extends StatelessWidget {
   const InicioApp({super.key});
@@ -22,7 +23,7 @@ class InicioApp extends StatelessWidget {
                 ),
                 image: DecorationImage(
                   image: AssetImage(
-                    'assets/images/header_inicio.png',
+                    AppImages.inicioHeader,
                   ),
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
