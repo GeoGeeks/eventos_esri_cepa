@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/constants/fonts.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -24,7 +25,7 @@ class EsriEventosApp extends StatelessWidget {
         title: 'Esri Eventos',
         theme: ThemeData(
           useMaterial3: true,
-          fontFamily: 'AvenirNext',
+          fontFamily: Fonts.avenir,
         ),
         home: const OnboardingScreen(),
       ),

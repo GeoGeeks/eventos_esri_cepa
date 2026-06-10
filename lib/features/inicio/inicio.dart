@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/images.dart';
+import '../../core/constants/app_colors.dart';
+
 class InicioApp extends StatelessWidget {
   const InicioApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
 
       body: SingleChildScrollView(
         child: Column(
@@ -22,7 +25,7 @@ class InicioApp extends StatelessWidget {
                 ),
                 image: DecorationImage(
                   image: AssetImage(
-                    'assets/images/header_inicio.png',
+                    Images.headerInicio,
                   ),
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
@@ -45,7 +48,7 @@ class InicioApp extends StatelessWidget {
                             const Text(
                               'Bienvenida',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -56,7 +59,7 @@ class InicioApp extends StatelessWidget {
                             const Text(
                               'María López',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.white,
                                 fontSize: 26,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -67,7 +70,7 @@ class InicioApp extends StatelessWidget {
                             Text(
                               'Ingeniera Civil · Procalculo',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: AppColors.white.withOpacity(0.9),
                                 fontSize: 14,
                               ),
                             ),
@@ -79,7 +82,7 @@ class InicioApp extends StatelessWidget {
                         width: 60,
                         height: 60,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.white,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -94,7 +97,7 @@ class InicioApp extends StatelessWidget {
                           children: [
                             const Icon(
                               Icons.notifications_none,
-                              color: Color(0xFF091F44),
+                              color: AppColors.primary,
                               size: 30,
                             ),
 
@@ -105,7 +108,7 @@ class InicioApp extends StatelessWidget {
                                 width: 12,
                                 height: 12,
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFFE64B3C),
+                                  color: AppColors.notification,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -130,7 +133,7 @@ class InicioApp extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF091F44),
+                    color: AppColors.primary,
                   ),
                 ),
               ),
