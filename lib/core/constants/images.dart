@@ -2,6 +2,9 @@ class Images {
   Images._();
 
   static const String esriEventos = 'assets/images/esri_eventos.png';
+
+  static const String planetaEsri = 'assets/images/comunidad_esri.png';
+
   static const String headerInicio = 'assets/images/header_inicio.png';
 
   static const String iconHeader = 'assets/images/icon_header.png';
