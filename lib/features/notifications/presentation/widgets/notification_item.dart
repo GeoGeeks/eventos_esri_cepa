@@ -26,14 +26,16 @@ class NotificationItem extends StatelessWidget {
         color: isNew
             ? const Color(0xFFF3F7FA)
             : Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius:
+            BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: const Color(0xFFDDF1FF),
-            child: Icon(
+            backgroundColor:
+                const Color(0xFFDDF1FF),
+            child: const Icon(
               Icons.event_note_outlined,
               color: Color(0xFF007AC2),
             ),
@@ -49,7 +51,8 @@ class NotificationItem extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w600,
+                    fontWeight:
+                        FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
@@ -72,7 +75,8 @@ class NotificationItem extends StatelessWidget {
                     color: Color(0xFF091F44),
                     fontSize: 12,
                     decoration:
-                        TextDecoration.underline,
+                        TextDecoration
+                            .underline,
                   ),
                 ),
               ],
@@ -92,7 +96,9 @@ class NotificationItem extends StatelessWidget {
               if (isNew)
                 Container(
                   margin:
-                      const EdgeInsets.only(top: 8),
+                      const EdgeInsets.only(
+                    top: 8,
+                  ),
                   width: 8,
                   height: 8,
                   decoration:

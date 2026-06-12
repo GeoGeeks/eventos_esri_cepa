@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
-class EmptyNotifications extends StatelessWidget {
-  const EmptyNotifications({super.key});
+class EmptyNotifications
+    extends StatelessWidget {
+  const EmptyNotifications({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding:
-            const EdgeInsets.symmetric(horizontal: 32),
+            const EdgeInsets.symmetric(
+          horizontal: 32,
+        ),
         child: Column(
           mainAxisAlignment:
               MainAxisAlignment.center,
@@ -16,16 +21,18 @@ class EmptyNotifications extends StatelessWidget {
             Icon(
               Icons.notifications_none,
               size: 100,
-              color: Colors.grey,
+              color: Colors.grey.shade400,
             ),
 
             const SizedBox(height: 24),
 
             const Text(
               'No tienes notificaciones',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
-                fontWeight: FontWeight.w500,
+                fontWeight:
+                    FontWeight.w500,
               ),
             ),
 
@@ -36,6 +43,7 @@ class EmptyNotifications extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey,
+                fontSize: 16,
               ),
             ),
           ],

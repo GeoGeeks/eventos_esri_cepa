@@ -1,21 +1,71 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/notification_item.dart';
+import '../widgets/empty_notifications.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
+  State<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
+}
+
+class _NotificationsScreenState
+    extends State<NotificationsScreen> {
+  final List<Map<String, dynamic>> notifications = [
+    {
+      'id': '1',
+      'title': 'Actualización del evento',
+      'description':
+          'Se ha modificado la hora de inicio.',
+      'date': '20/06',
+      'isNew': true,
+    },
+    {
+      'id': '2',
+      'title': 'Actualización del evento',
+      'description':
+          'Se ha modificado la hora de inicio.',
+      'date': '19/06',
+      'isNew': false,
+    },
+    {
+      'id': '3',
+      'title': 'Actualización del evento',
+      'description':
+          'Se ha modificado la hora de inicio.',
+      'date': '19/06',
+      'isNew': false,
+    },
+    {
+      'id': '4',
+      'title': 'Actualización del evento',
+      'description':
+          'Se ha modificado la hora de inicio.',
+      'date': '19/06',
+      'isNew': false,
+    },
+  ];
+
+  @override
   Widget build(BuildContext context) {
+    if (notifications.isEmpty) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: EmptyNotifications(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: Column(
           children: [
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 20,
               ),
@@ -30,9 +80,12 @@ class NotificationsScreen extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        notifications.clear();
+                      });
+                    },
                     child: const Text(
                       'Borrar todo',
                     ),
@@ -49,40 +102,7 @@ class NotificationsScreen extends StatelessWidget {
                 child: Text(
                   'Hoy',
                   style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            const NotificationItem(
-              title: 'Actualización del evento',
-              description:
-                  'Se ha modificado la hora de inicio.',
-              date: '20/06',
-              isNew: true,
-            ),
-
-            const NotificationItem(
-              title: 'Actualización del evento',
-              description:
-                  'Se ha modificado la hora de inicio.',
-              date: '19/06',
-            ),
-
-            const SizedBox(height: 16),
-
-            const Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Semana pasada',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -91,30 +111,66 @@ class NotificationsScreen extends StatelessWidget {
             const SizedBox(height: 8),
 
             Expanded(
-              child: ListView(
-                children: const [
-                  NotificationItem(
-                    title:
-                        'Actualización del evento',
-                    description:
-                        'Se ha modificado la hora de inicio.',
-                    date: '19/06',
-                  ),
-                  NotificationItem(
-                    title:
-                        'Actualización del evento',
-                    description:
-                        'Se ha modificado la hora de inicio.',
-                    date: '19/06',
-                  ),
-                  NotificationItem(
-                    title:
-                        'Actualización del evento',
-                    description:
-                        'Se ha modificado la hora de inicio.',
-                    date: '19/06',
-                  ),
-                ],
+              child: ListView.builder(
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final notification =
+                      notifications[index];
+
+                  return Dismissible(
+                    key: Key(
+                      notification['id'],
+                    ),
+
+                    direction:
+                        DismissDirection.endToStart,
+
+                    background: Container(
+                      margin:
+                          const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      alignment:
+                          Alignment.centerRight,
+                      padding:
+                          const EdgeInsets.only(
+                        right: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius:
+                            BorderRadius.circular(
+                          12,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    onDismissed: (_) {
+                      setState(() {
+                        notifications.removeAt(
+                          index,
+                        );
+                      });
+                    },
+
+                    child: NotificationItem(
+                      title:
+                          notification['title'],
+                      description:
+                          notification[
+                              'description'],
+                      date:
+                          notification['date'],
+                      isNew:
+                          notification['isNew'],
+                    ),
+                  );
+                },
               ),
             ),
           ],
