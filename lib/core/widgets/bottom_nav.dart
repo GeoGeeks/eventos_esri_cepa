@@ -88,19 +88,13 @@ class _NavButton extends StatelessWidget {
         width: 64,
         height: 56,
         decoration: BoxDecoration(
-          color: active
-              ? kWhite.withOpacity(0.15)
-              : Colors.transparent,
+          color: active ? kWhite.withOpacity(0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: kWhite,
-              size: 22,
-            ),
+            Icon(icon, color: kWhite, size: 22),
             const SizedBox(height: 4),
             Text(
               label,
@@ -131,6 +125,7 @@ class _FabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.translucent, // ← fix: captura tap aunque el círculo sobresalga
       child: SizedBox(
         width: 72,
         height: 80,
@@ -148,10 +143,7 @@ class _FabItem extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: active ? kNavBg : kWhite,
                   border: active
-                      ? Border.all(
-                          color: kWhite,
-                          width: 2.5,
-                        )
+                      ? Border.all(color: kWhite, width: 2.5)
                       : null,
                   boxShadow: active
                       ? null
@@ -170,8 +162,6 @@ class _FabItem extends StatelessWidget {
                 ),
               ),
             ),
-
-            // TEXTO MÁS ARRIBA COMO EN LA IMAGEN DE REFERENCIA
             const Positioned(
               bottom: 22,
               child: Text(
