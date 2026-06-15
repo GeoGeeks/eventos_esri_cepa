@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 
-const Color kNavBg = Color(0xFF091F44);
-const Color kWhite = Colors.white;
+const Color kNavBg = AppColors.primary;
+const Color kWhite = AppColors.white;
 const String kFont = 'AvenirNextLTPro';
 
 class CustomBottomNav extends StatelessWidget {
@@ -85,22 +86,24 @@ class _NavButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 64,
-        height: 56,
+        width: 54,
+        height: 52,
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         decoration: BoxDecoration(
-          color: active ? kWhite.withOpacity(0.15) : Colors.transparent,
+          color: active ? AppColors.navActiveHighlight : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: kWhite, size: 22),
-            const SizedBox(height: 4),
+            Icon(icon, color: kWhite, size: 20),
+            const SizedBox(height: 3),
             Text(
               label,
               style: const TextStyle(
                 fontFamily: kFont,
-                fontSize: 11,
+                fontSize: 10,
                 color: kWhite,
                 fontWeight: FontWeight.w400,
               ),
@@ -125,7 +128,7 @@ class _FabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.translucent, // ← fix: captura tap aunque el círculo sobresalga
+      behavior: HitTestBehavior.translucent,
       child: SizedBox(
         width: 72,
         height: 80,
@@ -141,7 +144,7 @@ class _FabItem extends StatelessWidget {
                 height: 58,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: active ? kNavBg : kWhite,
+                  color: active ? AppColors.navActiveReservas : kWhite,
                   border: active
                       ? Border.all(color: kWhite, width: 2.5)
                       : null,

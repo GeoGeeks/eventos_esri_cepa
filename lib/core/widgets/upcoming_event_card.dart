@@ -26,9 +26,9 @@ class UpcomingEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 120,
+      height: 140,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -63,8 +63,11 @@ class UpcomingEventCard extends StatelessWidget {
                           title,
                           style: const TextStyle(
                             fontFamily: Fonts.avenir,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textTitle,
+                            height: 24 / 20,
+                            letterSpacing: 0,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -75,7 +78,7 @@ class UpcomingEventCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  _InfoRow(icon: Icons.access_time, text: date),
+                  _InfoRow(icon: Icons.access_time_outlined, text: date),
                   const SizedBox(height: 3),
                   _InfoRow(icon: Icons.location_on_outlined, text: location),
                   const Spacer(),
@@ -86,8 +89,7 @@ class UpcomingEventCard extends StatelessWidget {
                           label: 'Ver más',
                           onPressed: onViewMore,
                           variant: ButtonCardsVariant.outlined,
-                          height: 30,
-                          fontSize: 11,
+                          height: 36,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -95,8 +97,7 @@ class UpcomingEventCard extends StatelessWidget {
                         child: AppButton(
                           label: 'Registrarse',
                           onPressed: onRegister,
-                          height: 30,
-                          fontSize: 11,
+                          height: 36,
                         ),
                       ),
                     ],
@@ -121,15 +122,18 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 13, color: Colors.grey),
+        Icon(icon, size: 16, color: AppColors.textSubtle),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
             text,
             style: const TextStyle(
               fontFamily: Fonts.avenir,
-              fontSize: 11,
-              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSubtle,
+              height: 16 / 14,
+              letterSpacing: 0,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -157,8 +161,9 @@ class _ModeChip extends StatelessWidget {
         label,
         style: const TextStyle(
           fontFamily: Fonts.avenir,
-          fontSize: 10,
-          color: Colors.grey,
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textSubtle,
         ),
       ),
     );

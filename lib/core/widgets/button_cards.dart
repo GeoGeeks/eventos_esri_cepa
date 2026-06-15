@@ -16,7 +16,7 @@ class AppButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.variant = ButtonCardsVariant.filled,
-    this.height = 44,
+    this.height = 36,
     this.fontSize,
   });
 
@@ -32,34 +32,44 @@ class AppButton extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.white,
                 elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero, // esquina recta
                 ),
               ),
               child: Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: Fonts.avenir,
-                  fontSize: fontSize ?? 13,
-                  fontWeight: FontWeight.w500,
+                  fontSize: fontSize ?? 16,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.white,
+                  height: 20 / 16,
                 ),
               ),
             )
           : OutlinedButton(
               onPressed: onPressed,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                backgroundColor: AppColors.cardBg,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                side: const BorderSide(color: AppColors.primary, width: 1),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero, // esquina recta
                 ),
               ),
               child: Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: Fonts.avenir,
                   color: AppColors.primary,
-                  fontSize: fontSize ?? 13,
-                  fontWeight: FontWeight.w500,
+                  fontSize: fontSize ?? 16,
+                  fontWeight: FontWeight.w400,
+                  height: 20 / 16,
                 ),
               ),
             ),

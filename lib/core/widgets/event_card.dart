@@ -26,7 +26,7 @@ class EventCard extends StatelessWidget {
     return Container(
       width: 260,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -58,12 +58,15 @@ class EventCard extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     fontFamily: Fonts.avenir,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textTitle,
+                    height: 24 / 20,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 8),
-                _InfoRow(icon: Icons.access_time, text: date),
+                _InfoRow(icon: Icons.access_time_outlined, text: date),
                 const SizedBox(height: 4),
                 _InfoRow(icon: Icons.location_on_outlined, text: location),
                 const SizedBox(height: 14),
@@ -74,8 +77,7 @@ class EventCard extends StatelessWidget {
                         label: 'Ver más',
                         onPressed: onViewMore,
                         variant: ButtonCardsVariant.outlined,
-                        height: 38,
-                        fontSize: 12,
+                        height: 36,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -83,8 +85,7 @@ class EventCard extends StatelessWidget {
                       child: AppButton(
                         label: 'Mi credencial',
                         onPressed: onCredential,
-                        height: 38,
-                        fontSize: 12,
+                        height: 36,
                       ),
                     ),
                   ],
@@ -108,15 +109,18 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 15, color: Colors.grey),
+        Icon(icon, size: 16, color: AppColors.textSubtle),
         const SizedBox(width: 5),
         Expanded(
           child: Text(
             text,
             style: const TextStyle(
               fontFamily: Fonts.avenir,
-              fontSize: 12,
-              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSubtle,
+              height: 16 / 14,
+              letterSpacing: 0,
             ),
           ),
         ),

@@ -6,7 +6,6 @@ import '../../core/constants/images.dart';
 import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 
-
 class _ReservedEvent {
   final String title, date, location, image;
   const _ReservedEvent({
@@ -27,7 +26,6 @@ class _UpcomingEvent {
     required this.mode,
   });
 }
-
 
 const _reservedEvents = [
   _ReservedEvent(
@@ -68,14 +66,13 @@ const _upcomingEvents = [
   ),
 ];
 
-
 class InicioApp extends StatelessWidget {
   const InicioApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background, // #F7F7F7
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +123,6 @@ class InicioApp extends StatelessWidget {
     );
   }
 }
-
 
 class _Header extends StatelessWidget {
   @override
@@ -277,15 +273,18 @@ class _SeeAllChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFFD7ECFF),
+          color: AppColors.chipBg, // #D6EFFF
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Text(
           'Ver todos',
           style: TextStyle(
             fontFamily: Fonts.avenir,
-            color: AppColors.primary,
-            fontSize: 12,
+            color: AppColors.primary, // #091F44
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 16 / 14,
+            letterSpacing: 0,
           ),
         ),
       ),
@@ -293,7 +292,6 @@ class _SeeAllChip extends StatelessWidget {
   }
 }
 
-/// Carrusel horizontal genérico con padding lateral y separación entre items.
 class _HorizontalCarousel extends StatelessWidget {
   final int itemCount;
   final double itemWidth;
@@ -308,7 +306,6 @@ class _HorizontalCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      // Ajusta la altura según el contenido de tus cards
       height: 300,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
