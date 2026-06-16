@@ -24,4 +24,8 @@ class Images {
   static const String logoCue = 'assets/images/invitados/cue.png';
   
   static const String fotoInvitado = 'assets/images/invitados/foto_invitados.png';
+
+  static const String experienciaComunidad = 'assets/images/experiencias/comunidad.png';
+  
+  static const String experienciaGeoIA     = 'assets/images/experiencias/geo.png';
 }

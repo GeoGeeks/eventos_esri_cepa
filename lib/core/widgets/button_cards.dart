@@ -34,7 +34,7 @@ class AppButton extends StatelessWidget {
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero, // esquina recta
+                  borderRadius: BorderRadius.zero, 
                 ),
               ),
               child: Text(
@@ -57,7 +57,7 @@ class AppButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 side: const BorderSide(color: AppColors.primary, width: 1),
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero, // esquina recta
+                  borderRadius: BorderRadius.zero, 
                 ),
               ),
               child: Text(

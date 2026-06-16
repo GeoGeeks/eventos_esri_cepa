@@ -34,7 +34,7 @@ class UpcomingEventCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Imagen exacta 138 × 122 (Figma) ──
+              
               SizedBox(
                 width: imageWidth,
                 child: Image.asset(
@@ -45,12 +45,12 @@ class UpcomingEventCard extends StatelessWidget {
                 ),
               ),
 
-              // ── Contenido derecho ──
+              
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Título + chip de modo
+                   
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                       child: Row(

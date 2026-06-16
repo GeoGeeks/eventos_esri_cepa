@@ -30,6 +30,8 @@ flutter:
     - assets/images/invitados/
     - assets/images/onboarding/
     - assets/images/profile/
+    - assets/images/experiencias/
+
 
 
   fonts:
