@@ -25,9 +25,12 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/onboarding/
+    - assets/images/cards/
     - assets/images/inicio/
+    - assets/images/invitados/
+    - assets/images/onboarding/
     - assets/images/profile/
+
 
   fonts:
     - family: AvenirNext
