@@ -5,7 +5,7 @@ class Evento {
   final String direccion;
   final bool presencial;
 
-  Evento({
+  const Evento({
     required this.titulo,
     required this.fecha,
     required this.hora,
@@ -14,7 +14,7 @@ class Evento {
   });
 }
 
-final eventosMock = [
+const List<Evento> eventosMock = [
   Evento(
     titulo: 'Planeta Esri Bogotá',
     fecha: '23 Mayo 2026',

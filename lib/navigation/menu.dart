@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import '../features/inicio/inicio.dart';
+
 import '../core/widgets/bottom_nav.dart';
+
+import '../features/inicio/inicio.dart';
+import '../features/historial/presentation/screens/historial_screen.dart';
 import '../features/reservas/reservas_screen.dart';
-import '../features/profile/presentation/screens/profile_menu_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
+import '../features/profile/presentation/screens/profile_menu_screen.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -21,9 +24,7 @@ class _MenuState extends State<Menu> {
         return const InicioApp();
 
       case 1:
-        return const Center(
-          child: Text('Historial'),
-        );
+        return const HistorialScreen();
 
       case 2:
         return const ReservasScreen();
