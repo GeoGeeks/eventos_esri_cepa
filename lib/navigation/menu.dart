@@ -3,6 +3,7 @@ import '../features/inicio/inicio.dart';
 import '../core/widgets/bottom_nav.dart';
 import '../features/reservas/reservas_screen.dart';
 import '../features/profile/presentation/screens/profile_menu_screen.dart';
+import '../features/notifications/presentation/screens/notifications_screen.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -14,21 +15,41 @@ class Menu extends StatefulWidget {
 class _MenuState extends State<Menu> {
   int currentIndex = 0;
 
+  Widget _buildPage(int index) {
+    switch (index) {
+      case 0:
+        return const InicioApp();
+
+      case 1:
+        return const Center(
+          child: Text('Historial'),
+        );
+
+      case 2:
+        return const ReservasScreen();
+
+      case 3:
+        return const NotificationsScreen();
+
+      case 4:
+        return const ProfileMenuScreen();
+
+      default:
+        return const SizedBox();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      const InicioApp(),                        
-      const Center(child: Text('Historial')),   
-      const ReservasScreen(),                  
-      const Center(child: Text('Alertas')),     
-      const ProfileMenuScreen(),                
-    ];
-
     return Scaffold(
-      body: pages[currentIndex],
+      body: _buildPage(currentIndex),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: currentIndex,
-        onTap: (index) => setState(() => currentIndex = index),
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
       ),
     );
   }

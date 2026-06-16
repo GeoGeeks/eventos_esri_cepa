@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/images.dart';
@@ -72,83 +71,84 @@ const _upcomingEvents = [
 class InicioApp extends StatelessWidget {
   const InicioApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _Header(),
-            const SizedBox(height: 20),
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.background,
+    body: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Header(),
+          const SizedBox(height: 20),
 
-            _SectionTitle(title: 'Eventos reservados'),
-            const SizedBox(height: 14),
+          _SectionTitle(title: 'Eventos reservados'),
+          const SizedBox(height: 14),
 
-            _HorizontalCarousel(
-              itemCount: _reservedEvents.length,
-              itemWidth: 260,
-              itemBuilder: (context, i) {
-                final e = _reservedEvents[i];
+          _HorizontalCarousel(
+            itemCount: _reservedEvents.length,
+            itemWidth: 260,
+            itemBuilder: (context, i) {
+              final e = _reservedEvents[i];
 
-                return EventCard(
-                  title: e.title,
-                  date: e.date,
-                  location: e.location,
-                  image: e.image,
-                  onViewMore: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const InvitadosScreen(),
-                      ),
-                    );
-                  },
-                  onCredential: () {},
-                );
-              },
+              return EventCard(
+                title: e.title,
+                date: e.date,
+                location: e.location,
+                image: e.image,
+                onViewMore: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const InvitadosScreen(),
+                    ),
+                  );
+                },
+                onCredential: () {},
+              );
+            },
+          ),
+
+          const SizedBox(height: 20),
+
+          _SectionTitle(
+            title: 'Próximos eventos',
+            action: _SeeAllChip(
+              onTap: () {},
             ),
+          ),
 
-            const SizedBox(height: 20),
+          const SizedBox(height: 14),
 
-            _SectionTitle(
-              title: 'Próximos eventos',
-              action: _SeeAllChip(onTap: () {}),
-            ),
-
-            const SizedBox(height: 14),
-
-            ..._upcomingEvents.map(
-              (e) => Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: UpcomingEventCard(
-                  title: e.title,
-                  date: e.date,
-                  location: e.location,
-                  image: e.image,
-                  mode: e.mode,
-                  onViewMore: () {},
-                  onRegister: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const InvitadosScreen(),
-                      ),
-                    );
-                  },
-                ),
+          ..._upcomingEvents.map(
+            (e) => Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+              child: UpcomingEventCard(
+                title: e.title,
+                date: e.date,
+                location: e.location,
+                image: e.image,
+                mode: e.mode,
+                onViewMore: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const InvitadosScreen(),
+                    ),
+                  );
+                },
+                onRegister: () {},
               ),
             ),
+          ),
 
-            const SizedBox(height: 16),
-          ],
-        ),
+          const SizedBox(height: 16),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
-
+}
 class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
