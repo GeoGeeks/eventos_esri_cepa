@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/images.dart';
 import '../../core/widgets/upcoming_event_card.dart';
+import '../invitados/invitados.dart';
 
 class _ReservedEvent {
   final String title, date, location, image, mode;
@@ -177,14 +178,21 @@ class _ReservasScreenState extends State<ReservasScreen> {
                       itemBuilder: (context, i) {
                         final e = _filtered[i];
                         return UpcomingEventCard(
-                          title: e.title,
-                          date: e.date,
-                          location: e.location,
-                          image: e.image,
-                          mode: e.mode,
-                          onViewMore: () {},
-                          onRegister: () {},
-                        );
+  title: e.title,
+  date: e.date,
+  location: e.location,
+  image: e.image,
+  mode: e.mode,
+  onViewMore: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const InvitadosScreen(),
+      ),
+    );
+  },
+  onRegister: () {},
+);
                       },
                     ),
             ),
@@ -197,8 +205,6 @@ class _ReservasScreenState extends State<ReservasScreen> {
   }
 }
 
-/// Split Button exacto del Figma: fondo #091F44
-/// [icono filtro] [divisor blanco 1px] [chevron-down]
 class _SplitFilterButton extends StatelessWidget {
   const _SplitFilterButton();
 

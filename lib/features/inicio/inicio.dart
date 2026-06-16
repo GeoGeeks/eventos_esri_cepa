@@ -97,8 +97,7 @@ class InicioApp extends StatelessWidget {
                   date: e.date,
                   location: e.location,
                   image: e.image,
-                  onViewMore: () {},
-                  onCredential: () {
+                  onViewMore: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -106,6 +105,7 @@ class InicioApp extends StatelessWidget {
                       ),
                     );
                   },
+                  onCredential: () {},
                 );
               },
             ),
@@ -114,9 +114,7 @@ class InicioApp extends StatelessWidget {
 
             _SectionTitle(
               title: 'Próximos eventos',
-              action: _SeeAllChip(
-                onTap: () {},
-              ),
+              action: _SeeAllChip(onTap: () {}),
             ),
 
             const SizedBox(height: 14),
@@ -171,10 +169,7 @@ class _Header extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -270,10 +265,7 @@ class _SectionTitle extends StatelessWidget {
   final String title;
   final Widget? action;
 
-  const _SectionTitle({
-    required this.title,
-    this.action,
-  });
+  const _SectionTitle({required this.title, this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -301,19 +293,14 @@ class _SectionTitle extends StatelessWidget {
 class _SeeAllChip extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _SeeAllChip({
-    required this.onTap,
-  });
+  const _SeeAllChip({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.chipBg,
           borderRadius: BorderRadius.circular(20),
@@ -352,10 +339,8 @@ class _HorizontalCarousel extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: itemCount,
         separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (context, index) => SizedBox(
-          width: itemWidth,
-          child: itemBuilder(context, index),
-        ),
+        itemBuilder: (context, index) =>
+            SizedBox(width: itemWidth, child: itemBuilder(context, index)),
       ),
     );
   }
