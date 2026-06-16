@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/images.dart';
 
 class InvitadosScreen extends StatefulWidget {
   const InvitadosScreen({super.key});
@@ -103,7 +104,7 @@ class _Header extends StatelessWidget {
           // Imagen de fondo amarilla
           Positioned.fill(
             child: Image.asset(
-              'assets/images/invitados.png',
+              Images.headerInvitados,
               fit: BoxFit.cover,
             ),
           ),
@@ -135,7 +136,7 @@ class _Header extends StatelessWidget {
             top: 36,
             left: 72,
             child: Image.asset(
-              'assets/images/cue.png',
+              Images.logoCue,
               height: 48,
               fit: BoxFit.fitHeight,
             ),
@@ -441,7 +442,7 @@ class _SpeakerCard extends StatelessWidget {
             padding: const EdgeInsets.only(left: 12),
             child: ClipOval(
               child: Image.asset(
-                'assets/images/foto_invitados.png',
+                Images.fotoInvitado,
                 width: 92,
                 height: 92,
                 fit: BoxFit.cover,
