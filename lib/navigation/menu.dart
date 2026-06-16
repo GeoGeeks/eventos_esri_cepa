@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../features/inicio/inicio.dart';
 import '../core/widgets/bottom_nav.dart';
-import '../features/reservas/presentation/screen/reservas_screen.dart';
+import '../features/reservas/reservas_screen.dart';
 import '../features/profile/presentation/screens/profile_menu_screen.dart';
 
 class Menu extends StatefulWidget {

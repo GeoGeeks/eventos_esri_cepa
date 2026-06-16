@@ -18,4 +18,10 @@ class Images {
   static const String onboarding4 = 'assets/images/onboarding_4.png';
 
   static const String profile1 = 'assets/images/profile_1.png';
+
+  static const String headerInvitados = 'assets/images/invitados.png';
+
+  static const String logoCue = 'assets/images/cue.png';
+  
+  static const String fotoInvitado = 'assets/images/foto_invitados.png';
 }

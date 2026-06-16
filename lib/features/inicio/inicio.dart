@@ -5,9 +5,11 @@ import '../../core/constants/fonts.dart';
 import '../../core/constants/images.dart';
 import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
+import '../invitados/invitados.dart';
 
 class _ReservedEvent {
   final String title, date, location, image;
+
   const _ReservedEvent({
     required this.title,
     required this.date,
@@ -18,6 +20,7 @@ class _ReservedEvent {
 
 class _UpcomingEvent {
   final String title, date, location, image, mode;
+
   const _UpcomingEvent({
     required this.title,
     required this.date,
@@ -72,36 +75,52 @@ class InicioApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background, // #F7F7F7
+      backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _Header(),
             const SizedBox(height: 20),
+
             _SectionTitle(title: 'Eventos reservados'),
             const SizedBox(height: 14),
+
             _HorizontalCarousel(
               itemCount: _reservedEvents.length,
               itemWidth: 260,
               itemBuilder: (context, i) {
                 final e = _reservedEvents[i];
+
                 return EventCard(
                   title: e.title,
                   date: e.date,
                   location: e.location,
                   image: e.image,
                   onViewMore: () {},
-                  onCredential: () {},
+                  onCredential: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const InvitadosScreen(),
+                      ),
+                    );
+                  },
                 );
               },
             ),
+
             const SizedBox(height: 20),
+
             _SectionTitle(
               title: 'Próximos eventos',
-              action: _SeeAllChip(onTap: () {}),
+              action: _SeeAllChip(
+                onTap: () {},
+              ),
             ),
+
             const SizedBox(height: 14),
+
             ..._upcomingEvents.map(
               (e) => Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
@@ -112,10 +131,18 @@ class InicioApp extends StatelessWidget {
                   image: e.image,
                   mode: e.mode,
                   onViewMore: () {},
-                  onRegister: () {},
+                  onRegister: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const InvitadosScreen(),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
           ],
         ),
@@ -144,7 +171,10 @@ class _Header extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 12,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -213,7 +243,11 @@ class _NotificationBell extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          const Icon(Icons.notifications_none, color: AppColors.primary, size: 26),
+          const Icon(
+            Icons.notifications_none,
+            color: AppColors.primary,
+            size: 26,
+          ),
           Positioned(
             top: 12,
             right: 12,
@@ -236,7 +270,10 @@ class _SectionTitle extends StatelessWidget {
   final String title;
   final Widget? action;
 
-  const _SectionTitle({required this.title, this.action});
+  const _SectionTitle({
+    required this.title,
+    this.action,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -264,27 +301,30 @@ class _SectionTitle extends StatelessWidget {
 class _SeeAllChip extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _SeeAllChip({required this.onTap});
+  const _SeeAllChip({
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ),
         decoration: BoxDecoration(
-          color: AppColors.chipBg, // #D6EFFF
+          color: AppColors.chipBg,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Text(
           'Ver todos',
           style: TextStyle(
             fontFamily: Fonts.avenir,
-            color: AppColors.primary, // #091F44
+            color: AppColors.primary,
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            height: 16 / 14,
-            letterSpacing: 0,
           ),
         ),
       ),
