@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/images.dart';
-import '../../core/widgets/info_card.dart'; // ← card reutilizable
+import '../../core/widgets/info_card.dart'; 
+import '../agenda/agenda.dart';
+import '../favoritos/favoritos.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  InvitadosScreen
-// ═══════════════════════════════════════════════════════════════════════════════
 class InvitadosScreen extends StatefulWidget {
   const InvitadosScreen({super.key});
 
@@ -328,45 +327,57 @@ class _BotonesAccion extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 26),
       child: Row(
         children: [
-          SizedBox(
-            height: 44,
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.person_add_alt_1, size: 24),
-              label: const Text('Agenda'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF091F44),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                textStyle: const TextStyle(
-                  fontFamily: 'AvenirNext',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
+          Expanded(
+            child: SizedBox(
+              height: 44,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AgendaScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.person_add_alt_1, size: 24),
+                label: const Text('Agenda'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF091F44),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
           ),
+
           const SizedBox(width: 16),
-          SizedBox(
-            height: 44,
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.star_border, size: 24),
-              label: const Text('Mis Favoritos'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF091F44),
-                side: const BorderSide(color: Color(0xFF091F44)),
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                textStyle: const TextStyle(
-                  fontFamily: 'AvenirNext',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
+
+          Expanded(
+            child: SizedBox(
+              height: 44,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FavoritosScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.star_border, size: 22),
+                label: const Text('Mis Favoritos'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF091F44),
+                  side: const BorderSide(
+                    color: Color(0xFF091F44),
+                  ),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
           ),
@@ -548,9 +559,6 @@ class _SesionCard extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  Modelos locales — reemplazar con clases de dominio reales
-// ═══════════════════════════════════════════════════════════════════════════════
 class _ItemCard {
   final String imagenAsset;
   final String titulo;
