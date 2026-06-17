@@ -5,6 +5,7 @@ import '../../core/constants/images.dart';
 import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../invitados/invitados.dart';
+import '../eventos/eventos_screen.dart';
 
 class _ReservedEvent {
   final String title, date, location, image;
@@ -112,11 +113,18 @@ Widget build(BuildContext context) {
           const SizedBox(height: 20),
 
           _SectionTitle(
-            title: 'Próximos eventos',
-            action: _SeeAllChip(
-              onTap: () {},
-            ),
-          ),
+  title: 'Próximos eventos',
+  action: _SeeAllChip(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const EventosScreen(),
+        ),
+      );
+    },
+  ),
+),
 
           const SizedBox(height: 14),
 
