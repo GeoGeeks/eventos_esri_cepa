@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/notification_item.dart';
 import '../widgets/empty_notifications.dart';
+import '../widgets/notification_item.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -50,15 +50,6 @@ class _NotificationsScreenState
 
   @override
   Widget build(BuildContext context) {
-    if (notifications.isEmpty) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: EmptyNotifications(),
-        ),
-      );
-    }
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -81,11 +72,13 @@ class _NotificationsScreenState
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      setState(() {
-                        notifications.clear();
-                      });
-                    },
+                    onPressed: notifications.isEmpty
+                        ? null
+                        : () {
+                            setState(() {
+                              notifications.clear();
+                            });
+                          },
                     child: const Text(
                       'Borrar todo',
                     ),
@@ -94,84 +87,104 @@ class _NotificationsScreenState
               ),
             ),
 
-            const Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Hoy',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
+            if (!notifications.isEmpty) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Hoy',
+                    style: TextStyle(
+                      fontWeight:
+                          FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
+            ],
 
             Expanded(
-              child: ListView.builder(
-                itemCount: notifications.length,
-                itemBuilder: (context, index) {
-                  final notification =
-                      notifications[index];
+              child: notifications.isEmpty
+                  ? const EmptyNotifications()
+                  : ListView.builder(
+                      itemCount:
+                          notifications.length,
+                      itemBuilder:
+                          (context, index) {
+                        final notification =
+                            notifications[
+                                index];
 
-                  return Dismissible(
-                    key: Key(
-                      notification['id'],
-                    ),
-
-                    direction:
-                        DismissDirection.endToStart,
-
-                    background: Container(
-                      margin:
-                          const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      alignment:
-                          Alignment.centerRight,
-                      padding:
-                          const EdgeInsets.only(
-                        right: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius:
-                            BorderRadius.circular(
-                          12,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                      ),
-                    ),
-
-                    onDismissed: (_) {
-                      setState(() {
-                        notifications.removeAt(
-                          index,
+                        return Dismissible(
+                          key: Key(
+                            notification['id'],
+                          ),
+                          direction:
+                              DismissDirection
+                                  .endToStart,
+                          background:
+                              Container(
+                            margin:
+                                const EdgeInsets
+                                    .symmetric(
+                              horizontal:
+                                  16,
+                              vertical: 6,
+                            ),
+                            alignment:
+                                Alignment
+                                    .centerRight,
+                            padding:
+                                const EdgeInsets
+                                    .only(
+                              right: 20,
+                            ),
+                            decoration:
+                                BoxDecoration(
+                              color:
+                                  Colors.red,
+                              borderRadius:
+                                  BorderRadius
+                                      .circular(
+                                12,
+                              ),
+                            ),
+                            child:
+                                const Icon(
+                              Icons.delete,
+                              color: Colors
+                                  .white,
+                            ),
+                          ),
+                          onDismissed: (_) {
+                            setState(() {
+                              notifications
+                                  .removeAt(
+                                index,
+                              );
+                            });
+                          },
+                          child:
+                              NotificationItem(
+                            title:
+                                notification[
+                                    'title'],
+                            description:
+                                notification[
+                                    'description'],
+                            date:
+                                notification[
+                                    'date'],
+                            isNew:
+                                notification[
+                                    'isNew'],
+                          ),
                         );
-                      });
-                    },
-
-                    child: NotificationItem(
-                      title:
-                          notification['title'],
-                      description:
-                          notification[
-                              'description'],
-                      date:
-                          notification['date'],
-                      isNew:
-                          notification['isNew'],
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

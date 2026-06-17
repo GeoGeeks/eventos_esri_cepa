@@ -3,6 +3,7 @@ import '../../../../core/constants/images.dart';
 import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/profile_section_title.dart';
+import 'e_card_screen.dart';
 
 class ProfileMenuScreen extends StatelessWidget {
   const ProfileMenuScreen({super.key});
@@ -12,6 +13,27 @@ class ProfileMenuScreen extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
+          const SizedBox(height: 24),
+
+          const CircleAvatar(
+            radius: 45,
+            backgroundImage: AssetImage(
+              Images.profile1,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            'Maria Lopez',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
           const ProfileSectionTitle(
             title: 'Perfil',
           ),
@@ -25,7 +47,14 @@ class ProfileMenuScreen extends StatelessWidget {
           ProfileMenuItem(
             icon: Icons.badge_outlined,
             title: 'E-card',
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ECardScreen(),
+                ),
+              );
+            },
           ),
 
           ProfileMenuItem(

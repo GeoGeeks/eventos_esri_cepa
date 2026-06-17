@@ -1,25 +1,26 @@
 import '../../data/eventos_data.dart';
 
-class ReservasState {
+class HistorialState {
   final List<Evento> eventos;
   final String query;
   final bool? presencial;
 
-  const ReservasState({
+  const HistorialState({
     required this.eventos,
     this.query = '',
     this.presencial,
   });
 
-  ReservasState copyWith({
+  HistorialState copyWith({
     List<Evento>? eventos,
     String? query,
     bool? presencial,
+    bool clearPresencial = false,
   }) {
-    return ReservasState(
+    return HistorialState(
       eventos: eventos ?? this.eventos,
       query: query ?? this.query,
-      presencial: presencial,
+      presencial: clearPresencial ? null : (presencial ?? this.presencial),
     );
   }
 }
