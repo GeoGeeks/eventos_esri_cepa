@@ -7,7 +7,7 @@ import 'reservas_state.dart';
 class ReservasBloc extends Bloc<ReservasEvent, ReservasState> {
   ReservasBloc()
       : super(
-          const ReservasState(
+          ReservasState(
             eventos: eventosMock,
           ),
         ) {
