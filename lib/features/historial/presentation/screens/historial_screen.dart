@@ -1,55 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/widgets/upcoming_event_card.dart';
-import '../bloc/historial_bloc.dart';
-import '../bloc/historial_event.dart';
-import '../bloc/historial_state.dart';
+import '../../data/eventos_data.dart';
 import '../widgets/detalle_evento_modal.dart';
 
-class HistorialScreen extends StatelessWidget {
+class HistorialScreen extends StatefulWidget {
   const HistorialScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => HistorialBloc(),
-      child: const _HistorialView(),
-    );
-  }
+  State<HistorialScreen> createState() =>
+      _HistorialScreenState();
 }
 
-class _HistorialView extends StatefulWidget {
-  const _HistorialView();
-
-  @override
-  State<_HistorialView> createState() => _HistorialViewState();
-}
-
-class _HistorialViewState extends State<_HistorialView> {
+class _HistorialScreenState extends State<HistorialScreen> {
+  String query = '';
   bool showFilter = false;
   bool virtualSelected = false;
   bool presencialSelected = false;
 
-  void _applyFilter() {
-    if (virtualSelected && presencialSelected) {
-      context.read<HistorialBloc>().add(FilterChanged(null));
-      return;
-    }
+  List<Evento> get filteredEvents {
+    return eventosMock.where((evento) {
+      final matchesSearch = evento.titulo
+          .toLowerCase()
+          .contains(query.toLowerCase());
 
-    if (virtualSelected) {
-      context.read<HistorialBloc>().add(FilterChanged(false));
-      return;
-    }
+      bool matchesFilter = true;
 
-    if (presencialSelected) {
-      context.read<HistorialBloc>().add(FilterChanged(true));
-      return;
-    }
+      if (virtualSelected && !presencialSelected) {
+        matchesFilter = evento.presencial == false;
+      } else if (!virtualSelected && presencialSelected) {
+        matchesFilter = evento.presencial == true;
+      }
 
-    context.read<HistorialBloc>().add(FilterChanged(null));
+      return matchesSearch && matchesFilter;
+    }).toList();
   }
 
   @override
@@ -59,271 +45,205 @@ class _HistorialViewState extends State<_HistorialView> {
       body: SafeArea(
         child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Eventos',
-                    style: TextStyle(
-                      fontFamily: Fonts.avenir,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textTitle,
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Historial de Eventos',
+                        style: TextStyle(
+                          fontFamily: Fonts.avenir,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF141414),
+                          height: 32 / 26,
+                        ),
+                      ),
+                      SizedBox(height: 14),
+                      Text(
+                        'Encuentre la información sobre los eventos pasados en los que ha participado.',
+                        style: TextStyle(
+                          fontFamily: Fonts.avenir,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF6B6B6B),
+                          height: 20 / 16,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
 
-                  const SizedBox(height: 8),
+                const SizedBox(height: 16),
 
-                  const Text(
-                    'Encuentre aquí toda la información sobre los eventos en los que se encuentra registrado.',
-                    style: TextStyle(
-                      fontFamily: Fonts.avenir,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSubtle,
-                      height: 1.4,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Row(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: 40,
+                          height: 32,
                           child: TextField(
-                            onChanged: (value) {
-                              context
-                                  .read<HistorialBloc>()
-                                  .add(SearchEventChanged(value));
-                            },
+                            onChanged: (v) =>
+                                setState(() => query = v),
                             style: const TextStyle(
                               fontFamily: Fonts.avenir,
-                              fontSize: 14,
-                              color: AppColors.textTitle,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF141414),
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Buscar',
-                              hintStyle: const TextStyle(
+                              hintStyle: TextStyle(
                                 fontFamily: Fonts.avenir,
-                                fontSize: 14,
-                                color: AppColors.textSubtle,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFF949494),
                               ),
-                              prefixIcon: const Icon(
+                              prefixIcon: Icon(
                                 Icons.search,
-                                size: 20,
-                                color: AppColors.textSubtle,
+                                size: 16,
+                                color: Color(0xFF949494),
                               ),
-                              contentPadding: EdgeInsets.zero,
+                              prefixIconConstraints: BoxConstraints(
+                                minWidth: 36,
+                                minHeight: 32,
+                              ),
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 6),
                               filled: true,
-                              fillColor: AppColors.cardBg,
+                              fillColor: Colors.white,
+                              isDense: true,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.zero,
+                                borderSide: BorderSide(
+                                    color: Color(0xFF949494)),
+                              ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFDDDDDD),
-                                ),
+                                borderRadius: BorderRadius.zero,
+                                borderSide: BorderSide(
+                                    color: Color(0xFF949494)),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                                borderSide: const BorderSide(
-                                  color: AppColors.primary,
-                                ),
+                                borderRadius: BorderRadius.zero,
+                                borderSide: BorderSide(
+                                    color: Color(0xFF091F44)),
                               ),
                             ),
                           ),
                         ),
                       ),
 
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
 
-                      GestureDetector(
+                      _SplitFilterButton(
                         onTap: () {
                           setState(() {
                             showFilter = !showFilter;
                           });
                         },
-                        child: Container(
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 10),
-                              const Icon(
-                                Icons.filter_list,
-                                color: AppColors.white,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 4),
-                              Container(
-                                width: 1,
-                                height: 20,
-                                color: Colors.white30,
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                showFilter
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
-                                color: AppColors.white,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 6),
-                            ],
-                          ),
-                        ),
                       ),
                     ],
                   ),
+                ),
 
-                  const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                  Expanded(
-                    child: BlocBuilder<HistorialBloc, HistorialState>(
-                      builder: (context, state) {
-                        if (state.eventos.isEmpty) {
-                          return const Center(
-                            child: Text(
-                              'No hay eventos registrados',
-                              style: TextStyle(
-                                fontFamily: Fonts.avenir,
-                                color: AppColors.textSubtle,
-                              ),
+                Expanded(
+                  child: filteredEvents.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No hay eventos',
+                            style: TextStyle(
+                              fontFamily: Fonts.avenir,
+                              color: Colors.grey,
                             ),
-                          );
-                        }
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16),
+                          itemCount: filteredEvents.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 24),
+                          itemBuilder: (context, index) {
+                            final evento = filteredEvents[index];
+                            return UpcomingEventCard(
+  title: evento.titulo,
+  date: '${evento.fecha} - ${evento.hora}',
+  location: evento.direccion,
+  image: evento.image,
+  mode: evento.presencial ? 'Presencial' : 'Virtual',
+  isHistorial: true,
+  estado: evento.estado,
+  onViewMore: () {
+    showDialog(
+      context: context,
+      builder: (_) => DetalleEventoModal(
+        evento: evento,
+      ),
+    );
+  },
+  onRegister: () {},
+);
+                          },
+                        ),
+                ),
 
-                        final grouped = <String, List<dynamic>>{};
-
-                        for (final evento in state.eventos) {
-                          grouped.putIfAbsent(
-                            evento.mes,
-                            () => [],
-                          );
-
-                          grouped[evento.mes]!.add(evento);
-                        }
-
-                        return ListView(
-                          children: grouped.entries.map((entry) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    entry.key,
-                                    style: const TextStyle(
-                                      fontFamily: Fonts.avenir,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textTitle,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 14),
-
-                                  ...entry.value.map((evento) {
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 16),
-                                      child: UpcomingEventCard(
-                                        title: evento.titulo,
-                                        date:
-                                            '${evento.fecha} - ${evento.hora}',
-                                        location: evento.direccion,
-                                        image: evento.image,
-                                        mode: evento.presencial
-                                            ? 'Presencial'
-                                            : 'Virtual',
-
-                                        onViewMore: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (_) =>
-                                                DetalleEventoModal(
-                                              evento: evento,
-                                            ),
-                                          );
-                                        },
-
-                                        onRegister: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (_) =>
-                                                DetalleEventoModal(
-                                              evento: evento,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                const SizedBox(height: 12),
+              ],
             ),
 
             if (showFilter)
               Positioned(
-                top: 148,
+                top: 130,
                 right: 16,
                 child: Material(
-                  elevation: 6,
+                  elevation: 8,
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    width: 200,
+                    width: 220,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.cardBg,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'Modalidad',
                           style: TextStyle(
-                            fontFamily: Fonts.avenir,
                             fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: AppColors.textTitle,
                           ),
                         ),
-
-                        const Divider(height: 16),
-
-                        _FilterCheckbox(
-                          label: 'Virtual',
+                        const Divider(),
+                        CheckboxListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Virtual'),
                           value: virtualSelected,
-                          onChanged: (v) {
+                          onChanged: (value) {
                             setState(() {
-                              virtualSelected = v ?? false;
+                              virtualSelected = value ?? false;
                             });
-                            _applyFilter();
                           },
                         ),
-
-                        _FilterCheckbox(
-                          label: 'Presencial',
+                        CheckboxListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Presencial'),
                           value: presencialSelected,
-                          onChanged: (v) {
+                          onChanged: (value) {
                             setState(() {
-                              presencialSelected = v ?? false;
+                              presencialSelected =
+                                  value ?? false;
                             });
-                            _applyFilter();
                           },
                         ),
                       ],
@@ -338,33 +258,59 @@ class _HistorialViewState extends State<_HistorialView> {
   }
 }
 
-class _FilterCheckbox extends StatelessWidget {
-  final String label;
-  final bool value;
-  final ValueChanged<bool?> onChanged;
-
-  const _FilterCheckbox({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
+class _SplitFilterButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _SplitFilterButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return CheckboxListTile(
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      activeColor: AppColors.primary,
-      title: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: Fonts.avenir,
-          fontSize: 14,
-          color: AppColors.textTitle,
-        ),
+    return SizedBox(
+      width: 65,
+      height: 32,
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: onTap,
+              child: Container(
+                height: 32,
+                color: const Color(0xFF091F44),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.filter_list,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 32,
+            color: const Color(0xFF091F44),
+            alignment: Alignment.center,
+            child: Container(
+              width: 1,
+              height: 24,
+              color: Colors.white,
+            ),
+          ),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              width: 32,
+              height: 32,
+              color: const Color(0xFF091F44),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+          ),
+        ],
       ),
-      value: value,
-      onChanged: onChanged,
     );
   }
 }
