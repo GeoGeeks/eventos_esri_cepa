@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
+import '../constants/fonts.dart';
+import 'button_cards.dart';
 
 class UpcomingEventCard extends StatelessWidget {
   final String title;
@@ -30,11 +33,10 @@ class UpcomingEventCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(4),
         child: Container(
-          color: Colors.white,
+          color: AppColors.cardBg,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Imagen exacta 138 × 122 (Figma) ──
               SizedBox(
                 width: imageWidth,
                 child: Image.asset(
@@ -44,13 +46,10 @@ class UpcomingEventCard extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-
-              // ── Contenido derecho ──
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Título + chip de modo
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                       child: Row(
@@ -60,11 +59,11 @@ class UpcomingEventCard extends StatelessWidget {
                             child: Text(
                               title,
                               style: const TextStyle(
-                                fontFamily: 'AvenirNext',
-                                fontSize: 18,
+                                fontFamily: Fonts.avenir,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF141414),
-                                height: 24 / 18,
+                                color: AppColors.textTitle,
+                                height: 22 / 16,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -75,9 +74,7 @@ class UpcomingEventCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
-
-                    // Fecha
+                    const SizedBox(height: 4),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: _InfoRow(
@@ -86,8 +83,6 @@ class UpcomingEventCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-
-                    // Ubicación
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: _InfoRow(
@@ -95,27 +90,26 @@ class UpcomingEventCard extends StatelessWidget {
                         text: location,
                       ),
                     ),
-
                     const Spacer(),
-
-                    // Botones — alineados a la derecha, dentro del margen
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 12, right: 12, bottom: 8),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.max,
                         children: [
-                          _CardButton(
+                          AppButton(
                             label: 'Ver más',
-                            filled: false,
                             onPressed: onViewMore,
+                            variant: ButtonCardsVariant.outlined,
+                            height: 30,
+                            fontSize: 13,
                           ),
                           const SizedBox(width: 8),
-                          _CardButton(
-                            label: 'Mi credencial',
-                            filled: true,
+                          AppButton(
+                            label: 'Registrarse',
                             onPressed: onRegister,
+                            height: 30,
+                            fontSize: 13,
                           ),
                         ],
                       ),
@@ -131,74 +125,6 @@ class UpcomingEventCard extends StatelessWidget {
   }
 }
 
-
-class _CardButton extends StatelessWidget {
-  final String label;
-  final bool filled;
-  final VoidCallback onPressed;
-
-  const _CardButton({
-    required this.label,
-    required this.filled,
-    required this.onPressed,
-  });
-
-  static const _textStyle = TextStyle(
-    fontFamily: 'AvenirNext',
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    height: 16 / 14,
-  );
-
-  static const _shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.zero,
-  );
-
-  static const _padding =
-      EdgeInsets.symmetric(horizontal: 12, vertical: 8);
-
-  @override
-  Widget build(BuildContext context) {
-    if (filled) {
-      return SizedBox(
-        height: 32,
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF091F44),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shadowColor: Colors.transparent,
-            shape: _shape,
-            padding: _padding,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            minimumSize: Size.zero,
-          ),
-          child: Text(label,
-              style: _textStyle.copyWith(color: Colors.white)),
-        ),
-      );
-    }
-    return SizedBox(
-      height: 32,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF091F44),
-          side: const BorderSide(color: Color(0xFF091F44), width: 1),
-          shape: _shape,
-          padding: _padding,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          minimumSize: Size.zero,
-        ),
-        child: Text(label,
-            style: _textStyle.copyWith(color: const Color(0xFF091F44))),
-      ),
-    );
-  }
-}
-
-// ─── Chip ────────────────────────────────────────────────────────────────────
 class _ModeChip extends StatelessWidget {
   final String label;
   const _ModeChip({required this.label});
@@ -206,26 +132,25 @@ class _ModeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFEBEBEB),
+        color: AppColors.chipBg,
         borderRadius: BorderRadius.circular(9999),
       ),
       child: Text(
         label,
         style: const TextStyle(
-          fontFamily: 'AvenirNext',
-          fontSize: 12,
+          fontFamily: Fonts.avenir,
+          fontSize: 11,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF6B6B6B),
-          height: 16 / 12,
+          color: AppColors.primary,
+          height: 16 / 11,
         ),
       ),
     );
   }
 }
 
-// ─── Fila info ───────────────────────────────────────────────────────────────
 class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -235,17 +160,17 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF949494)),
+        Icon(icon, size: 14, color: AppColors.textSubtle),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
             text,
             style: const TextStyle(
-              fontFamily: 'AvenirNext',
-              fontSize: 14,
+              fontFamily: Fonts.avenir,
+              fontSize: 12,
               fontWeight: FontWeight.w400,
-              color: Color(0xFF949494),
-              height: 16 / 14,
+              color: AppColors.textSubtle,
+              height: 16 / 12,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
