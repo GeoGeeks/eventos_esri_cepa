@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
+import '../../../../core/widgets/info_card.dart';
 
 class PostEventoScreen extends StatefulWidget {
   const PostEventoScreen({super.key});
@@ -14,22 +15,29 @@ class PostEventoScreen extends StatefulWidget {
 class _PostEventoScreenState extends State<PostEventoScreen> {
   static const _tabs = ['Galería', 'Agendar con expertos'];
   int _tabIndex = 0;
+  bool _showVideo = false;
 
   static const _expertos = [
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Edwin Chirivi',
       cargo: 'Gerente de Camacol',
+      descripcion:
+          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
     ),
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Edwin Chirivi',
       cargo: 'Gerente de Camacol',
+      descripcion:
+          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
     ),
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Edwin Chirivi',
       cargo: 'Gerente de Camacol',
+      descripcion:
+          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
     ),
   ];
 
@@ -52,7 +60,12 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   Widget _buildTabContent() {
     switch (_tabIndex) {
       case 0:
-        return _GaleriaTab(imagenes: _galeria);
+        return _GaleriaTab(
+          imagenes: _galeria,
+          showVideo: _showVideo,
+          onFotoTap: () => setState(() => _showVideo = true),
+          onCerrarVideo: () => setState(() => _showVideo = false),
+        );
       case 1:
         return _ExpertosTab(expertos: _expertos);
       default:
@@ -79,7 +92,10 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                   _TabBar(
                     tabs: _tabs,
                     tabIndex: _tabIndex,
-                    onTab: (i) => setState(() => _tabIndex = i),
+                    onTab: (i) => setState(() {
+                      _tabIndex = i;
+                      _showVideo = false;
+                    }),
                     onPrev: _prevTab,
                     onNext: _nextTab,
                   ),
@@ -381,7 +397,9 @@ class _TabItem extends StatelessWidget {
             fontFamily: Fonts.avenir,
             fontSize: 15,
             fontWeight: active ? FontWeight.w500 : FontWeight.w400,
-            color: active ? const Color(0xFF141414) : const Color(0xFF6B6B6B),
+            color: active
+                ? const Color(0xFF141414)
+                : const Color(0xFF6B6B6B),
           ),
         ),
       ),
@@ -392,7 +410,16 @@ class _TabItem extends StatelessWidget {
 // ─── Tab Galería ──────────────────────────────────────────────────────────────
 class _GaleriaTab extends StatelessWidget {
   final List<String> imagenes;
-  const _GaleriaTab({required this.imagenes});
+  final bool showVideo;
+  final VoidCallback onFotoTap;
+  final VoidCallback onCerrarVideo;
+
+  const _GaleriaTab({
+    required this.imagenes,
+    required this.showVideo,
+    required this.onFotoTap,
+    required this.onCerrarVideo,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -401,48 +428,74 @@ class _GaleriaTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.asset(
-                  Images.videoCover,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
+          if (showVideo) ...[
+            // ── Video player ──
+            Stack(
+              alignment: Alignment.topRight,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.asset(
+                        Images.videoCover,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.play_arrow,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  shape: BoxShape.circle,
+                GestureDetector(
+                  onTap: onCerrarVideo,
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.play_arrow,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          const Text(
-            'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
-            style: TextStyle(
-              fontFamily: Fonts.avenir,
-              fontSize: 13,
-              color: AppColors.textSubtle,
-              height: 1.5,
+              ],
             ),
-          ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
+            const Text(
+              'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
+              style: TextStyle(
+                fontFamily: Fonts.avenir,
+                fontSize: 13,
+                color: AppColors.textSubtle,
+                height: 1.5,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+          ],
+
+          // ── Grid de fotos ──
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -453,11 +506,35 @@ class _GaleriaTab extends StatelessWidget {
               childAspectRatio: 1.2,
             ),
             itemCount: imagenes.length,
-            itemBuilder: (_, i) => ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Image.asset(
-                imagenes[i],
-                fit: BoxFit.cover,
+            itemBuilder: (_, i) => GestureDetector(
+              onTap: i == 0 ? onFotoTap : null,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.asset(
+                      imagenes[i],
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  if (i == 0)
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.play_arrow,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -480,81 +557,16 @@ class _ExpertosTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       itemCount: expertos.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, i) => _ExpertoCard(experto: expertos[i]),
-    );
-  }
-}
-
-class _ExpertoCard extends StatelessWidget {
-  final _Experto experto;
-  const _ExpertoCard({required this.experto});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundImage: AssetImage(experto.imagenAsset),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  experto.nombre,
-                  style: const TextStyle(
-                    fontFamily: Fonts.avenir,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textTitle,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  experto.cargo,
-                  style: const TextStyle(
-                    fontFamily: Fonts.avenir,
-                    fontSize: 13,
-                    color: AppColors.textSubtle,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          SizedBox(
-            height: 32,
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text(
-                'Agendar',
-                style: TextStyle(
-                  fontFamily: Fonts.avenir,
-                  fontSize: 13,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      itemBuilder: (_, i) {
+        final e = expertos[i];
+        return InfoCard(
+          imagenAsset: e.imagenAsset,
+          titulo: e.nombre,
+          subtitulo: e.cargo,
+          descripcion: e.descripcion,
+          onExpandir: () {},
+        );
+      },
     );
   }
 }
@@ -564,10 +576,12 @@ class _Experto {
   final String imagenAsset;
   final String nombre;
   final String cargo;
+  final String descripcion;
 
   const _Experto({
     required this.imagenAsset,
     required this.nombre,
     required this.cargo,
+    required this.descripcion,
   });
 }

@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 
 class InfoCard extends StatelessWidget {
-  
   final String imagenAsset;
-
   final String titulo;
-
   final String subtitulo;
-
-
   final String descripcion;
-
   final VoidCallback? onExpandir;
 
   const InfoCard({
@@ -33,7 +27,6 @@ class InfoCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // ── Foto circular ─────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: ClipOval(
@@ -45,13 +38,10 @@ class InfoCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // ── Contenido ─────────────────────────────────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Título + subtítulo
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                   child: Column(
@@ -81,8 +71,6 @@ class InfoCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
                   child: Text(
@@ -99,8 +87,6 @@ class InfoCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-
-                // Chevron expandir
                 const Spacer(),
                 Align(
                   alignment: Alignment.centerRight,
