@@ -4,7 +4,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/widgets/upcoming_event_card.dart';
 import '../../data/eventos_data.dart';
-import '../screens/post_event_screen.dart';
+import '../widgets/detalle_evento_modal.dart';
+import '../../../post_evento/presentation/screens/post_evento_screen.dart';
 
 class HistorialScreen extends StatefulWidget {
   const HistorialScreen({super.key});
@@ -26,7 +27,6 @@ class _HistorialScreenState extends State<HistorialScreen> {
           .contains(query.toLowerCase());
 
       bool matchesFilter = true;
-
       if (virtualSelected && !presencialSelected) {
         matchesFilter = evento.presencial == false;
       } else if (!virtualSelected && presencialSelected) {
@@ -112,8 +112,8 @@ class _HistorialScreenState extends State<HistorialScreen> {
                                 minWidth: 36,
                                 minHeight: 32,
                               ),
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 6),
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 6),
                               filled: true,
                               fillColor: Colors.white,
                               isDense: true,
@@ -140,11 +140,8 @@ class _HistorialScreenState extends State<HistorialScreen> {
                       const SizedBox(width: 12),
 
                       _SplitFilterButton(
-                        onTap: () {
-                          setState(() {
-                            showFilter = !showFilter;
-                          });
-                        },
+                        onTap: () => setState(
+                            () => showFilter = !showFilter),
                       ),
                     ],
                   ),
@@ -176,14 +173,17 @@ class _HistorialScreenState extends State<HistorialScreen> {
                               date: '${evento.fecha} - ${evento.hora}',
                               location: evento.direccion,
                               image: evento.image,
-                              mode: evento.presencial ? 'Presencial' : 'Virtual',
+                              mode: evento.presencial
+                                  ? 'Presencial'
+                                  : 'Virtual',
                               isHistorial: true,
                               estado: evento.estado,
                               onViewMore: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const PostEventScreen(), // Corregido: Añadido const aquí
+                                    builder: (_) =>
+                                        const PostEventoScreen(),
                                   ),
                                 );
                               },
@@ -212,8 +212,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'Modalidad',
@@ -227,23 +226,16 @@ class _HistorialScreenState extends State<HistorialScreen> {
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Virtual'),
                           value: virtualSelected,
-                          onChanged: (value) {
-                            setState(() {
-                              virtualSelected = value ?? false;
-                            });
-                          },
+                          onChanged: (v) => setState(
+                              () => virtualSelected = v ?? false),
                         ),
                         CheckboxListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Presencial'),
                           value: presencialSelected,
-                          onChanged: (value) {
-                            setState(() {
-                              presencialSelected =
-                                  value ?? false;
-                            });
-                          },
+                          onChanged: (v) => setState(
+                              () => presencialSelected = v ?? false),
                         ),
                       ],
                     ),
@@ -288,11 +280,7 @@ class _SplitFilterButton extends StatelessWidget {
             height: 32,
             color: const Color(0xFF091F44),
             alignment: Alignment.center,
-            child: Container(
-              width: 1,
-              height: 24,
-              color: Colors.white,
-            ),
+            child: Container(width: 1, height: 24, color: Colors.white),
           ),
           GestureDetector(
             onTap: onTap,
