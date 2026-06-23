@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../../../../core/constants/images.dart';
 import '../widgets/post_event_actions.dart';
-import 'package:esri_eventos/features/historial/presentation/widgets/post_event_header.dart';
 import '../widgets/post_event_info.dart';
 
 class PostEventVideoScreen extends StatelessWidget {
@@ -14,24 +12,19 @@ class PostEventVideoScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF7F7F7),
       body: Column(
         children: [
-          PostEventHeader(),
+          const PostEventHeader(), // Local y libre de errores de import
 
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  PostEventInfo(),
-
+                  const PostEventInfo(),
                   const SizedBox(height: 16),
-
-                  PostEventActions(),
-
+                  const PostEventActions(),
                   const SizedBox(height: 24),
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 26,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 26),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Stack(
@@ -64,9 +57,7 @@ class PostEventVideoScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 26,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 26),
                     child: Text(
                       'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
                       style: TextStyle(
@@ -75,9 +66,49 @@ class PostEventVideoScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 30),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// FUSIONADO AQUÍ TAMBIÉN
+class PostEventHeader extends StatelessWidget {
+  const PostEventHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 122,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              Images.postEventoHeader,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 36,
+            left: 24,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF091F44),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.chevron_left,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
