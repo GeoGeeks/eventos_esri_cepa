@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
+import 'valoracion_modal.dart';
+import '../../core/widgets/filtro_modal.dart';
 
 class AgendaScreen extends StatefulWidget {
   const AgendaScreen({super.key});
@@ -79,13 +81,24 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
                 const SizedBox(width: 8),
 
-                Container(
-                  width: 40,
-                  height: 40,
-                  color: AppColors.primary,
-                  child: const Icon(
-                    Icons.filter_alt_outlined,
-                    color: Colors.white,
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      barrierColor: AppColors.modalOverlay,
+                      builder: (_) => const FiltroModal(),
+                    );
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    color: AppColors.primary,
+                    child: const Icon(
+                      Icons.filter_alt_outlined,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -217,9 +230,21 @@ class _AgendaCard extends StatelessWidget {
               const SizedBox(width: 6),
               _chip('GeoIA'),
               const Spacer(),
-              const Text(
-                'Valorar',
-                style: TextStyle(color: AppColors.primary, fontSize: 13),
+
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    barrierColor: const Color(0x80000000),
+                    builder: (_) => const ValoracionModal(),
+                  );
+                },
+                child: const Text(
+                  'Valorar',
+                  style: TextStyle(color: AppColors.primary, fontSize: 13),
+                ),
               ),
             ],
           ),
