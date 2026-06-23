@@ -4,14 +4,13 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/widgets/upcoming_event_card.dart';
 import '../../data/eventos_data.dart';
-import '../widgets/detalle_evento_modal.dart';
+import '../screens/post_event_screen.dart';
 
 class HistorialScreen extends StatefulWidget {
   const HistorialScreen({super.key});
 
   @override
-  State<HistorialScreen> createState() =>
-      _HistorialScreenState();
+  State<HistorialScreen> createState() => _HistorialScreenState();
 }
 
 class _HistorialScreenState extends State<HistorialScreen> {
@@ -173,23 +172,23 @@ class _HistorialScreenState extends State<HistorialScreen> {
                           itemBuilder: (context, index) {
                             final evento = filteredEvents[index];
                             return UpcomingEventCard(
-  title: evento.titulo,
-  date: '${evento.fecha} - ${evento.hora}',
-  location: evento.direccion,
-  image: evento.image,
-  mode: evento.presencial ? 'Presencial' : 'Virtual',
-  isHistorial: true,
-  estado: evento.estado,
-  onViewMore: () {
-    showDialog(
-      context: context,
-      builder: (_) => DetalleEventoModal(
-        evento: evento,
-      ),
-    );
-  },
-  onRegister: () {},
-);
+                              title: evento.titulo,
+                              date: '${evento.fecha} - ${evento.hora}',
+                              location: evento.direccion,
+                              image: evento.image,
+                              mode: evento.presencial ? 'Presencial' : 'Virtual',
+                              isHistorial: true,
+                              estado: evento.estado,
+                              onViewMore: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const PostEventScreen(), // Corregido: Añadido const aquí
+                                  ),
+                                );
+                              },
+                              onRegister: () {},
+                            );
                           },
                         ),
                 ),

@@ -4,7 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../historial/data/eventos_data.dart';
-import '../historial/presentation/widgets/detalle_evento_modal.dart';
+import '../historial/presentation/screens/post_event_screen.dart';
 import '../invitados/invitados.dart';
 
 class EventosScreen extends StatefulWidget {
@@ -22,15 +22,15 @@ class _EventosScreenState extends State<EventosScreen> {
 
   List<Evento> get _filtered {
     return eventosMock.where((e) {
-      final matchesSearch = e.titulo
-          .toLowerCase()
-          .contains(_query.toLowerCase());
+      final matchesSearch =
+          e.titulo.toLowerCase().contains(_query.toLowerCase());
 
       bool matchesFilter = true;
+
       if (_virtualSelected && !_presencialSelected) {
-        matchesFilter = e.presencial == false;
+        matchesFilter = !e.presencial;
       } else if (!_virtualSelected && _presencialSelected) {
-        matchesFilter = e.presencial == true;
+        matchesFilter = e.presencial;
       }
 
       return matchesSearch && matchesFilter;
@@ -39,12 +39,12 @@ class _EventosScreenState extends State<EventosScreen> {
 
   Map<String, List<Evento>> get _groupedByMonth {
     final Map<String, List<Evento>> map = {};
+
     for (final e in _filtered) {
-      // Toma la primera palabra del campo fecha como agrupador
-      // e.g. "Oct 02 - 11:00 a.m." → "Oct"
       final mes = e.fecha.split(' ').first;
       map.putIfAbsent(mes, () => []).add(e);
     }
+
     return map;
   }
 
@@ -61,14 +61,21 @@ class _EventosScreenState extends State<EventosScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    20,
+                    16,
+                    0,
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           GestureDetector(
-                            onTap: () => Navigator.pop(context),
+                            onTap: () =>
+                                Navigator.pop(context),
                             child: Container(
                               width: 36,
                               height: 36,
@@ -119,49 +126,72 @@ class _EventosScreenState extends State<EventosScreen> {
                               height: 32,
                               child: TextField(
                                 onChanged: (v) =>
-                                    setState(() => _query = v),
+                                    setState(
+                                  () => _query = v,
+                                ),
                                 style: const TextStyle(
                                   fontFamily: Fonts.avenir,
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight:
+                                      FontWeight.w400,
                                   color: Color(0xFF141414),
                                 ),
-                                decoration: const InputDecoration(
+                                decoration:
+                                    const InputDecoration(
                                   hintText: 'Buscar',
                                   hintStyle: TextStyle(
-                                    fontFamily: Fonts.avenir,
+                                    fontFamily:
+                                        Fonts.avenir,
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFF949494),
+                                    fontWeight:
+                                        FontWeight.w400,
+                                    color:
+                                        Color(0xFF949494),
                                   ),
                                   prefixIcon: Icon(
                                     Icons.search,
                                     size: 16,
-                                    color: Color(0xFF949494),
+                                    color:
+                                        Color(0xFF949494),
                                   ),
-                                  prefixIconConstraints: BoxConstraints(
+                                  prefixIconConstraints:
+                                      BoxConstraints(
                                     minWidth: 36,
                                     minHeight: 32,
                                   ),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      vertical: 6),
+                                  contentPadding:
+                                      EdgeInsets.symmetric(
+                                    vertical: 6,
+                                  ),
                                   filled: true,
                                   fillColor: Colors.white,
                                   isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
+                                  border:
+                                      OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.zero,
                                     borderSide: BorderSide(
-                                        color: Color(0xFF949494)),
+                                      color:
+                                          Color(0xFF949494),
+                                    ),
                                   ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
+                                  enabledBorder:
+                                      OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.zero,
                                     borderSide: BorderSide(
-                                        color: Color(0xFF949494)),
+                                      color:
+                                          Color(0xFF949494),
+                                    ),
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
+                                  focusedBorder:
+                                      OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.zero,
                                     borderSide: BorderSide(
-                                        color: Color(0xFF091F44)),
+                                      color:
+                                          Color(0xFF091F44),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -171,8 +201,12 @@ class _EventosScreenState extends State<EventosScreen> {
                           const SizedBox(width: 12),
 
                           _SplitFilterButton(
-                            onTap: () => setState(
-                                () => _showFilter = !_showFilter),
+                            onTap: () {
+                              setState(() {
+                                _showFilter =
+                                    !_showFilter;
+                              });
+                            },
                           ),
                         ],
                       ),
@@ -194,59 +228,109 @@ class _EventosScreenState extends State<EventosScreen> {
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          itemCount: grouped.keys.length,
-                          itemBuilder: (context, i) {
-                            final mes = grouped.keys.elementAt(i);
-                            final eventos = grouped[mes]!;
+                          padding:
+                              const EdgeInsets.fromLTRB(
+                            16,
+                            0,
+                            16,
+                            16,
+                          ),
+                          itemCount:
+                              grouped.keys.length,
+                          itemBuilder:
+                              (context, index) {
+                            final mes =
+                                grouped.keys.elementAt(
+                              index,
+                            );
+
+                            final eventos =
+                                grouped[mes]!;
 
                             return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
+                                  padding:
+                                      const EdgeInsets
+                                          .only(
+                                    bottom: 12,
+                                  ),
                                   child: Text(
                                     mes,
-                                    style: const TextStyle(
-                                      fontFamily: Fonts.avenir,
+                                    style:
+                                        const TextStyle(
+                                      fontFamily:
+                                          Fonts.avenir,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF141414),
+                                      fontWeight:
+                                          FontWeight
+                                              .w600,
+                                      color: Color(
+                                        0xFF141414,
+                                      ),
                                     ),
                                   ),
                                 ),
+
                                 ...eventos.map(
                                   (e) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: UpcomingEventCard(
-                                      title: e.titulo,
-                                      date: '${e.fecha} - ${e.hora}',
-                                      location: e.direccion,
-                                      image: e.image,
-                                      mode: e.presencial
+                                    padding:
+                                        const EdgeInsets
+                                            .only(
+                                      bottom: 16,
+                                    ),
+                                    child:
+                                        UpcomingEventCard(
+                                      title:
+                                          e.titulo,
+                                      date:
+                                          '${e.fecha} - ${e.hora}',
+                                      location:
+                                          e.direccion,
+                                      image:
+                                          e.image,
+                                      mode: e
+                                              .presencial
                                           ? 'Presencial'
                                           : 'Virtual',
-                                      onViewMore: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) => DetalleEventoModal(
-                                            evento: e,
+
+                                      onViewMore:
+                                          () {
+                                        Navigator
+                                            .push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (_) =>
+                                                    const InvitadosScreen(),
                                           ),
                                         );
                                       },
-                                      onRegister: () {
-                                        Navigator.push(
+
+                                      // Antes abría DetalleEventoModal
+                                      // Ahora abre directamente el detalle
+                                      onRegister:
+                                          () {
+                                        Navigator
+                                            .push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (_) =>
-                                                const InvitadosScreen(),
+                                            builder:
+                                                (_) =>
+                                                    const PostEventScreen(),
                                           ),
                                         );
                                       },
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+
+                                const SizedBox(
+                                  height: 8,
+                                ),
                               ],
                             );
                           },
@@ -261,37 +345,63 @@ class _EventosScreenState extends State<EventosScreen> {
                 right: 16,
                 child: Material(
                   elevation: 8,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius:
+                      BorderRadius.circular(8),
                   child: Container(
                     width: 220,
-                    padding: const EdgeInsets.all(12),
+                    padding:
+                        const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius:
+                          BorderRadius.circular(
+                        8,
+                      ),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'Modalidad',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            fontWeight:
+                                FontWeight.w600,
+                          ),
                         ),
                         const Divider(),
+
                         CheckboxListTile(
                           dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Virtual'),
-                          value: _virtualSelected,
-                          onChanged: (v) =>
-                              setState(() => _virtualSelected = v ?? false),
+                          contentPadding:
+                              EdgeInsets.zero,
+                          title:
+                              const Text('Virtual'),
+                          value:
+                              _virtualSelected,
+                          onChanged: (value) {
+                            setState(() {
+                              _virtualSelected =
+                                  value ?? false;
+                            });
+                          },
                         ),
+
                         CheckboxListTile(
                           dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Presencial'),
-                          value: _presencialSelected,
-                          onChanged: (v) =>
-                              setState(() => _presencialSelected = v ?? false),
+                          contentPadding:
+                              EdgeInsets.zero,
+                          title: const Text(
+                            'Presencial',
+                          ),
+                          value:
+                              _presencialSelected,
+                          onChanged: (value) {
+                            setState(() {
+                              _presencialSelected =
+                                  value ?? false;
+                            });
+                          },
                         ),
                       ],
                     ),
@@ -307,7 +417,10 @@ class _EventosScreenState extends State<EventosScreen> {
 
 class _SplitFilterButton extends StatelessWidget {
   final VoidCallback onTap;
-  const _SplitFilterButton({required this.onTap});
+
+  const _SplitFilterButton({
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +449,11 @@ class _SplitFilterButton extends StatelessWidget {
             height: 32,
             color: const Color(0xFF091F44),
             alignment: Alignment.center,
-            child: Container(width: 1, height: 24, color: Colors.white),
+            child: Container(
+              width: 1,
+              height: 24,
+              color: Colors.white,
+            ),
           ),
           GestureDetector(
             onTap: onTap,
