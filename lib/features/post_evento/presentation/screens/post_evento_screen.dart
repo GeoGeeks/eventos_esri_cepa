@@ -47,6 +47,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     Images.galeria3,
     Images.galeria4,
     Images.galeria5,
+    Images.galeria4,
   ];
 
   void _prevTab() {
@@ -120,7 +121,7 @@ class _Header extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Image.asset(
-              Images.postEventoHeader,
+              Images.headerInvitados,
               fit: BoxFit.cover,
             ),
           ),

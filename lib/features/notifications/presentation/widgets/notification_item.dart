@@ -21,39 +21,44 @@ class NotificationItem extends StatelessWidget {
         horizontal: 16,
         vertical: 6,
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isNew
-            ? const Color(0xFFF3F7FA)
+            ? const Color(0xFFF5F9FD)
             : Colors.white,
-        borderRadius:
-            BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor:
-                const Color(0xFFDDF1FF),
+          Container(
+            width: 52,
+            height: 52,
+            decoration: const BoxDecoration(
+              color: Color(0xFFE6F4FF),
+              shape: BoxShape.circle,
+            ),
             child: const Icon(
               Icons.event_note_outlined,
               color: Color(0xFF007AC2),
+              size: 24,
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
 
           Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment:
                   CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: const TextStyle(
-                    fontWeight:
-                        FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF333333),
                   ),
                 ),
 
@@ -63,50 +68,51 @@ class NotificationItem extends StatelessWidget {
                   description,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: Color(0xFFB6B6B6),
                   ),
                 ),
 
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
 
                 const Text(
                   'Revise los detalles',
                   style: TextStyle(
-                    color: Color(0xFF091F44),
                     fontSize: 12,
+                    color: Color(0xFF091F44),
                     decoration:
-                        TextDecoration
-                            .underline,
+                        TextDecoration.underline,
                   ),
                 ),
               ],
             ),
           ),
 
+          const SizedBox(width: 10),
+
           Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment:
+                CrossAxisAlignment.end,
             children: [
               Text(
                 date,
                 style: const TextStyle(
                   fontSize: 11,
-                  color: Colors.grey,
+                  color: Color(0xFFC7C7C7),
                 ),
               ),
 
-              if (isNew)
+              if (isNew) ...[
+                const SizedBox(height: 12),
                 Container(
-                  margin:
-                      const EdgeInsets.only(
-                    top: 8,
-                  ),
                   width: 8,
                   height: 8,
-                  decoration:
-                      const BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Color(0xFF007AC2),
                     shape: BoxShape.circle,
                   ),
                 ),
+              ],
             ],
           ),
         ],

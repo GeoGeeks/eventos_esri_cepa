@@ -13,7 +13,8 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState
     extends State<NotificationsScreen> {
-  final List<Map<String, dynamic>> notifications = [
+  final List<Map<String, dynamic>>
+      notifications = [
     {
       'id': '1',
       'title': 'Actualización del evento',
@@ -46,6 +47,14 @@ class _NotificationsScreenState
       'date': '19/06',
       'isNew': false,
     },
+    {
+      'id': '5',
+      'title': 'Actualización del evento',
+      'description':
+          'Se ha modificado la hora de inicio.',
+      'date': '19/06',
+      'isNew': false,
+    },
   ];
 
   @override
@@ -56,71 +65,124 @@ class _NotificationsScreenState
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 20,
+              padding:
+                  const EdgeInsets.fromLTRB(
+                24,
+                20,
+                24,
+                12,
               ),
               child: Row(
                 mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+                    MainAxisAlignment
+                        .spaceBetween,
                 children: [
                   const Text(
                     'Notificaciones',
                     style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 22,
+                      fontWeight:
+                          FontWeight.w600,
+                      color:
+                          Color(0xFF222222),
                     ),
                   ),
-                  TextButton(
-                    onPressed: notifications.isEmpty
-                        ? null
-                        : () {
-                            setState(() {
-                              notifications.clear();
-                            });
-                          },
-                    child: const Text(
-                      'Borrar todo',
+                  Container(
+                    height: 34,
+                    decoration:
+                        BoxDecoration(
+                      color: const Color(
+                        0xFFEAF5FF,
+                      ),
+                      borderRadius:
+                          BorderRadius
+                              .circular(
+                        20,
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed:
+                          notifications
+                                  .isEmpty
+                              ? null
+                              : () {
+                                  setState(
+                                    () {
+                                      notifications
+                                          .clear();
+                                    },
+                                  );
+                                },
+                      child: const Text(
+                        'Borrar todo',
+                        style: TextStyle(
+                          color: Color(
+                            0xFF7D9AB5,
+                          ),
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
 
-            if (!notifications.isEmpty) ...[
+            if (notifications
+                .isNotEmpty) ...[
               const Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
+                padding:
+                    EdgeInsets.symmetric(
+                  horizontal: 24,
                 ),
                 child: Align(
-                  alignment: Alignment.centerLeft,
+                  alignment:
+                      Alignment
+                          .centerLeft,
                   child: Text(
                     'Hoy',
                     style: TextStyle(
+                      fontSize: 16,
                       fontWeight:
-                          FontWeight.w600,
+                          FontWeight
+                              .w500,
+                      color: Color(
+                        0xFF555555,
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(
+                height: 10,
+              ),
             ],
 
             Expanded(
-              child: notifications.isEmpty
+              child: notifications
+                      .isEmpty
                   ? const EmptyNotifications()
                   : ListView.builder(
+                      padding:
+                          const EdgeInsets
+                              .only(
+                        bottom: 24,
+                      ),
                       itemCount:
-                          notifications.length,
+                          notifications
+                              .length,
                       itemBuilder:
-                          (context, index) {
-                        final notification =
+                          (
+                            context,
+                            index,
+                          ) {
+                        final item =
                             notifications[
                                 index];
 
                         return Dismissible(
                           key: Key(
-                            notification['id'],
+                            item['id'],
                           ),
                           direction:
                               DismissDirection
@@ -132,7 +194,8 @@ class _NotificationsScreenState
                                     .symmetric(
                               horizontal:
                                   16,
-                              vertical: 6,
+                              vertical:
+                                  6,
                             ),
                             alignment:
                                 Alignment
@@ -140,7 +203,7 @@ class _NotificationsScreenState
                             padding:
                                 const EdgeInsets
                                     .only(
-                              right: 20,
+                              right: 24,
                             ),
                             decoration:
                                 BoxDecoration(
@@ -149,7 +212,7 @@ class _NotificationsScreenState
                               borderRadius:
                                   BorderRadius
                                       .circular(
-                                12,
+                                14,
                               ),
                             ),
                             child:
@@ -159,27 +222,30 @@ class _NotificationsScreenState
                                   .white,
                             ),
                           ),
-                          onDismissed: (_) {
-                            setState(() {
-                              notifications
-                                  .removeAt(
-                                index,
-                              );
-                            });
+                          onDismissed:
+                              (_) {
+                            setState(
+                              () {
+                                notifications
+                                    .removeAt(
+                                  index,
+                                );
+                              },
+                            );
                           },
                           child:
                               NotificationItem(
                             title:
-                                notification[
+                                item[
                                     'title'],
                             description:
-                                notification[
+                                item[
                                     'description'],
                             date:
-                                notification[
+                                item[
                                     'date'],
                             isNew:
-                                notification[
+                                item[
                                     'isNew'],
                           ),
                         );
