@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/images.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/fonts.dart';
 import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/profile_section_title.dart';
@@ -10,149 +11,163 @@ class ProfileMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              SizedBox(
-                height: 210,
-                width: double.infinity,
-                child: Image.asset(
-                  Images.headerInicio,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              Positioned(
-                bottom: 18,
-                child: Column(
-                  children: [
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 4,
-                        ),
-                        image: const DecorationImage(
-                          image: AssetImage(
-                            Images.profile1,
-                          ),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // ── Header azul ──
+            Container(
+              width: double.infinity,
+              color: AppColors.primary,
+              padding: const EdgeInsets.fromLTRB(20, 52, 20, 24),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
                     ),
-
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      'Maria Lopez',
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'ML',
                       style: TextStyle(
-                        fontSize: 26,
+                        fontFamily: Fonts.avenir,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'María López',
+                        style: TextStyle(
+                          fontFamily: Fonts.avenir,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Ingeniera Civil · Procalculo',
+                        style: TextStyle(
+                          fontFamily: Fonts.avenir,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 8),
 
-          const ProfileSectionTitle(
-            title: 'Perfil',
-          ),
+            const ProfileSectionTitle(title: 'Perfil'),
 
-          ProfileMenuItem(
-            icon: Icons.settings_outlined,
-            title: 'Configuración',
-            onTap: () {},
-          ),
+            ProfileMenuItem(
+              icon: Icons.settings_outlined,
+              title: 'Configuración',
+              onTap: () {},
+            ),
 
-          ProfileMenuItem(
-            icon: Icons.badge_outlined,
-            title: 'E-card',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ECardScreen(),
+            ProfileMenuItem(
+              icon: Icons.badge_outlined,
+              title: 'E-card',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ECardScreen(),
+                  ),
+                );
+              },
+            ),
+
+            ProfileMenuItem(
+              icon: Icons.notifications_none,
+              title: 'Notificaciones',
+              onTap: () {},
+            ),
+
+            const ProfileSectionTitle(title: 'Eventos'),
+
+            ProfileMenuItem(
+              icon: Icons.calendar_month_outlined,
+              title: 'Reservas',
+              onTap: () {},
+            ),
+
+            ProfileMenuItem(
+              icon: Icons.star_border,
+              title: 'Mis favoritos',
+              onTap: () {},
+            ),
+
+            ProfileMenuItem(
+              icon: Icons.article_outlined,
+              title: 'Mis Encuestas',
+              onTap: () {},
+            ),
+
+            const ProfileSectionTitle(title: 'Soporte'),
+
+            ProfileMenuItem(
+              icon: Icons.mail_outline,
+              title: 'Contáctanos',
+              onTap: () {},
+            ),
+
+            ProfileMenuItem(
+              icon: Icons.chat_outlined,
+              title: 'Chat por WhatsApp',
+              onTap: () {},
+            ),
+
+            ProfileMenuItem(
+              icon: Icons.help_outline,
+              title: 'Preguntas frecuentes',
+              onTap: () {},
+            ),
+
+            const SizedBox(height: 24),
+
+            LogoutButton(onPressed: () {}),
+
+            const SizedBox(height: 20),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.language,
+                  size: 14,
+                  color: AppColors.textSubtle,
                 ),
-              );
-            },
-          ),
+                const SizedBox(width: 4),
+                Text(
+                  'esri Colombia',
+                  style: TextStyle(
+                    fontFamily: Fonts.avenir,
+                    fontSize: 13,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
 
-          ProfileMenuItem(
-            icon: Icons.notifications_none,
-            title: 'Notificaciones',
-            onTap: () {},
-          ),
-
-          const ProfileSectionTitle(
-            title: 'Eventos',
-          ),
-
-          ProfileMenuItem(
-            icon: Icons.calendar_month_outlined,
-            title: 'Reservas',
-            onTap: () {},
-          ),
-
-          ProfileMenuItem(
-            icon: Icons.star_border,
-            title: 'Mis favoritos',
-            onTap: () {},
-          ),
-
-          ProfileMenuItem(
-            icon: Icons.article_outlined,
-            title: 'Mis Encuestas',
-            onTap: () {},
-          ),
-
-          const ProfileSectionTitle(
-            title: 'Soporte',
-          ),
-
-          ProfileMenuItem(
-            icon: Icons.mail_outline,
-            title: 'Contáctanos',
-            onTap: () {},
-          ),
-
-          ProfileMenuItem(
-            icon: Icons.chat_outlined,
-            title: 'Chat por WhatsApp',
-            onTap: () {},
-          ),
-
-          ProfileMenuItem(
-            icon: Icons.help_outline,
-            title: 'Preguntas frecuentes',
-            onTap: () {},
-          ),
-
-          const SizedBox(height: 28),
-
-          LogoutButton(
-            onPressed: () {},
-          ),
-
-          const SizedBox(height: 32),
-
-          Image.asset(
-            Images.profile1,
-            height: 30,
-          ),
-
-          const SizedBox(height: 24),
-        ],
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }

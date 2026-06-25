@@ -29,8 +29,8 @@ class Images {
   
   static const String experienciaGeoIA     = 'assets/images/experiencias/geo.png';
 
-  static const String postEventoHeader =
-    'assets/images/post_evento/post_evento_header.png';
+  static const String qrEcard = 'assets/images/profile/qre_card.png';
+
 
 static const String galeria1 =
     'assets/images/post_evento/galeria_1.png';
@@ -49,4 +49,7 @@ static const String galeria5 =
 
 static const String videoCover =
     'assets/images/post_evento/video_cover.png';
+
+
+
 }

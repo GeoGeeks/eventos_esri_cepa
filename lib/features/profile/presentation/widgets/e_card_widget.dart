@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/fonts.dart';
+import '../../../../core/constants/images.dart';
 
 class ECardWidget extends StatelessWidget {
   const ECardWidget({super.key});
@@ -6,136 +9,76 @@ class ECardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250,
-      padding: const EdgeInsets.only(
-        top: 18,
-        left: 18,
-        right: 18,
-        bottom: 22,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
+          // Avatar azul con iniciales
           Container(
-            width: 48,
-            height: 48,
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              shape: BoxShape.circle,
+            ),
             alignment: Alignment.center,
-            color: const Color(0xFFD9EEF8),
             child: const Text(
               'ML',
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF4A4A4A),
+                fontFamily: Fonts.avenir,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
           const Text(
             'María López',
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF091F44),
+              fontFamily: Fonts.avenir,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textTitle,
             ),
           ),
 
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
 
           const Text(
-            'Ingeniería Civil - Procalculo',
-            textAlign: TextAlign.center,
+            'Ingeniera Civil · Procalculo',
             style: TextStyle(
-              fontSize: 11,
-              color: Color(0xFF666666),
+              fontFamily: Fonts.avenir,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSubtle,
             ),
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 24),
 
-          Container(
-            width: 170,
-            height: 170,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: const Color(0xFFE6E6E6),
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _QrPlaceholderPainter(),
-                  ),
-                ),
-
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF007AC2),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'esri',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          // QR real
+          Image.asset(
+            Images.qrEcard,
+            width: 180,
+            height: 180,
+            fit: BoxFit.contain,
           ),
         ],
       ),
     );
-  }
-}
-
-class _QrPlaceholderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF007AC2)
-      ..strokeWidth = 4;
-
-    canvas.drawRect(
-      const Rect.fromLTWH(10, 10, 28, 28),
-      paint,
-    );
-
-    canvas.drawRect(
-      Rect.fromLTWH(size.width - 38, 10, 28, 28),
-      paint,
-    );
-
-    canvas.drawRect(
-      Rect.fromLTWH(10, size.height - 38, 28, 28),
-      paint,
-    );
-
-    for (double x = 50; x < size.width - 20; x += 12) {
-      for (double y = 20; y < size.height - 20; y += 12) {
-        canvas.drawCircle(
-          Offset(x, y),
-          2,
-          Paint()..color = const Color(0xFF007AC2),
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }

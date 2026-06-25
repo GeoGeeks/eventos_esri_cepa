@@ -4,7 +4,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/widgets/upcoming_event_card.dart';
 import '../../data/eventos_data.dart';
-import '../widgets/detalle_evento_modal.dart';
 import '../../../post_evento/presentation/screens/post_evento_screen.dart';
 
 class HistorialScreen extends StatefulWidget {
