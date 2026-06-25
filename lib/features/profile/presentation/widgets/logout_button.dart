@@ -16,22 +16,23 @@ class LogoutButton extends StatelessWidget {
       ),
       child: SizedBox(
         width: double.infinity,
-        height: 44,
+        height: 48,
         child: OutlinedButton(
           onPressed: onPressed,
           style: OutlinedButton.styleFrom(
             side: const BorderSide(
-              color: Color(0xFFFF4D4F),
+              color: Color(0xFFE53935),
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0),
+              borderRadius: BorderRadius.circular(6),
             ),
           ),
           child: const Text(
             'Cerrar Sesión',
             style: TextStyle(
-              color: Color(0xFFFF4D4F),
-              fontSize: 14,
+              color: Color(0xFFE53935),
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

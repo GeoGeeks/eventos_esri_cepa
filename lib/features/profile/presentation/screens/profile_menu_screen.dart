@@ -13,23 +13,54 @@ class ProfileMenuScreen extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          const SizedBox(height: 24),
+          Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              SizedBox(
+                height: 210,
+                width: double.infinity,
+                child: Image.asset(
+                  Images.headerInicio,
+                  fit: BoxFit.cover,
+                ),
+              ),
 
-          const CircleAvatar(
-            radius: 45,
-            backgroundImage: AssetImage(
-              Images.profile1,
-            ),
-          ),
+              Positioned(
+                bottom: 18,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 4,
+                        ),
+                        image: const DecorationImage(
+                          image: AssetImage(
+                            Images.profile1,
+                          ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
 
-          const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-          const Text(
-            'Maria Lopez',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-            ),
+                    const Text(
+                      'Maria Lopez',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 24),
@@ -107,17 +138,17 @@ class ProfileMenuScreen extends StatelessWidget {
             onTap: () {},
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
 
           LogoutButton(
             onPressed: () {},
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 32),
 
           Image.asset(
             Images.profile1,
-            height: 24,
+            height: 30,
           ),
 
           const SizedBox(height: 24),
