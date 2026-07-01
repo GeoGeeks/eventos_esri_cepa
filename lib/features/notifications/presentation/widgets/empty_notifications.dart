@@ -12,27 +12,28 @@ class EmptyNotifications
       child: Padding(
         padding:
             const EdgeInsets.symmetric(
-          horizontal: 32,
+          horizontal: 40,
         ),
         child: Column(
           mainAxisAlignment:
               MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.notifications_none,
-              size: 100,
+              Icons.notifications_none_outlined,
+              size: 120,
               color: Colors.grey.shade400,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             const Text(
               'No tienes notificaciones',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 18,
                 fontWeight:
                     FontWeight.w500,
+                color: Color(0xFF666666),
               ),
             ),
 
@@ -42,8 +43,9 @@ class EmptyNotifications
               'Cuando recibas una notificación,\nla verás aquí.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
+                fontSize: 15,
+                color: Color(0xFFA0A0A0),
+                height: 1.5,
               ),
             ),
           ],

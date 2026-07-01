@@ -23,12 +23,7 @@ class DetalleEventoModal extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          16,
-          16,
-          16,
-          20,
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +91,6 @@ class DetalleEventoModal extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(

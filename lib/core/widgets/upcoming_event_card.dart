@@ -12,6 +12,10 @@ class UpcomingEventCard extends StatelessWidget {
   final VoidCallback onViewMore;
   final VoidCallback onRegister;
 
+  // Modo historial
+  final bool isHistorial;
+  final String? estado;
+
   const UpcomingEventCard({
     super.key,
     required this.title,
@@ -21,6 +25,8 @@ class UpcomingEventCard extends StatelessWidget {
     required this.mode,
     required this.onViewMore,
     required this.onRegister,
+    this.isHistorial = false,
+    this.estado,
   });
 
   @override
@@ -37,7 +43,6 @@ class UpcomingEventCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              
               SizedBox(
                 width: imageWidth,
                 child: Image.asset(
@@ -48,12 +53,10 @@ class UpcomingEventCard extends StatelessWidget {
                 ),
               ),
 
-              
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                   
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                       child: Row(
@@ -98,25 +101,56 @@ class UpcomingEventCard extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 12, right: 12, bottom: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          AppButton(
-                            label: 'Ver más',
-                            onPressed: onViewMore,
-                            variant: ButtonCardsVariant.outlined,
-                            height: 30,
-                            fontSize: 13,
-                          ),
-                          const SizedBox(width: 8),
-                          AppButton(
-                            label: 'Registrarse',
-                            onPressed: onRegister,
-                            height: 30,
-                            fontSize: 13,
-                          ),
-                        ],
-                      ),
+                      child: isHistorial
+                          ? Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.info_outline,
+                                      size: 13,
+                                      color: Color(0xFFF39C12),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      estado ?? '',
+                                      style: const TextStyle(
+                                        fontFamily: Fonts.avenir,
+                                        fontSize: 12,
+                                        color: Color(0xFFF39C12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                AppButton(
+                                  label: 'Ver más',
+                                  onPressed: onViewMore,
+                                  height: 30,
+                                  fontSize: 13,
+                                ),
+                              ],
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                AppButton(
+                                  label: 'Ver más',
+                                  onPressed: onViewMore,
+                                  variant: ButtonCardsVariant.outlined,
+                                  height: 30,
+                                  fontSize: 13,
+                                ),
+                                const SizedBox(width: 8),
+                                AppButton(
+                                  label: 'Registrarse',
+                                  onPressed: onRegister,
+                                  height: 30,
+                                  fontSize: 13,
+                                ),
+                              ],
+                            ),
                     ),
                   ],
                 ),
