@@ -8,11 +8,24 @@ class AppColors {
   static const Color background = Color(0xFFF7F7F7);
   static const Color cardBg = Color(0xFFFFFFFF);
   static const Color notification = Color(0xFFE64B3C);
+
   static const Color textTitle = Color(0xFF141414);
   static const Color textSubtle = Color(0xFF949494);
+
   static const Color chipBg = Color(0xFFD6EFFF);
-  // hover 
+
+  // hover
   static const Color navActiveHighlight = Color(0x4D00619B);
   // hover reservas
   static const Color navActiveReservas = Color(0xFF053D72);
+
+  // Valoración
+  static const Color modalOverlay = Color(0x80000000);
+  static const Color modalSubtitle = Color(0xFF4A4A4A);
+  static const Color requiredField = Color(0xFFD83020);
+  static const Color inputBorder = Color(0xFFCFCFCF);
+
+  //Filtro
+  static const Color lightGray = Color(0xFFEBEBEB);
+  static const Color filterButtonText = Color(0xFF00619B);
 }

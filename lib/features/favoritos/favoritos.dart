@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
+import '../../core/widgets/filtro_modal.dart';
 
 class FavoritosScreen extends StatefulWidget {
   const FavoritosScreen({super.key});
@@ -76,13 +77,24 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  width: 40,
-                  height: 40,
-                  color: AppColors.primary,
-                  child: const Icon(
-                    Icons.filter_alt_outlined,
-                    color: Colors.white,
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      barrierColor: AppColors.modalOverlay,
+                      builder: (_) => const FiltroModal(),
+                    );
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    color: AppColors.primary,
+                    child: const Icon(
+                      Icons.filter_alt_outlined,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
