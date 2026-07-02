@@ -38,7 +38,7 @@ class FiltroChip extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontFamily: Fonts.avenir,
+            fontFamily: Fonts.regular,
             fontSize: 12,
             fontWeight: FontWeight.w400,
             color: AppColors.filterButtonText,

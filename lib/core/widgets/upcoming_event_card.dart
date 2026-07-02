@@ -66,7 +66,7 @@ class UpcomingEventCard extends StatelessWidget {
                             child: Text(
                               title,
                               style: const TextStyle(
-                                fontFamily: Fonts.avenir,
+                                fontFamily: Fonts.regular,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textTitle,
@@ -117,7 +117,7 @@ class UpcomingEventCard extends StatelessWidget {
                                     Text(
                                       estado ?? '',
                                       style: const TextStyle(
-                                        fontFamily: Fonts.avenir,
+                                        fontFamily: Fonts.regular,
                                         fontSize: 12,
                                         color: Color(0xFFF39C12),
                                       ),
@@ -178,7 +178,7 @@ class _ModeChip extends StatelessWidget {
       child: Text(
         label,
         style: const TextStyle(
-          fontFamily: Fonts.avenir,
+          fontFamily: Fonts.regular,
           fontSize: 11,
           fontWeight: FontWeight.w500,
           color: AppColors.primary,
@@ -204,7 +204,7 @@ class _InfoRow extends StatelessWidget {
           child: Text(
             text,
             style: const TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: AppColors.textSubtle,

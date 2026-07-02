@@ -57,7 +57,7 @@ class EventCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 20,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textTitle,
@@ -115,7 +115,7 @@ class _InfoRow extends StatelessWidget {
           child: Text(
             text,
             style: const TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: AppColors.textSubtle,

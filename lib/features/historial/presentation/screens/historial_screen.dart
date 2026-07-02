@@ -54,7 +54,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                       Text(
                         'Historial de Eventos',
                         style: TextStyle(
-                          fontFamily: Fonts.avenir,
+                          fontFamily: Fonts.regular,
                           fontSize: 26,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFF141414),
@@ -65,7 +65,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                       Text(
                         'Encuentre la información sobre los eventos pasados en los que ha participado.',
                         style: TextStyle(
-                          fontFamily: Fonts.avenir,
+                          fontFamily: Fonts.regular,
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: Color(0xFF6B6B6B),
@@ -89,7 +89,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                             onChanged: (v) =>
                                 setState(() => query = v),
                             style: const TextStyle(
-                              fontFamily: Fonts.avenir,
+                              fontFamily: Fonts.regular,
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
                               color: Color(0xFF141414),
@@ -97,7 +97,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                             decoration: const InputDecoration(
                               hintText: 'Buscar',
                               hintStyle: TextStyle(
-                                fontFamily: Fonts.avenir,
+                                fontFamily: Fonts.regular,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w400,
                                 color: Color(0xFF949494),
@@ -154,7 +154,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                           child: Text(
                             'No hay eventos',
                             style: TextStyle(
-                              fontFamily: Fonts.avenir,
+                              fontFamily: Fonts.regular,
                               color: Colors.grey,
                             ),
                           ),

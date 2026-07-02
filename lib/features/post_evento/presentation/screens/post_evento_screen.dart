@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/widgets/info_card.dart';
+import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
 
 class PostEventoScreen extends StatefulWidget {
   const PostEventoScreen({super.key});
@@ -156,7 +157,7 @@ class _InfoEvento extends StatelessWidget {
   Widget build(BuildContext context) {
     const iconColor = Color(0xFF091F44);
     const textoStyle = TextStyle(
-      fontFamily: Fonts.avenir,
+      fontFamily: Fonts.regular,
       fontSize: 16,
       fontWeight: FontWeight.w500,
       color: Color(0xFF141414),
@@ -201,7 +202,7 @@ class _InfoEvento extends StatelessWidget {
           const Text(
             'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
             style: TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 14,
               fontWeight: FontWeight.w300,
               color: Color(0xFF141414),
@@ -212,7 +213,7 @@ class _InfoEvento extends StatelessWidget {
           const Text(
             'Información sujeta a cambios sin aviso.*',
             style: TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 13,
               fontWeight: FontWeight.w500,
               fontStyle: FontStyle.italic,
@@ -237,12 +238,19 @@ class _BotonesAccion extends StatelessWidget {
             child: SizedBox(
               height: 44,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const ValoracionPaso1Screen(),
+    ),
+  );
+},
                 icon: const Icon(Icons.bar_chart, size: 20),
                 label: const Text(
                   'Valorar evento',
                   style: TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 14,
                   ),
                 ),
@@ -271,7 +279,7 @@ class _BotonesAccion extends StatelessWidget {
                 label: Text(
                   'Certificado',
                   style: TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 14,
                     color: Colors.grey.shade400,
                   ),
@@ -352,7 +360,7 @@ class _TabItem extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontFamily: Fonts.avenir,
+            fontFamily: Fonts.regular,
             fontSize: 15,
             fontWeight: active ? FontWeight.w700 : FontWeight.w400,
             color: active
@@ -443,7 +451,7 @@ class _GaleriaTab extends StatelessWidget {
             const Text(
               'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
               style: TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 13,
                 color: AppColors.textSubtle,
                 height: 1.5,

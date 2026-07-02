@@ -35,7 +35,7 @@ class AgendaItemCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: const TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textTitle,
@@ -65,7 +65,7 @@ class AgendaItemCard extends StatelessWidget {
               Text(
                 time,
                 style: const TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   color: AppColors.textSubtle,
                 ),
               ),
@@ -85,7 +85,7 @@ class AgendaItemCard extends StatelessWidget {
               Text(
                 location,
                 style: const TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   color: AppColors.textSubtle,
                 ),
               ),

@@ -12,7 +12,7 @@ class AgendaTabSelector extends StatelessWidget {
     super.key,
     required this.title,
     required this.selected,
-    required this.onTap,
+    required this.onTap,      
   });
 
   @override
@@ -35,7 +35,7 @@ class AgendaTabSelector extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 14,
               color: selected
                   ? AppColors.primary

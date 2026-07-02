@@ -73,7 +73,7 @@ class _ValoracionModalState extends State<ValoracionModal> {
             child: Text(
               'Queremos saber tu opinión',
               style: TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 color: AppColors.modalSubtitle,
@@ -88,7 +88,7 @@ class _ValoracionModalState extends State<ValoracionModal> {
               'Charla Educación y SIG',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textTitle,
@@ -101,7 +101,7 @@ class _ValoracionModalState extends State<ValoracionModal> {
           RichText(
             text: const TextSpan(
               style: TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 14,
                 color: AppColors.textTitle,
               ),
@@ -134,7 +134,7 @@ class _ValoracionModalState extends State<ValoracionModal> {
           const Text(
             'Cuéntanos más (Opcional)',
             style: TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: AppColors.textTitle,
@@ -152,7 +152,7 @@ class _ValoracionModalState extends State<ValoracionModal> {
                 contentPadding: EdgeInsets.all(12),
                 hintText: 'Escribe tu comentario aquí...',
                 hintStyle: TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   fontSize: 14,
                   color: AppColors.textSubtle,
                 ),
@@ -194,7 +194,7 @@ class _ValoracionModalState extends State<ValoracionModal> {
               child: const Text(
                 'Enviar valoración',
                 style: TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: AppColors.white,

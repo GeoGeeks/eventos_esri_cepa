@@ -37,9 +37,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
         title: const Text(
           'Agenda',
           style: TextStyle(
-            fontFamily: Fonts.avenir,
+            fontFamily: Fonts.regular,
             color: Color(0xFF141414),
-            fontSize: Fonts.titleLarge,
+            fontSize: Fonts.body,
             fontWeight: FontWeight.w500,
             height: 32 / 26,
           ),
@@ -152,7 +152,7 @@ class _AgendaCard extends StatelessWidget {
                 child: Text(
                   'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
                   style: TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textTitle,

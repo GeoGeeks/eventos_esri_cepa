@@ -18,7 +18,7 @@ class ProfileSectionTitle extends StatelessWidget {
         child: Text(
           title,
           style: const TextStyle(
-            fontFamily: Fonts.avenir,
+            fontFamily: Fonts.regular,
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Color(0xFF202020),

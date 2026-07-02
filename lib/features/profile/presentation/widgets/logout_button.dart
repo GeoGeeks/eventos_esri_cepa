@@ -27,7 +27,7 @@ class LogoutButton extends StatelessWidget {
           child: const Text(
             'Cerrar Sesión',
             style: TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               color: Color(0xFFFF4D4F),
               fontSize: 15,
               fontWeight: FontWeight.w500,

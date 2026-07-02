@@ -1,11 +1,14 @@
 class Fonts {
   Fonts._();
 
-  static const String avenir = 'AvenirNext';
+  static const String regular    = 'AvenirNextRegular';
+  static const String bold       = 'AvenirNextBold';
+  static const String demi       = 'AvenirNextDemi';
+  static const String medium     = 'AvenirNextMedium';
+  static const String heavy      = 'AvenirNextHeavy';
+  static const String light      = 'AvenirNextLight';
+  static const String thin       = 'AvenirNextThin';
+  static const String ultraLight = 'AvenirNextUltraLight';
 
-  // Tamaños reutilizables
-  static const double titleLarge = 26;
-  static const double titleMedium = 20;
-  static const double body = 16;
-  static const double caption = 14;
+static const double body = 16;
 }

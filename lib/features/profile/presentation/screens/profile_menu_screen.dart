@@ -34,7 +34,7 @@ class ProfileMenuScreen extends StatelessWidget {
                     child: const Text(
                       'ML',
                       style: TextStyle(
-                        fontFamily: Fonts.avenir,
+                        fontFamily: Fonts.regular,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -48,7 +48,7 @@ class ProfileMenuScreen extends StatelessWidget {
                       Text(
                         'María López',
                         style: TextStyle(
-                          fontFamily: Fonts.avenir,
+                          fontFamily: Fonts.regular,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -58,7 +58,7 @@ class ProfileMenuScreen extends StatelessWidget {
                       Text(
                         'Ingeniera Civil · Procalculo',
                         style: TextStyle(
-                          fontFamily: Fonts.avenir,
+                          fontFamily: Fonts.regular,
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           color: Colors.white,
@@ -157,7 +157,7 @@ class ProfileMenuScreen extends StatelessWidget {
                 Text(
                   'esri Colombia',
                   style: TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 13,
                     color: Colors.grey.shade500,
                   ),

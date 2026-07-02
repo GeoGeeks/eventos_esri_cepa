@@ -37,7 +37,7 @@ class ProfileMenuItem extends StatelessWidget {
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
                   color: Color(0xFF333333),

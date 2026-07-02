@@ -19,7 +19,7 @@ class FiltroPanel extends StatelessWidget {
         Text(
           titulo,
           style: const TextStyle(
-            fontFamily: Fonts.avenir,
+            fontFamily: Fonts.regular,
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.modalSubtitle,
@@ -58,7 +58,7 @@ class FiltroPanel extends StatelessWidget {
               title: Text(
                 'Combobox item ${index + 1}',
                 style: const TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textTitle,
