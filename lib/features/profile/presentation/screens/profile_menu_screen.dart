@@ -66,7 +66,7 @@ class ProfileMenuScreen extends StatelessWidget {
             style: TextStyle(
               fontFamily: Fonts.avenir,
               fontSize: 13,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w400,                    
               color: Colors.white,
             ),
           ),
