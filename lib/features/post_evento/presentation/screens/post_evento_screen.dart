@@ -50,14 +50,6 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     Images.galeria4,
   ];
 
-  void _prevTab() {
-    if (_tabIndex > 0) setState(() => _tabIndex--);
-  }
-
-  void _nextTab() {
-    if (_tabIndex < _tabs.length - 1) setState(() => _tabIndex++);
-  }
-
   Widget _buildTabContent() {
     switch (_tabIndex) {
       case 0:
@@ -97,8 +89,6 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                       _tabIndex = i;
                       _showVideo = false;
                     }),
-                    onPrev: _prevTab,
-                    onNext: _nextTab,
                   ),
                   _buildTabContent(),
                 ],
@@ -306,56 +296,31 @@ class _TabBar extends StatelessWidget {
   final List<String> tabs;
   final int tabIndex;
   final ValueChanged<int> onTab;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
 
   const _TabBar({
     required this.tabs,
     required this.tabIndex,
     required this.onTab,
-    required this.onPrev,
-    required this.onNext,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left, size: 20),
-            color: tabIndex > 0
-                ? const Color(0xFF6B6B6B)
-                : const Color(0xFFCCCCCC),
-            onPressed: tabIndex > 0 ? onPrev : null,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 38),
-          ),
-          Expanded(
-            child: Row(
-              children: tabs.asMap().entries.map((entry) {
-                final i = entry.key;
-                final label = entry.value;
-                return _TabItem(
-                  label: label,
-                  active: i == tabIndex,
-                  onTap: () => onTab(i),
-                );
-              }).toList(),
+        children: tabs.asMap().entries.map((entry) {
+          final i = entry.key;
+          final label = entry.value;
+          return Padding(
+            padding: const EdgeInsets.only(right: 24),
+            child: _TabItem(
+              label: label,
+              active: i == tabIndex,
+              onTap: () => onTab(i),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right, size: 20),
-            color: tabIndex < tabs.length - 1
-                ? const Color(0xFF6B6B6B)
-                : const Color(0xFFCCCCCC),
-            onPressed: tabIndex < tabs.length - 1 ? onNext : null,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 38),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
@@ -377,19 +342,11 @@ class _TabItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFFEBEBEB) : Colors.transparent,
           border: active
               ? const Border(
                   bottom: BorderSide(color: Color(0xFF091F44), width: 2))
-              : null,
-          borderRadius: active
-              ? const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
-                )
               : null,
         ),
         child: Text(
@@ -397,7 +354,7 @@ class _TabItem extends StatelessWidget {
           style: TextStyle(
             fontFamily: Fonts.avenir,
             fontSize: 15,
-            fontWeight: active ? FontWeight.w500 : FontWeight.w400,
+            fontWeight: active ? FontWeight.w700 : FontWeight.w400,
             color: active
                 ? const Color(0xFF141414)
                 : const Color(0xFF6B6B6B),
@@ -564,8 +521,7 @@ class _ExpertosTab extends StatelessWidget {
           imagenAsset: e.imagenAsset,
           titulo: e.nombre,
           subtitulo: e.cargo,
-          descripcion: e.descripcion,
-          onExpandir: () {},
+          onAgendar: () {},
         );
       },
     );
