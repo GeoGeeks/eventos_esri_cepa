@@ -42,7 +42,7 @@ class AppButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   fontSize: fontSize ?? 16,
                   fontWeight: FontWeight.w400,
                   color: AppColors.white,
@@ -65,7 +65,7 @@ class AppButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontFamily: Fonts.avenir,
+                  fontFamily: Fonts.regular,
                   color: AppColors.primary,
                   fontSize: fontSize ?? 16,
                   fontWeight: FontWeight.w400,

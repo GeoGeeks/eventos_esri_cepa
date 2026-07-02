@@ -36,7 +36,7 @@ class ECardWidget extends StatelessWidget {
             child: const Text(
               'ML',
               style: TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -49,7 +49,7 @@ class ECardWidget extends StatelessWidget {
           const Text(
             'María López',
             style: TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColors.textTitle,
@@ -61,7 +61,7 @@ class ECardWidget extends StatelessWidget {
           const Text(
             'Ingeniera Civil · Procalculo',
             style: TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 13,
               fontWeight: FontWeight.w400,
               color: AppColors.textSubtle,

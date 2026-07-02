@@ -65,7 +65,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                   Text(
                     'Eventos Reservados',
                     style: TextStyle(
-                      fontFamily: Fonts.avenir,
+                      fontFamily: Fonts.regular,
                       fontSize: 26,
                       fontWeight: FontWeight.w500, // Avenir Medium
                       color: Color(0xFF141414),
@@ -76,7 +76,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                   Text(
                     'Encuentre la información sobre los eventos en los que se ha registrado.',
                     style: TextStyle(
-                      fontFamily: Fonts.avenir,
+                      fontFamily: Fonts.regular,
                       fontSize: 16,
                       fontWeight: FontWeight.w400, // Avenir Regular
                       color: Color(0xFF6B6B6B),
@@ -101,7 +101,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                       child: TextField(
                         onChanged: (v) => setState(() => _query = v),
                         style: const TextStyle(
-                          fontFamily: Fonts.avenir,
+                          fontFamily: Fonts.regular,
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: Color(0xFF141414),
@@ -109,7 +109,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                         decoration: const InputDecoration(
                           hintText: 'Buscar',
                           hintStyle: TextStyle(
-                            fontFamily: Fonts.avenir,
+                            fontFamily: Fonts.regular,
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                             color: Color(0xFF949494),
@@ -165,7 +165,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                       child: Text(
                         'No se encontraron eventos',
                         style: TextStyle(
-                          fontFamily: Fonts.avenir,
+                          fontFamily: Fonts.regular,
                           color: Colors.grey,
                         ),
                       ),

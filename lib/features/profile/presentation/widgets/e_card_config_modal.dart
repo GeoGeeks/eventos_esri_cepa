@@ -37,7 +37,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
                 const Text(
                   'Configure su e-card',
                   style: TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textTitle,
@@ -59,7 +59,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
             const Text(
               'Seleccione qué información desea mostrar cuando alguien escanee su tarjeta digital.',
               style: TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 13,
                 color: AppColors.textSubtle,
                 height: 1.5,
@@ -107,7 +107,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
                 child: const Text(
                   'Guardar cambios',
                   style: TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                   ),
@@ -140,7 +140,7 @@ class _ConfigToggle extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontFamily: Fonts.avenir,
+            fontFamily: Fonts.regular,
             fontSize: 14,
             color: AppColors.textTitle,
           ),

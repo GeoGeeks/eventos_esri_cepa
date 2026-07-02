@@ -25,7 +25,7 @@ class EsriEventosApp extends StatelessWidget {
         title: 'Esri Eventos',
         theme: ThemeData(
           useMaterial3: true,
-          fontFamily: Fonts.avenir,
+          fontFamily: Fonts.regular,
         ),
         home: const OnboardingScreen(),
       ),

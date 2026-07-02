@@ -86,7 +86,7 @@ class _ECardScreenState extends State<ECardScreen> {
                         const Text(
                           'E-card',
                           style: TextStyle(
-                            fontFamily: Fonts.avenir,
+                            fontFamily: Fonts.regular,
                             fontSize: 26,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textTitle,
@@ -101,7 +101,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             'Utilice este código para identificarse y conectar con otros asistentes.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontFamily: Fonts.avenir,
+                              fontFamily: Fonts.regular,
                               fontSize: 13,
                               color: AppColors.textSubtle,
                               height: 1.5,
@@ -170,7 +170,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             Text(
                               'Configuración actualizada.',
                               style: TextStyle(
-                                fontFamily: Fonts.avenir,
+                                fontFamily: Fonts.regular,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF135200),
@@ -180,7 +180,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             Text(
                               'Los cambios ya están disponibles al escanear el código QR.',
                               style: TextStyle(
-                                fontFamily: Fonts.avenir,
+                                fontFamily: Fonts.regular,
                                 fontSize: 12,
                                 color: Color(0xFF135200),
                                 height: 1.4,

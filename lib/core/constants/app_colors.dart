@@ -28,4 +28,7 @@ class AppColors {
   //Filtro
   static const Color lightGray = Color(0xFFEBEBEB);
   static const Color filterButtonText = Color(0xFF00619B);
+
+  //Valoración
+  static const Color success = Color(0xFF288835);
 }

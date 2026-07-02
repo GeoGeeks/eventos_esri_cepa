@@ -6,7 +6,6 @@ import '../../core/widgets/upcoming_event_card.dart';
 import '../historial/data/eventos_data.dart';
 import '../historial/presentation/widgets/detalle_evento_modal.dart';
 import '../invitados/invitados.dart';
-import '../post_evento/presentation/screens/post_evento_screen.dart';
 
 class EventosScreen extends StatefulWidget {
   const EventosScreen({super.key});
@@ -85,7 +84,7 @@ class _EventosScreenState extends State<EventosScreen> {
                           const Text(
                             'Eventos',
                             style: TextStyle(
-                              fontFamily: Fonts.avenir,
+                              fontFamily: Fonts.regular,
                               fontSize: 26,
                               fontWeight: FontWeight.w500,
                               color: Color(0xFF141414),
@@ -100,7 +99,7 @@ class _EventosScreenState extends State<EventosScreen> {
                       const Text(
                         'Encuentre aquí toda la información sobre los eventos en los que se encuentra registrado.',
                         style: TextStyle(
-                          fontFamily: Fonts.avenir,
+                          fontFamily: Fonts.regular,
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                           color: Color(0xFF6B6B6B),
@@ -119,7 +118,7 @@ class _EventosScreenState extends State<EventosScreen> {
                                 onChanged: (v) =>
                                     setState(() => _query = v),
                                 style: const TextStyle(
-                                  fontFamily: Fonts.avenir,
+                                  fontFamily: Fonts.regular,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF141414),
@@ -127,7 +126,7 @@ class _EventosScreenState extends State<EventosScreen> {
                                 decoration: const InputDecoration(
                                   hintText: 'Buscar',
                                   hintStyle: TextStyle(
-                                    fontFamily: Fonts.avenir,
+                                    fontFamily: Fonts.regular,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w400,
                                     color: Color(0xFF949494),
@@ -186,7 +185,7 @@ class _EventosScreenState extends State<EventosScreen> {
                           child: Text(
                             'No se encontraron eventos',
                             style: TextStyle(
-                              fontFamily: Fonts.avenir,
+                              fontFamily: Fonts.regular,
                               color: Colors.grey,
                             ),
                           ),
@@ -206,7 +205,7 @@ class _EventosScreenState extends State<EventosScreen> {
                                   child: Text(
                                     mes,
                                     style: const TextStyle(
-                                      fontFamily: Fonts.avenir,
+                                      fontFamily: Fonts.regular,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF141414),

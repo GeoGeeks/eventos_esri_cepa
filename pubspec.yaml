@@ -34,9 +34,36 @@ flutter:
     - assets/images/post_evento/
 
 
-
-
+  flutter:
   fonts:
-    - family: AvenirNext
+    - family: AvenirNextUltraLight
+      fonts:
+        - asset: assets/fonts/AvenirNextLTPro-UltLt.ttf
+
+    - family: AvenirNextThin
+      fonts:
+        - asset: assets/fonts/AvenirNextLTPro-Thin.ttf
+
+    - family: AvenirNextLight
+      fonts:
+        - asset: assets/fonts/AvenirNextLTPro-Light.otf
+
+    - family: AvenirNextRegular
       fonts:
         - asset: assets/fonts/AvenirNextLTPro-Regular.ttf
+
+    - family: AvenirNextMedium
+      fonts:
+        - asset: assets/fonts/AvenirNextLTPro-Medium.ttf
+
+    - family: AvenirNextDemi
+      fonts:
+        - asset: assets/fonts/AvenirNextLTPro-Demi.ttf
+
+    - family: AvenirNextBold
+      fonts:
+        - asset: assets/fonts/AvenirNextLTPro-Bold.ttf
+
+    - family: AvenirNextHeavy
+      fonts:
+        - asset: assets/fonts/AvenirNextLTPro-Heavy.ttf

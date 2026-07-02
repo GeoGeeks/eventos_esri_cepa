@@ -189,7 +189,7 @@ class _Header extends StatelessWidget {
                     const Text(
                       'Bienvenida',
                       style: TextStyle(
-                        fontFamily: Fonts.avenir,
+                        fontFamily: Fonts.regular,
                         color: AppColors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.w400,
@@ -199,7 +199,7 @@ class _Header extends StatelessWidget {
                     const Text(
                       'María López',
                       style: TextStyle(
-                        fontFamily: Fonts.avenir,
+                        fontFamily: Fonts.regular,
                         color: AppColors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
@@ -209,7 +209,7 @@ class _Header extends StatelessWidget {
                     Text(
                       'Ingeniera Civil · Procalculo',
                       style: TextStyle(
-                        fontFamily: Fonts.avenir,
+                        fontFamily: Fonts.regular,
                         color: AppColors.white.withOpacity(0.9),
                         fontSize: 13,
                       ),
@@ -285,7 +285,7 @@ class _SectionTitle extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 17,
               fontWeight: FontWeight.w600,
               color: AppColors.primary,
@@ -316,7 +316,7 @@ class _SeeAllChip extends StatelessWidget {
         child: const Text(
           'Ver todos',
           style: TextStyle(
-            fontFamily: Fonts.avenir,
+            fontFamily: Fonts.regular,
             color: AppColors.primary,
             fontSize: 14,
             fontWeight: FontWeight.w500,

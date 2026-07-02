@@ -42,7 +42,7 @@ class DetalleEventoModal extends StatelessWidget {
             Text(
               evento.titulo,
               style: const TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textTitle,
@@ -75,7 +75,7 @@ class DetalleEventoModal extends StatelessWidget {
             const Text(
               'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
               style: TextStyle(
-                fontFamily: Fonts.avenir,
+                fontFamily: Fonts.regular,
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textSubtle,
@@ -110,7 +110,7 @@ class DetalleEventoModal extends StatelessWidget {
                 child: const Text(
                   'Registrarse',
                   style: TextStyle(
-                    fontFamily: Fonts.avenir,
+                    fontFamily: Fonts.regular,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -148,7 +148,7 @@ class _DetailRow extends StatelessWidget {
           child: Text(
             text,
             style: const TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.regular,
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: AppColors.textTitle,
