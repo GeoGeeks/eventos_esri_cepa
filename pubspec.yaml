@@ -14,8 +14,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^8.1.0
   flutter_bloc: ^9.1.1
+ 
   qr_flutter: ^4.1.0
-
+  screenshot: ^3.0.0
+  path_provider: ^2.1.5
+  share_plus: ^11.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -35,7 +38,6 @@ flutter:
     - assets/images/post_evento/
 
 
-  flutter:
   fonts:
     - family: AvenirNextUltraLight
       fonts:
