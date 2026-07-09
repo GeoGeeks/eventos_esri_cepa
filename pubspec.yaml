@@ -34,8 +34,6 @@ flutter:
     - assets/images/experiencias/
     - assets/images/post_evento/
 
-
-  flutter:
   fonts:
     - family: AvenirNextUltraLight
       fonts:
@@ -64,7 +62,3 @@ flutter:
     - family: AvenirNextBold
       fonts:
         - asset: assets/fonts/AvenirNextLTPro-Bold.ttf
-
-    - family: AvenirNextHeavy
-      fonts:
-        - asset: assets/fonts/AvenirNextLTPro-Heavy.ttf
