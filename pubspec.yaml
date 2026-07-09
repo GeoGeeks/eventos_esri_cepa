@@ -1,6 +1,6 @@
 name: esri_eventos
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -10,6 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  qr_flutter: ^4.1.0
+  screenshot: ^3.0.0
+  path_provider: ^2.1.5
+  share_plus: ^11.0.0
+
 
   cupertino_icons: ^1.0.8
   google_fonts: ^8.1.0
@@ -33,8 +39,6 @@ flutter:
     - assets/images/experiencias/
     - assets/images/post_evento/
 
-
-  flutter:
   fonts:
     - family: AvenirNextUltraLight
       fonts:
