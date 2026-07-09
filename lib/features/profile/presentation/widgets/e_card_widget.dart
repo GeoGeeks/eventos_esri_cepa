@@ -1,10 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
-import '../../../../core/constants/images.dart';
+import '../../data/ecard_mock_data.dart';
+import '../../data/ecard_visibility_config.dart';
 
 class ECardWidget extends StatelessWidget {
-  const ECardWidget({super.key});
+  final ECardVisibilityConfig visibilityConfig;
+
+  const ECardWidget({
+    super.key,
+    required this.visibilityConfig,
+  });
+
+  String _buildVCard() {
+    final buffer = StringBuffer()
+      ..writeln('BEGIN:VCARD')
+      ..writeln('VERSION:3.0')
+      ..writeln('N:;${EcardMockData.nombre};;;')
+      ..writeln('FN:${EcardMockData.nombre}');
+
+    if (visibilityConfig.cargo) {
+      buffer.writeln('TITLE:${EcardMockData.cargo}');
+    }
+    if (visibilityConfig.empresa) {
+      buffer.writeln('ORG:${EcardMockData.empresa}');
+    }
+    if (visibilityConfig.correo) {
+      buffer.writeln('EMAIL;TYPE=INTERNET:${EcardMockData.correo}');
+    }
+    if (visibilityConfig.telefono) {
+      buffer.writeln('TEL;TYPE=CELL:${EcardMockData.telefono}');
+    }
+
+    buffer.writeln('END:VCARD');
+    return buffer.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +55,6 @@ class ECardWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Avatar azul con iniciales
           Container(
             width: 64,
             height: 64,
@@ -70,12 +100,20 @@ class ECardWidget extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // QR real
-          Image.asset(
-            Images.qrEcard,
-            width: 180,
-            height: 180,
-            fit: BoxFit.contain,
+          QrImageView(
+            data: _buildVCard(),
+            version: QrVersions.auto,
+            size: 180,
+            gapless: false,
+            backgroundColor: Colors.white,
+            eyeStyle: const QrEyeStyle(
+              eyeShape: QrEyeShape.square,
+              color: AppColors.primary,
+            ),
+            dataModuleStyle: const QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.square,
+              color: AppColors.primary,
+            ),
           ),
         ],
       ),
