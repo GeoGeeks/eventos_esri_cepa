@@ -5,6 +5,7 @@ import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/profile_section_title.dart';
 import 'e_card_screen.dart';
+import '../../../../core/constants/images.dart';
 
 class ProfileMenuScreen extends StatelessWidget {
   const ProfileMenuScreen({super.key});
@@ -18,57 +19,62 @@ class ProfileMenuScreen extends StatelessWidget {
           children: [
             // ── Header azul ──
             Container(
-              width: double.infinity,
-              color: AppColors.primary,
-              padding: const EdgeInsets.fromLTRB(20, 52, 20, 24),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'ML',
-                      style: TextStyle(
-                        fontFamily: Fonts.regular,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'María López',
-                        style: TextStyle(
-                          fontFamily: Fonts.regular,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Ingeniera Civil · Procalculo',
-                        style: TextStyle(
-                          fontFamily: Fonts.regular,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+  width: double.infinity,
+  decoration: const BoxDecoration(
+    image: DecorationImage(
+      image: AssetImage(Images.headerInicio),
+      fit: BoxFit.cover,
+    ),
+  ),
+  padding: const EdgeInsets.fromLTRB(20, 52, 20, 24),
+  child: Row(
+    children: [
+      Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'ML',
+          style: TextStyle(
+            fontFamily: Fonts.light,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      const SizedBox(width: 16),
+      const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'María López',
+            style: TextStyle(
+              fontFamily: Fonts.light,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Ingeniera Civil · Procalculo',
+            style: TextStyle(
+              fontFamily: Fonts.light,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,                    
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
 
             const SizedBox(height: 8),
 

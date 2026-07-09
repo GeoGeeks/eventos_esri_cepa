@@ -1,19 +1,34 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../data/ecard_visibility_config.dart';
 
 class ECardConfigModal extends StatefulWidget {
-  const ECardConfigModal({super.key});
+  final ECardVisibilityConfig initialConfig;
+
+  const ECardConfigModal({
+    super.key,
+    required this.initialConfig,
+  });
 
   @override
   State<ECardConfigModal> createState() => _ECardConfigModalState();
 }
 
 class _ECardConfigModalState extends State<ECardConfigModal> {
-  bool _cargo = true;
-  bool _empresa = true;
-  bool _correo = true;
-  bool _telefono = true;
+  late bool _cargo;
+  late bool _empresa;
+  late bool _correo;
+  late bool _telefono;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargo = widget.initialConfig.cargo;
+    _empresa = widget.initialConfig.empresa;
+    _correo = widget.initialConfig.correo;
+    _telefono = widget.initialConfig.telefono;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +59,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => Navigator.pop(context, false),
+                  onTap: () => Navigator.pop(context, null),
                   child: const Icon(
                     Icons.close,
                     color: AppColors.textSubtle,
@@ -95,7 +110,15 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
               width: double.infinity,
               height: 44,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
+                onPressed: () {
+                  final result = ECardVisibilityConfig(
+                    cargo: _cargo,
+                    empresa: _empresa,
+                    correo: _correo,
+                    telefono: _telefono,
+                  );
+                  Navigator.pop(context, result);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
