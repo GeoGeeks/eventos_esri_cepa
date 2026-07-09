@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../data/ecard_visibility_config.dart';
 import '../widgets/e_card_action_button.dart';
 import '../widgets/e_card_config_modal.dart';
 import '../widgets/e_card_widget.dart';
@@ -14,15 +15,19 @@ class ECardScreen extends StatefulWidget {
 
 class _ECardScreenState extends State<ECardScreen> {
   bool _showNotification = false;
+  ECardVisibilityConfig _visibilityConfig = const ECardVisibilityConfig();
 
   Future<void> _openConfig() async {
-    final result = await showDialog(
+    final result = await showDialog<ECardVisibilityConfig>(
       context: context,
       barrierColor: Colors.black54,
-      builder: (_) => const ECardConfigModal(),
+      builder: (_) => ECardConfigModal(initialConfig: _visibilityConfig),
     );
-    if (result == true && mounted) {
-      setState(() => _showNotification = true);
+    if (result != null && mounted) {
+      setState(() {
+        _visibilityConfig = result;
+        _showNotification = true;
+      });
     }
   }
 
@@ -35,7 +40,6 @@ class _ECardScreenState extends State<ECardScreen> {
           children: [
             Column(
               children: [
-                // ── Botones flotantes ──
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(
@@ -111,7 +115,7 @@ class _ECardScreenState extends State<ECardScreen> {
 
                         const SizedBox(height: 28),
 
-                        const ECardWidget(),
+                        ECardWidget(visibilityConfig: _visibilityConfig),
 
                         const SizedBox(height: 28),
 
@@ -140,7 +144,6 @@ class _ECardScreenState extends State<ECardScreen> {
               ],
             ),
 
-            // ── Banner notificación ──
             if (_showNotification)
               Positioned(
                 top: 0,
