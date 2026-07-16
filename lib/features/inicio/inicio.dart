@@ -47,9 +47,9 @@ const _reservedEvents = [
 
 const _upcomingEvents = [
   _UpcomingEvent(
-    title: 'Planeta Esri',
-    date: 'Oct 02 - 11:00 a.m.',
-    location: 'Calle 32 # 54-34',
+    title: 'Planeta Esri Villavicencio',
+    date: 'Ago 20 - 08:00 a.m.',
+    location: 'Universidad de los Llanos',
     image: Images.planetaEsri,
     mode: 'Presencial',
   ),
@@ -72,97 +72,122 @@ const _upcomingEvents = [
 class InicioApp extends StatelessWidget {
   const InicioApp({super.key});
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.background,
-    body: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background, // background: #F7F7F7
+      body: Column(
         children: [
+          // 1. HEADER CON BOTÓN ABSOLUTO CORRECTO
           _Header(),
-          const SizedBox(height: 20),
 
-          _SectionTitle(title: 'Eventos reservados'),
-          const SizedBox(height: 14),
+          // 2. CUERPO CON SCROLL INDEPENDIENTE (Asegura que se vean todas las tarjetas abajo)
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Center(
+                child: SizedBox(
+                  width: 360, // Limita al ancho exacto del Frame 1420
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
 
-          _HorizontalCarousel(
-            itemCount: _reservedEvents.length,
-            itemWidth: 260,
-            itemBuilder: (context, i) {
-              final e = _reservedEvents[i];
+                      // Título Sección 1
+                      const _SectionTitle(title: 'Eventos reservados'),
+                      const SizedBox(height: 12), // gap: 12px
 
-              return EventCard(
-                title: e.title,
-                date: e.date,
-                location: e.location,
-                image: e.image,
-                onViewMore: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const InvitadosScreen(),
-                    ),
-                  );
-                },
-                onCredential: () {},
-              );
-            },
-          ),
+                      // Carrusel Horizontal
+                      _HorizontalCarousel(
+                        itemCount: _reservedEvents.length,
+                        itemWidth: 237,
+                        itemBuilder: (context, i) {
+                          final e = _reservedEvents[i];
+                          return EventCard(
+                            title: e.title,
+                            date: e.date,
+                            location: e.location,
+                            image: e.image,
+                            onViewMore: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const InvitadosScreen(),
+                                ),
+                              );
+                            },
+                            onCredential: () {},
+                          );
+                        },
+                      ),
 
-          const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
-          _SectionTitle(
-  title: 'Próximos eventos',
-  action: _SeeAllChip(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const EventosScreen(),
-        ),
-      );
-    },
-  ),
-),
+                      // Título Sección 2 con botón "Ver todos"
+                      _SectionTitle(
+                        title: 'Próximos eventos',
+                        action: _SeeAllChip(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const EventosScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
 
-          const SizedBox(height: 14),
+                      const SizedBox(height: 12), // gap: 12px
 
-          ..._upcomingEvents.map(
-            (e) => Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-              child: UpcomingEventCard(
-                title: e.title,
-                date: e.date,
-                location: e.location,
-                image: e.image,
-                mode: e.mode,
-                onViewMore: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const InvitadosScreen(),
-                    ),
-                  );
-                },
-                onRegister: () {},
+                      // Listado vertical de tarjetas Próximos Eventos
+                      ..._upcomingEvents.map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: UpcomingEventCard(
+                            title: e.title,
+                            date: e.date,
+                            location: e.location,
+                            image: e.image,
+                            mode: e.mode,
+                            onViewMore: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const InvitadosScreen(),
+                                ),
+                              );
+                            },
+                            onRegister: () {},
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24), // Espacio extra inferior
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-
-          const SizedBox(height: 16),
         ],
       ),
-    ),
-  );
+    );
+  }
 }
-}
+
+// --- SUBWIDGETS ---
+
 class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Tomamos la altura del área segura (Notch/Status Bar) para que no tape el contenido
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Container(
       width: double.infinity,
-      height: 165,
+      // Altura del Header según Figma (120px) + la barra de estado del celular
+      height: 120 + statusBarHeight, 
       clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
@@ -172,52 +197,64 @@ class _Header extends StatelessWidget {
         image: DecorationImage(
           image: AssetImage(Images.headerInicio),
           fit: BoxFit.cover,
-          alignment: Alignment.center,
         ),
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+        bottom: false,
+        child: SizedBox(
+          width: double.infinity,
+          height: 120, // Altura neta del contenido del Header
+          child: Stack(
             children: [
-              Expanded(
+              // 1. TEXTOS DE BIENVENIDA (Alineados a la izquierda a 26px del borde)
+              Positioned(
+                left: 26,
+                top: 26, // top aproximado para centrar verticalmente con la campana
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Bienvenida',
                       style: TextStyle(
-                        fontFamily: Fonts.regular,
+                        fontFamily: Fonts.medium,
                         color: AppColors.white,
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 2),
                     const Text(
                       'María López',
                       style: TextStyle(
-                        fontFamily: Fonts.regular,
+                        fontFamily: Fonts.bold,
                         color: AppColors.white,
-                        fontSize: 24,
+                        fontSize: 32, // font-size: 32px de Figma
                         fontWeight: FontWeight.w700,
+                        height: 1.25, // line-height: 40px
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
                       'Ingeniera Civil · Procalculo',
                       style: TextStyle(
                         fontFamily: Fonts.regular,
-                        color: AppColors.white.withOpacity(0.9),
-                        fontSize: 13,
+                        color: const Color(0xFFD6EFFF), // color: #D6EFFF
+                        fontSize: 14,
+                        height: 1.14, // line-height: 16px
                       ),
                     ),
                   ],
                 ),
               ),
-              _NotificationBell(),
+
+              // 2. CAMPANA DE ALERTAS EN POSICIÓN EXACTA DE FIGMA
+              // left: 346px de un plano de 412px de ancho equivale a estar a 26px del borde derecho (right: 26)
+              // top: 30px del CSS de Figma
+              Positioned(
+                right: 26, 
+                top: 30, 
+                child: _NotificationBell(),
+              ),
             ],
           ),
         ),
@@ -230,16 +267,17 @@ class _NotificationBell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        color: AppColors.white,
+      width: 40, // width: 40px en CSS
+      height: 40, // height: 40px en CSS
+      decoration: const BoxDecoration(
+        color: AppColors.white, // background: #FFFFFF
         shape: BoxShape.circle,
+        // Traduciendo el drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.3)) de Figma
         boxShadow: [
           BoxShadow(
-            color: AppColors.white.withOpacity(0.4),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Color(0x4D000000), // Opacidad de 30% (0x4D) sobre negro
+            blurRadius: 4,
+            offset: Offset(1, 2),
           ),
         ],
       ),
@@ -249,14 +287,15 @@ class _NotificationBell extends StatelessWidget {
           const Icon(
             Icons.notifications_none,
             color: AppColors.primary,
-            size: 26,
+            size: 22,
           ),
+          // Indicador de notificación rojo
           Positioned(
-            top: 12,
-            right: 12,
+            top: 10,
+            right: 11,
             child: Container(
-              width: 10,
-              height: 10,
+              width: 8,
+              height: 8,
               decoration: const BoxDecoration(
                 color: AppColors.notification,
                 shape: BoxShape.circle,
@@ -277,23 +316,21 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: Fonts.regular,
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontFamily: Fonts.medium,
+            fontSize: 18, // font-size: 18px del CSS
+            fontWeight: FontWeight.w500, // font-weight: 500
+            color: Color(0xFF141414), // color: #141414
+            height: 24 / 18, // line-height: 24px
           ),
-          if (action != null) action!,
-        ],
-      ),
+        ),
+        if (action != null) action!,
+      ],
     );
   }
 }
@@ -316,7 +353,7 @@ class _SeeAllChip extends StatelessWidget {
         child: const Text(
           'Ver todos',
           style: TextStyle(
-            fontFamily: Fonts.regular,
+            fontFamily: Fonts.medium,
             color: AppColors.primary,
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -341,12 +378,13 @@ class _HorizontalCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300,
+      width: 360, // Sincroniza con el ancho de Figma
+      height: 262, // 257px de altura + 5px de tolerancia para sombras
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (_, __) => const SizedBox(width: 14),
+        separatorBuilder: (_, __) => const SizedBox(width: 24), // gap: 24px del CSS
         itemBuilder: (context, index) =>
             SizedBox(width: itemWidth, child: itemBuilder(context, index)),
       ),
