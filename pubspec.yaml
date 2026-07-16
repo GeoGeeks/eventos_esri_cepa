@@ -1,6 +1,6 @@
 name: esri_eventos
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -37,7 +37,6 @@ flutter:
     - assets/images/experiencias/
     - assets/images/post_evento/
 
-
   fonts:
     - family: AvenirNextUltraLight
       fonts:
@@ -67,6 +66,4 @@ flutter:
       fonts:
         - asset: assets/fonts/AvenirNextLTPro-Bold.ttf
 
-    - family: AvenirNextHeavy
-      fonts:
-        - asset: assets/fonts/AvenirNextLTPro-Heavy.ttf
+  

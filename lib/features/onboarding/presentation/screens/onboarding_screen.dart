@@ -63,7 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return BlocBuilder<OnboardingBloc, OnboardingState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFFF7F7F7),
           body: SafeArea(
             child: Column(
               children: [
@@ -79,21 +79,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     itemBuilder: (context, index) {
                       final item = onboardingItems[index];
 
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 12),
-                            OnboardingContent(
-                              image: item.image,
-                              title: item.title,
-                              description: item.description,
-                            ),
-                          ],
-                        ),
+                      return OnboardingContent(
+                        image: item.image,
+                        title: item.title,
+                        description: item.description,
                       );
                     },
                   ),
                 ),
+
+                const SizedBox(height: 12),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -105,12 +100,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                  ),
+                SizedBox(
+                  width: 360,
+                  height: 44,
                   child: OnboardingButton(
                     text: 'Continuar',
                     onPressed: () =>
@@ -120,20 +114,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                 const SizedBox(height: 16),
 
-                TextButton(
-                  onPressed: () => _skip(context),
-                  child: const Text(
-                    'Omitir',
-                    style: TextStyle(
-                      color: Color(0xFF091F44),
-                      decoration: TextDecoration.underline,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                SizedBox(
+                  width: 360,
+                  height: 44,
+                  child: TextButton(
+                    onPressed: () => _skip(context),
+                    style: TextButton.styleFrom(
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                      ),
+                    ),
+                    child: const Text(
+                      'Omitir',
+                      style: TextStyle(
+                        color: Color(0xFF007AC2),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 36),
               ],
             ),
           ),

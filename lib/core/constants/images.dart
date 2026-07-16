@@ -50,6 +50,6 @@ static const String galeria5 =
 static const String videoCover =
     'assets/images/post_evento/video_cover.png';
 
-
-
+static const String logoqr =
+    'assets/images/post_evento/logo_qr.png';
 }

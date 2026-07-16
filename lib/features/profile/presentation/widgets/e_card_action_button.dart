@@ -46,7 +46,7 @@ class ECardActionButton extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              fontFamily: Fonts.avenir,
+              fontFamily: Fonts.light,
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: AppColors.textSubtle,

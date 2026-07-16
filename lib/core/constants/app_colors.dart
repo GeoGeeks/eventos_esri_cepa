@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF091F44);
+  static const Color primary = Color(0xFF007AC2);
   static const Color white = Color(0xFFFFFFFF);
   static const Color background = Color(0xFFF7F7F7);
   static const Color cardBg = Color(0xFFFFFFFF);

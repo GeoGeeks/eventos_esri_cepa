@@ -7,16 +7,32 @@ import '../features/historial/presentation/screens/historial_screen.dart';
 import '../features/reservas/reservas_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
 import '../features/profile/presentation/screens/profile_menu_screen.dart';
+import '../features/profile/presentation/screens/e_card_screen.dart';
 
 class Menu extends StatefulWidget {
-  const Menu({super.key});
+  final int initialIndex;
+
+  const Menu({super.key, this.initialIndex = 0});
 
   @override
   State<Menu> createState() => _MenuState();
 }
 
 class _MenuState extends State<Menu> {
-  int currentIndex = 0;
+  late int currentIndex = widget.initialIndex;
+
+  // Sub-vista dentro del tab "Perfil" (index 4).
+  bool _showEcard = false;
+
+  void _onNavTap(int index) {
+    setState(() {
+      currentIndex = index;
+      if (index == 4) {
+        // Al tocar el ícono "Perfil" siempre volvemos al menú raíz.
+        _showEcard = false;
+      }
+    });
+  }
 
   Widget _buildPage(int index) {
     switch (index) {
@@ -33,7 +49,13 @@ class _MenuState extends State<Menu> {
         return const NotificationsScreen();
 
       case 4:
-        return const ProfileMenuScreen();
+        return _showEcard
+            ? ECardScreen(
+                onBack: () => setState(() => _showEcard = false),
+              )
+            : ProfileMenuScreen(
+                onOpenEcard: () => setState(() => _showEcard = true),
+              );
 
       default:
         return const SizedBox();
@@ -46,11 +68,7 @@ class _MenuState extends State<Menu> {
       body: _buildPage(currentIndex),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
+        onTap: _onNavTap,
       ),
     );
   }

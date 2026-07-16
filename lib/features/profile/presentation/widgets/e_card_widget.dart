@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../../../core/constants/images.dart';
 import '../../data/ecard_mock_data.dart';
 import '../../data/ecard_visibility_config.dart';
 
@@ -66,7 +67,7 @@ class ECardWidget extends StatelessWidget {
             child: const Text(
               'ML',
               style: TextStyle(
-                fontFamily: Fonts.regular,
+                fontFamily: Fonts.light,
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -79,7 +80,7 @@ class ECardWidget extends StatelessWidget {
           const Text(
             'María López',
             style: TextStyle(
-              fontFamily: Fonts.regular,
+              fontFamily: Fonts.light,
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColors.textTitle,
@@ -91,7 +92,7 @@ class ECardWidget extends StatelessWidget {
           const Text(
             'Ingeniera Civil · Procalculo',
             style: TextStyle(
-              fontFamily: Fonts.regular,
+              fontFamily: Fonts.light,
               fontSize: 13,
               fontWeight: FontWeight.w400,
               color: AppColors.textSubtle,
@@ -106,6 +107,7 @@ class ECardWidget extends StatelessWidget {
             size: 180,
             gapless: false,
             backgroundColor: Colors.white,
+            errorCorrectionLevel: QrErrorCorrectLevel.H,
             eyeStyle: const QrEyeStyle(
               eyeShape: QrEyeShape.square,
               color: AppColors.primary,
@@ -113,6 +115,10 @@ class ECardWidget extends StatelessWidget {
             dataModuleStyle: const QrDataModuleStyle(
               dataModuleShape: QrDataModuleShape.square,
               color: AppColors.primary,
+            ),
+            embeddedImage: const AssetImage(Images.logoqr),
+            embeddedImageStyle: const QrEmbeddedImageStyle(
+              size: Size(36, 36),
             ),
           ),
         ],
