@@ -66,6 +66,4 @@ flutter:
       fonts:
         - asset: assets/fonts/AvenirNextLTPro-Bold.ttf
 
-    - family: AvenirNextHeavy
-      fonts:
-        - asset: assets/fonts/AvenirNextLTPro-Heavy.ttf
+  
