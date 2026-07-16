@@ -7,7 +7,9 @@ import '../widgets/e_card_config_modal.dart';
 import '../widgets/e_card_widget.dart';
 
 class ECardScreen extends StatefulWidget {
-  const ECardScreen({super.key});
+  final VoidCallback onBack;
+
+  const ECardScreen({super.key, required this.onBack});
 
   @override
   State<ECardScreen> createState() => _ECardScreenState();
@@ -33,9 +35,9 @@ class _ECardScreenState extends State<ECardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: SafeArea(
+    return Container(
+      color: const Color(0xFFF5F5F5),
+      child: SafeArea(
         child: Stack(
           children: [
             Column(
@@ -46,7 +48,7 @@ class _ECardScreenState extends State<ECardScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: widget.onBack,
                         child: Container(
                           width: 36,
                           height: 36,
@@ -90,7 +92,7 @@ class _ECardScreenState extends State<ECardScreen> {
                         const Text(
                           'E-card',
                           style: TextStyle(
-                            fontFamily: Fonts.regular,
+                            fontFamily: Fonts.light,
                             fontSize: 26,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textTitle,
@@ -105,7 +107,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             'Utilice este código para identificarse y conectar con otros asistentes.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontFamily: Fonts.regular,
+                              fontFamily: Fonts.light,
                               fontSize: 13,
                               color: AppColors.textSubtle,
                               height: 1.5,
@@ -173,7 +175,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             Text(
                               'Configuración actualizada.',
                               style: TextStyle(
-                                fontFamily: Fonts.regular,
+                                fontFamily: Fonts.light,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF135200),
@@ -183,7 +185,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             Text(
                               'Los cambios ya están disponibles al escanear el código QR.',
                               style: TextStyle(
-                                fontFamily: Fonts.regular,
+                                fontFamily: Fonts.light,
                                 fontSize: 12,
                                 color: Color(0xFF135200),
                                 height: 1.4,
