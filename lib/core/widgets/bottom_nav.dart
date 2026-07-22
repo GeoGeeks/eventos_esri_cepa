@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
 
-const Color kNavBg = AppColors.primary;
-const Color kWhite = AppColors.white;
-const String kFont = 'AvenirNextLTPro';
+import '../constants/app_colors.dart';
+import '../constants/fonts.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -18,48 +16,72 @@ class CustomBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 80,
+      height: 70,
       child: Stack(
         clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
         children: [
+
+          /// Barra azul
           Positioned.fill(
             child: Container(
-              color: kNavBg,
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.white24,
+                    width: 1,
+                  ),
+                ),
+              ),
             ),
           ),
+
+          /// Botones
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+
               _NavButton(
                 icon: Icons.home_outlined,
-                label: 'Inicio',
+                label: "Inicio",
                 active: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
+
               _NavButton(
                 icon: Icons.history,
-                label: 'Historial',
+                label: "Historial",
                 active: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
-              _FabItem(
-                active: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
+
+              const SizedBox(width: 60),
+
               _NavButton(
                 icon: Icons.notifications_none,
-                label: 'Alertas',
+                label: "Alertas",
                 active: currentIndex == 3,
                 onTap: () => onTap(3),
               ),
+
               _NavButton(
                 icon: Icons.person_outline,
-                label: 'Perfil',
+                label: "Perfil",
                 active: currentIndex == 4,
                 onTap: () => onTap(4),
               ),
             ],
+          ),
+
+          /// Botón central
+          Positioned(
+            top: -14,
+            child: _ReservasButton(
+              active: currentIndex == 2,
+              onTap: () => onTap(2),
+            ),
           ),
         ],
       ),
@@ -82,29 +104,38 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 180),
         width: 54,
         height: 52,
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         decoration: BoxDecoration(
-          color: active ? AppColors.navActiveHighlight : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: active
+              ? AppColors.navActiveHighlight
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: kWhite, size: 20),
-            const SizedBox(height: 3),
+
+            Icon(
+              icon,
+              color: AppColors.white,
+              size: 24,
+            ),
+
+            const SizedBox(height: 4),
+
             Text(
               label,
               style: const TextStyle(
-                fontFamily: kFont,
-                fontSize: 10,
-                color: kWhite,
+                fontFamily: Fonts.regular,
+                fontSize: 12,
+                height: 1,
+                color: AppColors.white,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -115,68 +146,78 @@ class _NavButton extends StatelessWidget {
   }
 }
 
-class _FabItem extends StatelessWidget {
+class _ReservasButton extends StatelessWidget {
+
   final bool active;
   final VoidCallback onTap;
 
-  const _FabItem({
+  const _ReservasButton({
     required this.active,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(40),
       onTap: onTap,
-      behavior: HitTestBehavior.translucent,
       child: SizedBox(
-        width: 72,
-        height: 80,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
+        width: 60,
+        height: 84,
+        child: Column(
           children: [
-            Positioned(
-              top: -20,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: active ? AppColors.navActiveReservas : kWhite,
-                  border: active
-                      ? Border.all(color: kWhite, width: 2.5)
-                      : null,
-                  boxShadow: active
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.18),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                ),
-                child: Icon(
-                  Icons.calendar_today_outlined,
-                  color: active ? kWhite : kNavBg,
-                  size: 24,
-                ),
+
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+
+              width: 60,
+              height: 60,
+
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: active
+                    ? AppColors.navActiveReservas
+                    : AppColors.white,
+
+                border: active
+                    ? Border.all(
+                        color: AppColors.white,
+                        width: 1,
+                      )
+                    : null,
+
+                boxShadow: active
+                    ? null
+                    : const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 12,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+              ),
+
+              child: Icon(
+                Icons.calendar_today_outlined,
+                size: 24,
+                color: active
+                    ? AppColors.white
+                    : AppColors.primary,
               ),
             ),
-            const Positioned(
-              bottom: 22,
-              child: Text(
-                'Reservas',
-                style: TextStyle(
-                  fontFamily: kFont,
-                  fontSize: 11,
-                  color: kWhite,
-                  fontWeight: FontWeight.w400,
-                ),
+
+            const SizedBox(height: 4),
+
+            const Text(
+              "Reservas",
+              style: TextStyle(
+                fontFamily: Fonts.regular,
+                fontSize: 12,
+                color: AppColors.white,
+                fontWeight: FontWeight.w400,
               ),
-            ),
+            )
           ],
         ),
       ),

@@ -50,9 +50,7 @@ class _MenuState extends State<Menu> {
 
       case 4:
         return _showEcard
-            ? ECardScreen(
-                onBack: () => setState(() => _showEcard = false),
-              )
+            ? ECardScreen(onBack: () => setState(() => _showEcard = false))
             : ProfileMenuScreen(
                 onOpenEcard: () => setState(() => _showEcard = true),
               );
@@ -66,9 +64,12 @@ class _MenuState extends State<Menu> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildPage(currentIndex),
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: currentIndex,
-        onTap: _onNavTap,
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: CustomBottomNav
+        (currentIndex: currentIndex,
+         onTap: _onNavTap
+         ),
       ),
     );
   }

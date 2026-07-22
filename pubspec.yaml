@@ -14,7 +14,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^8.1.0
   flutter_bloc: ^9.1.1
- 
+  flutter_svg: ^2.2.0
+
   qr_flutter: ^4.1.0
   screenshot: ^3.0.0
   path_provider: ^2.1.5
@@ -29,13 +30,14 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/cards/
-    - assets/images/inicio/
-    - assets/images/invitados/
-    - assets/images/onboarding/
-    - assets/images/profile/
-    - assets/images/experiencias/
-    - assets/images/post_evento/
+      - assets/icons/
+      - assets/images/cards/
+      - assets/images/inicio/
+      - assets/images/invitados/
+      - assets/images/onboarding/
+      - assets/images/profile/
+      - assets/images/experiencias/
+      - assets/images/post_evento/
 
   fonts:
     - family: AvenirNextUltraLight
@@ -65,5 +67,3 @@ flutter:
     - family: AvenirNextBold
       fonts:
         - asset: assets/fonts/AvenirNextLTPro-Bold.ttf
-
-  
