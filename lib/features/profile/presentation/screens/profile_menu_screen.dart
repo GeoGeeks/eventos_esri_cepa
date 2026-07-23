@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../../../core/constants/images.dart';
 import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/profile_section_title.dart';
-import '../../../../core/constants/images.dart';
 
 class ProfileMenuScreen extends StatelessWidget {
   final VoidCallback onOpenEcard;
@@ -18,7 +18,7 @@ class ProfileMenuScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ── Header azul ──
+            // ── Header azul (Diseño Rectangle 12) ──
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
@@ -26,59 +26,68 @@ class ProfileMenuScreen extends StatelessWidget {
                   image: AssetImage(Images.headerInicio),
                   fit: BoxFit.cover,
                 ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(22),
+                  bottomRight: Radius.circular(22),
+                ),
               ),
-              padding: const EdgeInsets.fromLTRB(20, 52, 20, 24),
+              padding: const EdgeInsets.fromLTRB(26, 52, 26, 30),
               child: Row(
                 children: [
+                  // Avatar con iniciales
                   Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFD6EFFF), // Color según diseño
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: const Text(
                       'ML',
                       style: TextStyle(
-                        fontFamily: Fonts.light,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        fontFamily: Fonts.regular,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700, // Avenir Bold
+                        color: Color(0xFF4A4A4A),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'María López',
-                        style: TextStyle(
-                          fontFamily: Fonts.light,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                  const SizedBox(width: 17),
+                  // Nombre e Información Profesional
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'María López',
+                          style: TextStyle(
+                            fontFamily: Fonts.regular,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700, // Avenir Bold
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Ingeniera Civil · Procalculo',
-                        style: TextStyle(
-                          fontFamily: Fonts.light,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white,
+                        SizedBox(height: 2),
+                        Text(
+                          'Ingeniera Civil',
+                          style: TextStyle(
+                            fontFamily: Fonts.light,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300, // Avenir Light
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
 
+            // ── Sección: Perfil ──
             const ProfileSectionTitle(title: 'Perfil'),
 
             ProfileMenuItem(
@@ -99,6 +108,7 @@ class ProfileMenuScreen extends StatelessWidget {
               onTap: () {},
             ),
 
+            // ── Sección: Eventos ──
             const ProfileSectionTitle(title: 'Eventos'),
 
             ProfileMenuItem(
@@ -119,6 +129,7 @@ class ProfileMenuScreen extends StatelessWidget {
               onTap: () {},
             ),
 
+            // ── Sección: Soporte ──
             const ProfileSectionTitle(title: 'Soporte'),
 
             ProfileMenuItem(
