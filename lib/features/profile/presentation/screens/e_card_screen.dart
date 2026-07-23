@@ -9,7 +9,10 @@ import '../widgets/e_card_widget.dart';
 class ECardScreen extends StatefulWidget {
   final VoidCallback onBack;
 
-  const ECardScreen({super.key, required this.onBack});
+  const ECardScreen({
+    super.key,
+    required this.onBack,
+  });
 
   @override
   State<ECardScreen> createState() => _ECardScreenState();
@@ -17,14 +20,19 @@ class ECardScreen extends StatefulWidget {
 
 class _ECardScreenState extends State<ECardScreen> {
   bool _showNotification = false;
-  ECardVisibilityConfig _visibilityConfig = const ECardVisibilityConfig();
+
+  ECardVisibilityConfig _visibilityConfig =
+      const ECardVisibilityConfig();
 
   Future<void> _openConfig() async {
     final result = await showDialog<ECardVisibilityConfig>(
       context: context,
       barrierColor: Colors.black54,
-      builder: (_) => ECardConfigModal(initialConfig: _visibilityConfig),
+      builder: (_) => ECardConfigModal(
+        initialConfig: _visibilityConfig,
+      ),
     );
+
     if (result != null && mounted) {
       setState(() {
         _visibilityConfig = result;
@@ -43,9 +51,11 @@ class _ECardScreenState extends State<ECardScreen> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  padding:
+                      const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
                         onTap: widget.onBack,
@@ -102,7 +112,9 @@ class _ECardScreenState extends State<ECardScreen> {
                         const SizedBox(height: 8),
 
                         const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 48),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 48,
+                          ),
                           child: Text(
                             'Utilice este código para identificarse y conectar con otros asistentes.',
                             textAlign: TextAlign.center,
@@ -117,12 +129,15 @@ class _ECardScreenState extends State<ECardScreen> {
 
                         const SizedBox(height: 28),
 
-                        ECardWidget(visibilityConfig: _visibilityConfig),
+                        ECardWidget(
+                          visibilityConfig: _visibilityConfig,
+                        ),
 
                         const SizedBox(height: 28),
 
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment:
+                              MainAxisAlignment.center,
                           children: [
                             ECardActionButton(
                               icon: Icons.share_outlined,
@@ -146,64 +161,98 @@ class _ECardScreenState extends State<ECardScreen> {
               ],
             ),
 
-            if (_showNotification)
+            // ======= NOTIFICACIÓN =======
+                        if (_showNotification)
               Positioned(
-                top: 0,
+                top: 25,
                 left: 0,
                 right: 0,
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF6FFED),
-                    border: Border.all(color: const Color(0xFF52C41A)),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.check_circle_outline,
-                        color: Color(0xFF52C41A),
-                        size: 18,
+                child: Center(
+                  child: Container(
+                    width: 360,
+                    height: 92,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: const Color(0x8035AC46),
+                        width: 1,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Configuración actualizada.',
-                              style: TextStyle(
-                                fontFamily: Fonts.light,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF135200),
+                    ),
+                    child: Row(
+                      children: [
+                        /// ICONO
+                        SizedBox(
+                          width: 36,
+                          height: 56,
+                          child: Center(
+                            child: Icon(
+                              Icons.check_circle,
+                              size: 16,
+                              color: const Color(0xFF288835),
+                            ),
+                          ),
+                        ),
+
+                        /// TEXTO
+                        Expanded(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 11),
+                            child: Column(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'Configuración actualizada.',
+                                  style: TextStyle(
+                                    fontFamily: Fonts.medium,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.25,
+                                    color: Color(0xFF141414),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Los cambios ya están disponibles al escanear el código QR.',
+                                  style: TextStyle(
+                                    fontFamily: Fonts.regular,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    height: 16 / 14,
+                                    color: Color(0xFF4A4A4A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        /// BOTÓN CERRAR
+                        SizedBox(
+                          width: 44,
+                          height: 32,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(2),
+                            onTap: () {
+                              setState(() {
+                                _showNotification = false;
+                              });
+                            },
+                            child: const Center(
+                              child: Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Color(0xFF6B6B6B),
                               ),
                             ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Los cambios ya están disponibles al escanear el código QR.',
-                              style: TextStyle(
-                                fontFamily: Fonts.light,
-                                fontSize: 12,
-                                color: Color(0xFF135200),
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () =>
-                            setState(() => _showNotification = false),
-                        child: const Icon(
-                          Icons.close,
-                          size: 16,
-                          color: Color(0xFF135200),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
