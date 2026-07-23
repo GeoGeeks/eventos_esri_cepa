@@ -53,7 +53,7 @@ class _ECardScreenState extends State<ECardScreen> {
                           width: 36,
                           height: 36,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF1A2B4A),
+                            color: Color(0xFF007AC2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -69,7 +69,7 @@ class _ECardScreenState extends State<ECardScreen> {
                           width: 36,
                           height: 36,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF1A2B4A),
+                            color: Color(0xFF007AC2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
