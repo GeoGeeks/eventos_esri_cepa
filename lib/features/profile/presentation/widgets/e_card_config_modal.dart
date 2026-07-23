@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../data/ecard_visibility_config.dart';
 
@@ -213,7 +212,7 @@ class _ConfigToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -229,19 +228,33 @@ class _ConfigToggleRow extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(
-            width: 36,
-            height: 24,
-            child: Transform.scale(
-              scale: 0.75,
-              child: Switch(
-                value: value,
-                onChanged: onChanged,
-                activeColor: Colors.white,
-                activeTrackColor: const Color(0xFF007AC2),
-                inactiveThumbColor: Colors.white,
-                inactiveTrackColor: const Color(0xFFD6D6D6),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          GestureDetector(
+            onTap: () => onChanged(!value),
+            behavior: HitTestBehavior.opaque,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeInOut,
+              width: 32.0,  // Ancho exacto
+              height: 16.0, // Alto exacto
+              padding: const EdgeInsets.all(2.0), // Padding interno para la bolita
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                color: value 
+                    ? const Color(0xFF007AC2) // Azul activo
+                    : const Color(0xFFD6D6D6), // Gris inactivo
+              ),
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeInOut,
+                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: 12.0,  // Tamaño del thumb/círculo interno
+                  height: 12.0,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
