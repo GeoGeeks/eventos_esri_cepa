@@ -1,5 +1,5 @@
-class AppIcons {
-  AppIcons._();
+class SvgIcon {
+  SvgIcon._();
 
   static const String alertas = 'assets/icons/alertas.svg';
   static const String historial = 'assets/icons/historial.svg';
