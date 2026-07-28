@@ -1,5 +1,13 @@
 class Images {
   Images._();
+  static const String backgroundInicio =
+    'assets/images/login/background_inicio.svg';
+
+static const String logoApp =
+    'assets/images/login/logo_app.svg';
+
+static const String esriBlanco =
+    'assets/images/login/esri_blanco.svg';
 
   static const String esriEventos = 'assets/images/cards/esri_eventos.png';
 
