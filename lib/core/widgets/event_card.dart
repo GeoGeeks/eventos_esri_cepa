@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/fonts.dart'; // Mantén tu archivo de fuentes
+import 'package:flutter_svg/flutter_svg.dart';
+import '../constants/fonts.dart';
 
 class EventCard extends StatelessWidget {
   final String title;
@@ -69,7 +70,7 @@ class EventCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                    fontFamily: Fonts.medium, // Mapeado a "Avenir Next LT Pro"
+                                    fontFamily: Fonts.medium,
                                     fontSize: 20,
                                     fontWeight: FontWeight.w500,
                                     color: Color(0xFF141414),
@@ -84,12 +85,12 @@ class EventCard extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _InfoRow(
-                                      icon: Icons.access_time_outlined,
+                                      iconPath: 'assets/icons/date-time.svg',
                                       text: date,
                                     ),
                                     const SizedBox(height: 4), // gap: 4px
                                     _InfoRow(
-                                      icon: Icons.location_on_outlined,
+                                      iconPath: 'assets/icons/lugar.svg',
                                       text: location,
                                     ),
                                   ],
@@ -170,11 +171,11 @@ class EventCard extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  final IconData icon;
+  final String iconPath;
   final String text;
 
   const _InfoRow({
-    required this.icon,
+    required this.iconPath,
     required this.text,
   });
 
@@ -184,10 +185,17 @@ class _InfoRow extends StatelessWidget {
       height: 16,
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 16, // width/height: 16px en CSS
-            color: const Color(0xFF949494),
+          // SVG Icon (16x16)
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: SvgPicture.asset(
+              iconPath,
+              colorFilter: const ColorFilter.mode(
+                Color(0xFF949494),
+                BlendMode.srcIn,
+              ),
+            ),
           ),
           const SizedBox(width: 2), // gap: 2px
           Flexible(
@@ -233,7 +241,7 @@ class _OutlineButton extends StatelessWidget {
             color: const Color(0xFF007AC2),
             width: 1,
           ),
-          borderRadius: BorderRadius.zero, // border-radius: 0
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           label,
@@ -269,7 +277,7 @@ class _PrimaryButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: Color(0xFF007AC2),
-          borderRadius: BorderRadius.zero, // border-radius: 0
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           label,

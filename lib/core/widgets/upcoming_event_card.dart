@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../constants/fonts.dart';
 
 class UpcomingEventCard extends StatelessWidget {
@@ -35,10 +36,10 @@ class UpcomingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Card principal (width: 360px, height: 146px)
+    // Card principal (width: 360px, height: 122px) - CORREGIDO
     return SizedBox(
       width: 360,
-      height: 146,
+      height: 122,
       child: Stack(
         children: [
           // card-container
@@ -46,7 +47,7 @@ class UpcomingEventCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: Container(
               width: 360,
-              height: 146,
+              height: 122,
               color: const Color(0xFFFFFFFF), // background: #FFFFFF
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,14 +56,14 @@ class UpcomingEventCard extends StatelessWidget {
                   Image.asset(
                     image,
                     width: 138,
-                    height: 146,
+                    height: 122, // CORREGIDO: era 146
                     fit: BoxFit.cover,
                   ),
 
                   // CONTENT CONTAINER (content-container)
                   Container(
                     width: 222,
-                    height: 146,
+                    height: 122, // CORREGIDO: era 146
                     color: const Color(0xFFFFFFFF),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +71,7 @@ class UpcomingEventCard extends StatelessWidget {
                         // HEADER (header / header-text-container)
                         Container(
                           width: 222,
-                          height: 106,
+                          height: 82, // CORREGIDO: era 106
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // padding: 8px 12px
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,21 +79,21 @@ class UpcomingEventCard extends StatelessWidget {
                               // Frame 1461: Contiene Título y Chip en Fila
                               SizedBox(
                                 width: 198,
-                                height: 48,
+                                height: 24, // CORREGIDO: era 48, solo 1 línea de título
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Card title
+                                    // Card title - maxLines: 1
                                     SizedBox(
-                                      width: 110, // Ajustado dinámico para convivir con el Chip (Figma indica max 198 total)
-                                      height: 48,
+                                      width: 97, // Según CSS: 97px
+                                      height: 24,
                                       child: Text(
                                         title,
-                                        maxLines: 2,
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          fontFamily: Fonts.medium, // Avenir Next LT Pro
+                                          fontFamily: Fonts.medium,
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xFF141414),
@@ -114,12 +115,12 @@ class UpcomingEventCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _InfoRow(
-                                    icon: Icons.access_time_outlined,
+                                    iconPath: 'assets/icons/date-time.svg',
                                     text: date,
                                   ),
                                   const SizedBox(height: 4), // gap: 4px
                                   _InfoRow(
-                                    icon: Icons.location_on_outlined,
+                                    iconPath: 'assets/icons/lugar.svg',
                                     text: location,
                                   ),
                                 ],
@@ -128,11 +129,11 @@ class UpcomingEventCard extends StatelessWidget {
                           ),
                         ),
 
-                        // FOOTER (footer)
+                        // FOOTER (footer) - height: 40px
                         Container(
                           width: 222,
                           height: 40,
-                          padding: const EdgeInsets.only(right: 12, bottom: 8), // padding: 0px 12px 8px 0px
+                          padding: const EdgeInsets.only(right: 12, bottom: 8),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -197,7 +198,7 @@ class UpcomingEventCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: Container(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.5), // #FFFFFF con opacity: 0.5
+                  color: const Color(0xFFFFFFFF).withOpacity(0.5),
                 ),
               ),
             ),
@@ -208,7 +209,7 @@ class UpcomingEventCard extends StatelessWidget {
               top: 1,
               left: 1,
               right: 1,
-              bottom: 1, // inset: 1px
+              bottom: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: Container(
@@ -243,10 +244,10 @@ class _ModeChip extends StatelessWidget {
       width: 72,
       height: 24,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 4), // padding: 0px 4px
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFEBEBEB), // background: #EBEBEB
-        borderRadius: BorderRadius.circular(9999), // border-radius: 9999px
+        color: const Color(0xFFEBEBEB),
+        borderRadius: BorderRadius.circular(9999),
       ),
       child: Text(
         label,
@@ -256,8 +257,8 @@ class _ModeChip extends StatelessWidget {
           fontFamily: Fonts.medium,
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF6B6B6B), // color: #6B6B6B
-          height: 16 / 12, // line-height: 16px
+          color: Color(0xFF6B6B6B),
+          height: 16 / 12,
         ),
       ),
     );
@@ -265,9 +266,13 @@ class _ModeChip extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  final IconData icon;
+  final String iconPath;
   final String text;
-  const _InfoRow({required this.icon, required this.text});
+  
+  const _InfoRow({
+    required this.iconPath,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -276,10 +281,17 @@ class _InfoRow extends StatelessWidget {
       height: 16,
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 16, // width & height: 16px
-            color: const Color(0xFF949494),
+          // SVG Icon (16x16)
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: SvgPicture.asset(
+              iconPath,
+              colorFilter: const ColorFilter.mode(
+                Color(0xFF949494),
+                BlendMode.srcIn,
+              ),
+            ),
           ),
           const SizedBox(width: 2), // gap: 2px
           Expanded(
@@ -292,7 +304,7 @@ class _InfoRow extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 color: Color(0xFF949494),
-                height: 16 / 14, // line-height: 16px
+                height: 16 / 14,
               ),
             ),
           ),
@@ -316,8 +328,8 @@ class _OutlineButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 75, // width: 75px
-        height: 32, // height: 32px
+        width: 75,
+        height: 32,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
@@ -325,7 +337,7 @@ class _OutlineButton extends StatelessWidget {
             color: const Color(0xFF007AC2),
             width: 1,
           ),
-          borderRadius: BorderRadius.zero, // border-radius: 0.001px -> Recto
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           label,
@@ -334,7 +346,7 @@ class _OutlineButton extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: Color(0xFF007AC2),
-            height: 16 / 14, // line-height: 16px
+            height: 16 / 14,
           ),
         ),
       ),
@@ -356,12 +368,12 @@ class _PrimaryButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 95, // width: 95px
-        height: 32, // height: 32px
+        width: 95,
+        height: 32,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: Color(0xFF007AC2),
-          borderRadius: BorderRadius.zero, // border-radius: 0.001px -> Recto
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           label,
@@ -370,7 +382,7 @@ class _PrimaryButton extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: Colors.white,
-            height: 16 / 14, // line-height: 16px
+            height: 16 / 14,
           ),
         ),
       ),
