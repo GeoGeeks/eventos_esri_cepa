@@ -84,81 +84,109 @@ class InicioApp extends StatelessWidget {
       backgroundColor: const Color(0xFFF7F7F7),
       body: Column(
         children: [
-          // 1. HEADER (136px + status bar)
+          // 1. HEADER
           const _Header(),
 
-          // 2. CUERPO CON SCROLL INDEPENDIENTE
+          // 2. CUERPO
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
-
-                  // Título Sección 1
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
-                    child: _SectionTitle(title: 'Eventos reservados'),
-                  ),
                   const SizedBox(height: 12),
 
-                  // Carrusel Horizontal
-                  SizedBox(
-                    height: 262,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _reservedEvents.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        final e = _reservedEvents[index];
-                        return SizedBox(
-                          width: 237,
-                          child: EventCard(
-                            title: e.title,
-                            date: e.date,
-                            location: e.location,
-                            image: e.image,
-                            onViewMore: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const InvitadosScreen(),
-                                ),
-                              );
-                            },
-                            onCredential: () {},
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Título Sección 2 con botón "Ver todos"
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _SectionTitle(
-                      title: 'Próximos eventos',
-                      action: _SeeAllChip(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const EventosScreen(),
-                            ),
-                          );
-                        },
+                  // Título Sección 1 (Eventos reservados)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Eventos reservados',
+                      style: TextStyle(
+                        fontFamily: Fonts.medium,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        height: 24 / 18,
+                        color: Color(0xFF141414),
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 12),
 
-                  // Listado vertical de tarjetas Próximos Eventos
+                  // Frame 1405: Carrusel Horizontal con recorte estricto
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: SizedBox(
+                      height: 257,
+                      child: ClipRect(
+                        child: ListView.separated(
+                          padding: EdgeInsets.zero,
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: _reservedEvents.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 24),
+                          itemBuilder: (context, index) {
+                            final e = _reservedEvents[index];
+                            return SizedBox(
+                              width: 237,
+                              height: 257,
+                              child: EventCard(
+                                title: e.title,
+                                date: e.date,
+                                location: e.location,
+                                image: e.image,
+                                onViewMore: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const InvitadosScreen(),
+                                    ),
+                                  );
+                                },
+                                onCredential: () {},
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Header Sección 2: Título "Próximos eventos" + Chip "Ver todos"
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center, // CORREGIDO AQUÍ
+                      children: [
+                        const Text(
+                          'Próximos eventos',
+                          style: TextStyle(
+                            fontFamily: Fonts.medium,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF141414),
+                          ),
+                        ),
+                        _SeeAllChip(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const EventosScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Listado vertical Próximos Eventos
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
@@ -210,7 +238,6 @@ class _Header extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      // Altura exacta del banner (136px) sumando la barra de estado superior
       height: 136 + statusBarHeight,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
@@ -227,7 +254,6 @@ class _Header extends StatelessWidget {
         child: SizedBox.expand(
           child: Stack(
             children: [
-              // Frame 1464: Textos (left: 24px, top: 30px)
               Positioned(
                 left: 24,
                 top: 30,
@@ -236,7 +262,6 @@ class _Header extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: const [
-                    // Bienvenido (width: 83, height: 20)
                     Text(
                       'Bienvenida',
                       style: TextStyle(
@@ -247,7 +272,6 @@ class _Header extends StatelessWidget {
                         height: 20 / 14,
                       ),
                     ),
-                    // María López + Subtítulo (_Body)
                     Text(
                       'María López',
                       maxLines: 1,
@@ -275,8 +299,6 @@ class _Header extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // Alertas (Campana): left: 346px, top: 30px
               const Positioned(
                 left: 346,
                 top: 30,
@@ -301,7 +323,6 @@ class _NotificationBell extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Base circular blanca con sombra paralela (1px, 2px, blur 4, 30%)
           Container(
             width: 40,
             height: 40,
@@ -310,15 +331,13 @@ class _NotificationBell extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Color(0x4D000000), // #000000 al 30%
+                  color: Color(0x4D000000),
                   blurRadius: 4,
                   offset: Offset(1, 2),
                 ),
               ],
             ),
           ),
-
-          // Icono campana (24x24 px, Azul #007AC2)
           const Center(
             child: Icon(
               Icons.notifications_none_rounded,
@@ -326,9 +345,6 @@ class _NotificationBell extends StatelessWidget {
               size: 24,
             ),
           ),
-
-          // Ellipse 6: Punto indicador rojo (#D83020) de 8.65px x 8.65px
-          // Delta exacto Figma: (367.62 - 346 = 21.62px left | 41.89 - 30 = 11.89px top)
           Positioned(
             left: 21.62,
             top: 11.89,
@@ -347,33 +363,6 @@ class _NotificationBell extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  final Widget? action;
-
-  const _SectionTitle({required this.title, this.action});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontFamily: Fonts.medium,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF141414),
-            height: 24 / 18,
-          ),
-        ),
-        if (action != null) action!,
-      ],
-    );
-  }
-}
-
 class _SeeAllChip extends StatelessWidget {
   final VoidCallback onTap;
 
@@ -384,22 +373,27 @@ class _SeeAllChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        width: 88,
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFFE3F2FD),
-          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xFFD6EFFF),
+          border: Border.all(color: const Color(0xFFD6EFFF)),
+          borderRadius: BorderRadius.circular(9999),
         ),
-        child: const Text(
-          'Ver todos',
-          style: TextStyle(
-            fontFamily: Fonts.medium,
-            color: AppColors.primary,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+        child: const Center(
+          child: Text(
+            'Ver todos',
+            style: TextStyle(
+              fontFamily: Fonts.medium,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 16 / 14,
+              color: Color(0xFF007AC2),
+            ),
           ),
         ),
       ),
     );
   }
 }
-
