@@ -61,9 +61,25 @@ Están completas en `docs/03-plan-de-trabajo.md` §0. Resumen:
 
 ```bash
 flutter analyze --no-pub    # línea base: 0 errores, 18 avisos info
+flutter test                # línea base: 4 tests, todos en verde
 ```
 
-No dejar errores nuevos. Los 18 avisos existentes están catalogados en `01` §9.
+No dejar errores nuevos ni tests rojos. Los 18 avisos existentes están catalogados en `01` §9.
+
+### Verificar de verdad, no solo compilar
+
+Los dos defectos más graves encontrados hasta ahora **no se veían leyendo el código**:
+un asset que parecía SVG y era un PNG que `flutter_svg` ignora en silencio (D19), y un
+botón fuera de pantalla a la altura real del dispositivo (D20). Aparecieron solo al
+ejecutar la app y al fijar el lienzo de test a 412×917.
+
+- **Los tests de widget deben fijar el lienzo a 412×917.** El de `flutter_test` es
+  800×600 y deja los botones fuera del área visible, produciendo fallos engañosos.
+- **Comprobar que cada asset se dibuje**, no solo que exista. Antes de dar por bueno un
+  `.svg`, verificar que no contenga `<image xlink:href="data:image/...;base64,…">`:
+  `flutter_svg` no renderiza rásteres embebidos y no lanza ningún error.
+- **Ejecutar en emulador** cuando el cambio afecte al layout. `flutter analyze` limpio no
+  dice nada sobre desbordes.
 
 ---
 

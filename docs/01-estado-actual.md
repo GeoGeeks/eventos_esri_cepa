@@ -1,8 +1,12 @@
 # Estado actual del proyecto — `esri_eventos`
 
-> Documento generado el **2026-07-29** sobre la rama `a-develop` (commit `79f9c23`).
+> Rama `a-develop` · commit **`4fbd7a4`** · última actualización **2026-07-29**.
 > Describe **lo que hay hoy en el código**, sin juicios sobre lo que debería haber.
 > La comparación contra Figma vive en [`02-comparativo-figma.md`](./02-comparativo-figma.md).
+
+> **Revisión 2** — recoge el trabajo de `feat(auth): connect login flow and fix broken
+> login assets` (`4fbd7a4`), ya integrado en `a-develop`. Lo que cambió respecto de la
+> revisión 1 está marcado con ✅ (resuelto) o 🆕 (hallazgo nuevo).
 
 ---
 
@@ -17,10 +21,11 @@
 | Plataformas con carpeta generada | `android`, `ios`, `web`, `windows` |
 | Repositorio | `GeoGeeks/...` — rama base `base-aplicacion` |
 | Ramas activas | `base-aplicacion` (base), `develop`, `a-develop`, `d-develop` |
-| Total de código Dart | **~8.850 líneas** en 62 archivos |
-| `flutter analyze` | ✅ **0 errores**, 18 avisos `info` |
-| Tests | 1 smoke test (`test/widget_test.dart`) |
+| Total de código Dart | **~8.900 líneas** en 63 archivos |
+| `flutter analyze` | ✅ **0 errores**, 18 avisos `info` (línea base estable) |
+| Tests | ✅ **4 tests** del flujo de login, todos en verde (`test/widget_test.dart`) |
 | README | Plantilla por defecto de Flutter, sin personalizar |
+| Verificado en dispositivo | Emulador Android `sdk gphone64 x86 64` |
 
 ### Dependencias
 
@@ -67,12 +72,19 @@ Esto no rompe nada hoy, pero significa que no existe una regla única para saber
 
 ## 3. Punto de entrada y flujo de navegación
 
-`main.dart` levanta `MaterialApp` con `home: OnboardingScreen()`. **No hay rutas con nombre**: toda la navegación es `Navigator.push` con `MaterialPageRoute` inline.
+`main.dart` levanta `MaterialApp` con `home: LoginScreen()` ✅. **No hay rutas con nombre**: toda la navegación es `Navigator.push` con `MaterialPageRoute` inline.
 
 ### Grafo de navegación real
 
 ```
-OnboardingScreen  (home — 4 páginas con PageView)
+LoginScreen  (home) ✅
+   ├── documento registrado    ──► OnboardingScreen   (pushReplacement)
+   ├── documento no registrado ──► VerificacionScreen
+   │        └── "Contactar a soporte" ──► SoporteScreen
+   │                  └── "Enviar" ──► vuelve a LoginScreen (popUntil isFirst)
+   └── campo vacío ─────────────► mensaje en línea, no navega
+
+OnboardingScreen  (4 páginas con PageView)
    ├── "Continuar" en la última página ──► Menu
    └── "Omitir" ─────────────────────────► Menu
 
@@ -98,13 +110,19 @@ EventosScreen ──► InvitadosScreen / DetalleEventoModal
 PostEventoScreen ──► ValoracionPaso1Screen ──► ValoracionPaso2Screen ──► ValoracionSuccessDialog
 ```
 
-### ⚠️ El flujo de login está desconectado
+### ✅ El flujo de login está conectado (antes huérfano)
 
-`LoginScreen`, `VerificacionScreen` y `SoporteScreen` existen y están implementadas (commit `79f9c23`), **pero ningún punto de la app navega hacia `LoginScreen`**. Son código huérfano en tiempo de ejecución:
+En la revisión 1, `LoginScreen`, `VerificacionScreen` y `SoporteScreen` existían pero **ningún punto de la app navegaba hacia ellas**: la app arrancaba en `OnboardingScreen`. Resuelto en `4fbd7a4`:
 
-- La app arranca directamente en `OnboardingScreen`.
-- `LoginScreen.ingresar()` hace `pushReplacement` **hacia `OnboardingScreen`**, es decir el flujo está invertido respecto de lo esperable (login → app).
-- `LoginScreen` incluye un botón `"Simular error"` marcado en el código como `/// BORRAR LUEGO`.
+- `main.dart` arranca en `LoginScreen`.
+- Validación real en `ingresar()`: registrado → Onboarding, no registrado → Verificación, vacío → mensaje en línea (usa el `message-container` que Figma deja oculto, `54686:29827`).
+- `SoporteScreen.enviarSolicitud()` hace `popUntil(isFirst)` para volver a la pantalla 1; antes hacía un `pop` simple y volvía a Verificación.
+- Retirado el botón `"Simular error"` que estaba marcado `/// BORRAR LUEGO`.
+- Las tres pantallas comparten ahora `FondoInicio`, que existía sin usarse mientras ellas duplicaban su contenido.
+
+**Corrección de la revisión 1:** esa revisión afirmaba que `ingresar() → OnboardingScreen` estaba «invertido». **Era un hallazgo erróneo** — el flujo correcto sí es login → Onboarding 1. El único defecto real era que nadie llegaba al login.
+
+⚠️ **La regla de validación es un mock** (`login/data/login_mock_data.dart`): solo los documentos `1234567890` y `0987654321` se consideran registrados. Pendiente de la regla o endpoint real.
 
 ### Otras observaciones de navegación
 
@@ -192,13 +210,16 @@ Familia **Avenir Next LT Pro**, 7 pesos declarados en `pubspec.yaml` y expuestos
 | 12 | Post-Evento | `features/post_evento/.../post_evento_screen.dart` | 552 | ✅ Historial → "Ver más" |
 | 13 | Valoración paso 1 | `features/post_evento/.../valoracion_paso1_screen.dart` | 398 | ✅ Post-Evento |
 | 14 | Valoración paso 2 | `features/post_evento/.../valoracion_paso2_screen.dart` | 301 | ✅ paso 1 |
-| 15 | Iniciar sesión | `features/login/login_screen.dart` | 207 | ❌ **huérfana** |
-| 16 | Verificación | `features/login/verificacion_screen.dart` | 236 | ❌ solo vía login |
-| 17 | Soporte | `features/login/soporte_screen.dart` | 228 | ❌ solo vía verificación |
+| 15 | Iniciar sesión | `features/login/login_screen.dart` | 185 | ✅ **home** |
+| 16 | Verificación | `features/login/verificacion_screen.dart` | 172 | ✅ desde login |
+| 17 | Soporte | `features/login/soporte_screen.dart` | 170 | ✅ desde verificación |
 
 **Modales y diálogos:** `DetalleEventoModal`, `FiltroModal`, `ValoracionModal`, `ECardConfigModal`, `ValoracionSuccessDialog`, `EmptyNotifications`, `ErrorBanner`.
 
-**Total: 17 pantallas + 7 modales.** 14 de las 17 son alcanzables navegando desde el arranque.
+**Total: 17 pantallas + 7 modales. Las 17 son alcanzables** navegando desde el arranque (antes eran 14).
+
+**Archivo nuevo:** `features/login/data/login_mock_data.dart` — mock de documentos registrados.
+**Widget que pasó a usarse:** `features/login/widgets/fondo_inicio.dart`, ahora contenedor real de las 3 pantallas de login. Siguen sin usarse `error_banner.dart` y `login_input.dart`.
 
 ---
 
@@ -242,9 +263,12 @@ Además hay **datos hardcodeados directamente dentro de las pantallas**, no en `
 
 | # | Problema | Ubicación | Efecto |
 |---|---|---|---|
-| D1 | **`assets/images/login/` no está declarada en `pubspec.yaml`** | `pubspec.yaml:32-40` | Las 3 pantallas de login lanzan excepción al cargar `background_inicio.svg`, `logo_app.svg`, `esri_blanco.svg`. Hoy no se nota porque las pantallas son inalcanzables. |
-| D2 | `Images.videoCover` → `assets/images/post_evento/video_cover.png` **no existe** | `images.dart:58`, usado en `post_evento_screen.dart:408` | Error de asset al abrir la pestaña de video del Post-Evento. |
-| D3 | `Images.logoqr` → `assets/images/post_evento/logo_qr.png` **no existe** (el archivo real está en `assets/images/profile/logo_qr.png`) | `images.dart:61`, usado en `e_card_widget.dart:119` | El logo embebido del QR de la e-card falla. |
+| ~~D1~~ | ✅ **RESUELTO** en `4fbd7a4` — `assets/images/login/` declarada en `pubspec.yaml` | `pubspec.yaml` | — |
+| D2 | `Images.videoCover` → `assets/images/post_evento/video_cover.png` **no existe** | `images.dart`, usado en `post_evento_screen.dart:408` | Error de asset al abrir la pestaña de video del Post-Evento. **Sigue abierto.** |
+| D3 | `Images.logoqr` → `assets/images/post_evento/logo_qr.png` **no existe** (el archivo real está en `assets/images/profile/logo_qr.png`) | `images.dart`, usado en `e_card_widget.dart:119` | El logo embebido del QR de la e-card falla. **Sigue abierto.** |
+| **D19** | 🆕 ✅ **RESUELTO** — **SVG que en realidad son PNG.** `background_inicio.svg` (814 KB) y `esri_blanco.svg` (340 KB) contenían `<image xlink:href="data:image/png;base64,…">`. `flutter_svg` ignora los `<image>`, así que **no dibujaban nada** y aun así parseaban 1,15 MB en el hilo principal → frames de 31 s y 4156 frames saltados en emulador. Se extrajeron a PNG reales (`background_inicio.png` 412×917, `esri_blanco.png` 4096×674); los `.svg` se conservan. `logo_app.svg` sí es vector. | `assets/images/login/`, `images.dart`, `fondo_inicio.dart` | ⚠️ **El resto de los `.svg` del proyecto no está auditado** — el patrón puede repetirse en silencio. |
+| **D20** | 🆕 ✅ **RESUELTO** — **Paneles que desbordan a 412×917.** Soporte desbordaba 117 px y su botón "Enviar" quedaba en y=938, fuera de pantalla y **sin forma de pulsarlo**; Verificación desbordaba 24 px. Corregido en `FondoInicio` con cabecera y pie fijos más área desplazable. | `fondo_inicio.dart` | ⚠️ **Ninguna otra pantalla se ha medido**: el patrón `Column` + `Spacer` sin scroll está repetido en el proyecto. |
+| **D21** | 🆕 **Assets sobredimensionados.** `esri_blanco.png` mide 4096×674 para mostrarse a 158 px (26× más grande). Mitigado con `cacheWidth`, pero convendría reexportar. | `assets/images/login/` | ~11 MB de mapa de bits por pantalla sin `cacheWidth`. |
 
 ### 🟡 Referencias muertas y huecos
 
@@ -254,9 +278,10 @@ Además hay **datos hardcodeados directamente dentro de las pantallas**, no en `
 | D5 | `assets/images/post_evento/galeria_6.png` existe en disco pero no tiene constante ni uso. |
 | D6 | `assets/icons/contactenos.svg` existe en disco pero no se referencia desde el código. |
 | D7 | Tres archivos **vacíos**: `lib/app.dart`, `lib/core/theme/app_theme.dart`, `lib/core/theme/text_styles.dart`. |
-| D8 | Flujo de login desconectado (ver §3) y con `pushReplacement` invertido hacia `OnboardingScreen`. |
-| D9 | Botón `"Simular error"` de debug en producción, marcado `/// BORRAR LUEGO` (`login_screen.dart:182-187`). |
+| ~~D8~~ | ✅ **RESUELTO** — flujo de login conectado. La parte de «`pushReplacement` invertido» era un **hallazgo erróneo** y queda retirada. |
+| ~~D9~~ | ✅ **RESUELTO** — retirado el botón `"Simular error"`. |
 | D10 | `google_fonts` declarada en `pubspec.yaml` pero nunca importada. |
+| **D22** | 🆕 `assets/icons/perfil.svg` existe sin usar y podría ser el ícono `user` que Figma pone en el campo de identificación; hoy se usa `Icons.person_outline` de Material. |
 
 ### 🟢 Calidad de código (18 avisos de `flutter analyze`)
 
@@ -286,11 +311,19 @@ Además hay **datos hardcodeados directamente dentro de las pantallas**, no en `
 
 El proyecto es un **prototipo de UI de alta fidelidad**, no una aplicación funcional:
 
-- ✅ **17 pantallas** construidas con cuidado visual, la mayoría fieles a un diseño de referencia (los commits citan explícitamente "to match Figma design").
+- ✅ **17 pantallas** construidas con cuidado visual, la mayoría fieles a un diseño de referencia (los commits citan explícitamente "to match Figma design"). **Todas alcanzables** desde el arranque.
 - ✅ Sistema de color y tipografía definido y mayormente respetado; compila limpio.
-- ⚠️ **Cero backend**: todos los datos son mocks hardcodeados, muchos duplicados dentro de las pantallas.
-- ⚠️ **Cero estado compartido**: nada persiste al navegar.
-- ⚠️ El **flujo de autenticación está construido pero desconectado** y, tal como está, fallaría por assets no declarados.
+- ✅ El **flujo de autenticación está conectado y verificado** con 4 tests y en emulador.
+- ⚠️ **Cero backend**: todos los datos son mocks hardcodeados, muchos duplicados dentro de las pantallas. La validación del login también es un mock.
+- ⚠️ **Cero estado compartido**: nada persiste al navegar. No hay sesión de usuario.
 - ⚠️ Tres capas de infraestructura previstas pero **vacías**: `app.dart`, `app_theme.dart`, `text_styles.dart`.
 
-El siguiente paso natural es cerrar los tres defectos bloqueantes (D1–D3), conectar el flujo de login, y unificar el modelo de datos antes de agregar pantallas nuevas.
+### Lección de la primera intervención
+
+Los dos defectos más graves del flujo de login **no se veían leyendo el código**: un asset que parecía SVG y era un PNG que el renderizador ignora en silencio, y un botón fuera de pantalla a la altura real del dispositivo. Ambos aparecieron solo al **ejecutar la app y correr tests con el lienzo fijado a 412×917**.
+
+Conclusión práctica para las fases siguientes: **medir cada pantalla a 412×917 y verificar que cada asset se dibuje**, no dar por bueno lo que compila. Ver **D19**, **D20** y los hallazgos **T16**/**T17** de [`02-comparativo-figma.md`](./02-comparativo-figma.md): ambos patrones pueden estar repetidos en el resto del proyecto sin haberse detectado.
+
+### Siguiente paso natural
+
+Cerrar **D2** y **D3** (los dos assets inexistentes que quedan), auditar el resto de los `.svg` buscando el patrón de **D19**, y unificar el modelo de datos antes de agregar pantallas nuevas.

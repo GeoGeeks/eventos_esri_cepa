@@ -1,8 +1,8 @@
 # Informe comparativo — Código vs. Figma
 
 > **Figma:** [Aplicación Eventos](https://www.figma.com/design/re1N5rv6AMTbhiH0OADIIV/Aplicaci%C3%B3n-Eventos?node-id=54686-28030) · página **`Pantallas Flujo completo`** (`54686:28030`)
-> **Código:** rama `a-develop`, commit `79f9c23`
-> **Fecha:** 2026-07-29 · **Revisión 2** (auditada)
+> **Código:** rama `a-develop`, commit **`4fbd7a4`**
+> **Fecha:** 2026-07-29 · **Revisión 3** (auditada + flujo de login implementado)
 > Estado del código descrito en [`01-estado-actual.md`](./01-estado-actual.md).
 
 ---
@@ -58,7 +58,8 @@ La página tiene **40 pantallas/estados** y 15 componentes sueltos, repartidos e
 | Pantallas con algo de código | **32 / 40 = 80 %** |
 | Pantallas **fieles** al diseño | **14 / 40 = 35 %** |
 | App de asistente: con código | 32 / 33 = 97 % |
-| App de asistente: fieles | 14 / 33 = 42 % |
+| App de asistente: fieles | **17 / 33 = 52 %** (antes 14) |
+| App de asistente: **alcanzables navegando** | **33 / 33 = 100 %** (antes 30) |
 | Staff/admin móvil | 0 / 4 = 0 % |
 | Escritorio | 0 / 3 = 0 % |
 

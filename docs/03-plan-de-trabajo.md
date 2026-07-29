@@ -2,7 +2,22 @@
 
 > Punto de partida: [`01-estado-actual.md`](./01-estado-actual.md)
 > Objetivo: [`02-comparativo-figma.md`](./02-comparativo-figma.md)
-> Rama actual: `a-develop` · commit `79f9c23` · árbol limpio
+> Rama actual: `a-develop` · commit **`4fbd7a4`** · árbol limpio
+
+## Progreso
+
+| Fase | Estado |
+|---|---|
+| 0 — Desbloqueos | ⏳ MCP de Figma sigue limitado; Q1, Q2 y Q4 resueltas |
+| 1 — Defectos bloqueantes | 🟡 **1.1 hecha** (+ D19, D20, D21 descubiertos y resueltos); 1.2–1.9 pendientes |
+| 2 — Cablear lo que existe | 🟡 **login completo** (2.1–2.3); 2.4–2.7 pendientes |
+| 3 — Modal `Credencial` | ⬜ pendiente |
+| 4 — Fidelidad visual | ⬜ pendiente (A8–A14 del login ya identificadas) |
+| 5 — Consolidación | ⬜ pendiente |
+| 6 / 7 — Productos B y C | ⛔ bloqueadas por Q2′ y Q3′ |
+
+**Entregado:** `feat(auth): connect login flow and fix broken login assets` (`4fbd7a4`) —
+flujo de login conectado, 4 assets corregidos, botón inalcanzable arreglado, 4 tests nuevos.
 
 ---
 
@@ -78,6 +93,8 @@ Estas reglas aplican a **todas** las fases. Son el contrato entre nosotros.
 | 1.7 | 🆕 Corregir el **tema de la página 3 del onboarding** ("Agenda personalizada" → "Soporte y alertas") y las 3 descripciones | `onboarding_data.dart` | **O1 / O2** |
 | 1.8 | 🆕 Pasar a **"usted"** los textos que tutean | `empty_notifications.dart`, 3 archivos de valoración | **T11** |
 | 1.9 | 🆕 Renombrar `"Actividad"` → `"Tipo de Actividad"` | `filtro_modal.dart:18` | F2 |
+| **1.10** | 🆕 **Auditar todos los `.svg` del proyecto** buscando `<image …base64…>`: `flutter_svg` no los dibuja y no avisa. Ya confirmado en 2 de los 3 de `login/` | `assets/**/*.svg` | **D19 / T16** |
+| **1.11** | 🆕 **Medir cada pantalla a 412×917** buscando desbordes. El patrón `Column` + `Spacer` sin scroll está repetido; en login dejó un botón inalcanzable | todas | **D20 / T17** |
 
 **Criterio de aceptación:**
 - `flutter analyze` sin errores nuevos.
