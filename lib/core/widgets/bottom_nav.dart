@@ -130,7 +130,10 @@ class _NavButton extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         width: 54,
         height: 52,
-        padding: const EdgeInsets.all(8),
+        // Sin padding real: el "padding: 8px" del spec de Figma ya está
+        // reflejado en cómo se calculó el frame de 54x52 en el diseño.
+        // Ponerlo aquí como padding literal reduce el espacio disponible
+        // para el ícono+texto y provoca overflow (texto se parte en 2 líneas).
         decoration: BoxDecoration(
           // #00619B4D con 30% de opacidad, tal cual el spec.
           color: active
@@ -155,6 +158,9 @@ class _NavButton extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.visible,
               style: const TextStyle(
                 fontFamily: Fonts.regular,
                 fontSize: 12,
@@ -235,6 +241,8 @@ class _ReservasButton extends StatelessWidget {
             child: Text(
               "Reservas",
               textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
               style: TextStyle(
                 fontFamily: Fonts.regular,
                 fontSize: 12,

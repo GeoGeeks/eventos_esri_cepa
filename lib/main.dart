@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/constants/fonts.dart';
+import 'features/login/login_screen.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
-import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 
 void main() {
   runApp(const EsriEventosApp());
@@ -27,7 +27,8 @@ class EsriEventosApp extends StatelessWidget {
           useMaterial3: true,
           fontFamily: Fonts.regular,
         ),
-        home: const OnboardingScreen(),
+        // El flujo arranca en Iniciar Sesión; al ingresar pasa a Onboarding 1.
+        home: const LoginScreen(),
       ),
     );
   }
