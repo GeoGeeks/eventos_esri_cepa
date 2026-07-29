@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/fonts.dart';
 
 class ECardActionButton extends StatelessWidget {
   final IconData icon;
@@ -19,43 +17,45 @@ class ECardActionButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: const Color(0xFFE0E0E0)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: Icon(
+      child: Container(
+        width: 81,
+        height: 59,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0xFFEBEBEB), width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            /// Icono 16x16px
+            Icon(
               icon,
-              size: 22,
-              color: AppColors.primary,
+              size: 16,
+              color: const Color(0xFF007AC2),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: Fonts.light,
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSubtle,
+
+            /// Gap exacto de 4px (según Figma)
+            const SizedBox(height: 4),
+
+            /// Texto "Hug" natural con alineación limpia
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              style: const TextStyle(
+                fontFamily: 'Inter', // O la constante Fonts.regular / Fonts.medium que uses
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                height: 15 / 12, // 125% line-height = 15px
+                color: Color(0xFF007AC2),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
+

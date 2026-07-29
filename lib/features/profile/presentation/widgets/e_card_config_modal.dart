@@ -34,54 +34,71 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
     return Dialog(
       elevation: 0,
       backgroundColor: Colors.transparent,
+      // Baja la posición de la tarjeta respecto al centro predeterminado
+      alignment: const Alignment(0, 0.05),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         width: 358,
+        height: 378, // Altura exacta del panel-container
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            /// --- HEADER ---
+            /// --- HEADER (358x69px) ---
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              width: 358,
+              height: 69,
+              padding: const EdgeInsets.fromLTRB(20, 18, 16, 18),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
                 border: Border(
                   bottom: BorderSide(color: Color(0xFFF2F2F2), width: 1),
                 ),
               ),
               child: Row(
                 children: [
-                  const Expanded(
+                  /// text-content (282x32px)
+                  const SizedBox(
+                    width: 282,
+                    height: 32,
                     child: Text(
                       'Configure su e-card',
                       style: TextStyle(
                         fontFamily: Fonts.medium,
-                        fontSize: 22,
+                        fontSize: 26,
                         fontWeight: FontWeight.w500,
-                        height: 28 / 22,
+                        height: 32 / 26,
                         color: Color(0xFF141414),
                       ),
                     ),
                   ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(2),
+
+                  const Spacer(),
+
+                  /// close-action (36x32px)
+                  GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const SizedBox(
-                      width: 32,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      width: 36,
                       height: 32,
-                      child: Icon(
-                        Icons.close,
-                        size: 16,
-                        color: Color(0xFF6B6B6B),
+                      padding: const EdgeInsets.only(right: 4),
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Color(0xFF6B6B6B),
+                        ),
                       ),
                     ),
                   ),
@@ -89,66 +106,81 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
               ),
             ),
 
-            /// --- BODY ---
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Seleccione qué información desea mostrar cuando alguien escanee su tarjeta digital.',
-                      style: TextStyle(
-                        fontFamily: Fonts.regular,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        height: 20 / 15,
-                        color: Color(0xFF141414),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _ConfigToggleRow(
-                      label: 'Cargo',
-                      value: _cargo,
-                      onChanged: (v) => setState(() => _cargo = v),
-                    ),
-                    _ConfigToggleRow(
-                      label: 'Empresa',
-                      value: _empresa,
-                      onChanged: (v) => setState(() => _empresa = v),
-                    ),
-                    _ConfigToggleRow(
-                      label: 'Correo electrónico',
-                      value: _correo,
-                      onChanged: (v) => setState(() => _correo = v),
-                    ),
-                    _ConfigToggleRow(
-                      label: 'Número de teléfono',
-                      value: _telefono,
-                      onChanged: (v) => setState(() => _telefono = v),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            /// --- CONTENT CONTAINER (358x216px) ---
+            /// --- CONTENT CONTAINER (358x216px) ---
+Container(
+  width: 358,
+  height: 216,
+  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 318,
+        height: 40,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+  'Seleccione qué información desea mostrar cuando alguien escanee su tarjeta digital.',
+  maxLines: 2,
+  style: const TextStyle(
+    fontFamily: Fonts.regular,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: -0.35,
+  ),
+)
+        ),
+      ),
 
-            /// --- FOOTER ---
+      const SizedBox(height: 8),
+
+      SizedBox(
+        width: 318,
+        height: 128,
+        child: Column(
+          children: [
+            _ConfigToggleRow(
+              label: ' Cargo',
+              value: _cargo,
+              onChanged: (v) => setState(() => _cargo = v),
+            ),
+            _ConfigToggleRow(
+              label: ' Empresa',
+              value: _empresa,
+              onChanged: (v) => setState(() => _empresa = v),
+            ),
+            _ConfigToggleRow(
+              label: ' Correo electrónico',
+              value: _correo,
+              onChanged: (v) => setState(() => _correo = v),
+            ),
+            _ConfigToggleRow(
+              label: ' Número de teléfono',
+              value: _telefono,
+              onChanged: (v) => setState(() => _telefono = v),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+),
+
+            /// --- FOOTER (358x93px) ---
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              width: 358,
+              height: 93,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(4),
-                  bottomRight: Radius.circular(4),
-                ),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
                 border: Border(
                   top: BorderSide(color: Color(0xFFF2F2F2), width: 1),
                 ),
               ),
               child: SizedBox(
-                width: double.infinity,
+                width: 318,
                 height: 44,
                 child: ElevatedButton(
                   onPressed: () {
@@ -166,9 +198,9 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
                     elevation: 0,
                     backgroundColor: const Color(0xFF007AC2),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   child: const Text(
@@ -205,12 +237,18 @@ class _ConfigToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Container(
+      width: 310,
+      height: 32,
+      padding: const EdgeInsets.only(top: 4, bottom: 4, right: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
+          /// List item label (262x20px)
+          SizedBox(
+            width: 262,
+            height: 20,
             child: Text(
               label,
               style: const TextStyle(
@@ -222,6 +260,8 @@ class _ConfigToggleRow extends StatelessWidget {
               ),
             ),
           ),
+
+          /// Switch (32x16px)
           GestureDetector(
             onTap: () => onChanged(!value),
             behavior: HitTestBehavior.opaque,
@@ -230,9 +270,9 @@ class _ConfigToggleRow extends StatelessWidget {
               curve: Curves.easeInOut,
               width: 32.0,
               height: 16.0,
-              padding: const EdgeInsets.all(2.0),
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(9999.0),
                 color: value ? const Color(0xFF007AC2) : const Color(0xFFD6D6D6),
               ),
               child: AnimatedAlign(
@@ -255,3 +295,4 @@ class _ConfigToggleRow extends StatelessWidget {
     );
   }
 }
+

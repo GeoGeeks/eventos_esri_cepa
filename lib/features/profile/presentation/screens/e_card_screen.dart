@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../data/ecard_visibility_config.dart';
 import '../widgets/e_card_action_button.dart';
@@ -43,15 +42,15 @@ class _ECardScreenState extends State<ECardScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF5F5F5),
+      color: const Color(0xFFEBEBEB),
       child: SafeArea(
         child: Stack(
           children: [
             Column(
               children: [
-                /// App Bar superior / Header botones
+                /// Appbar superior con botones
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(26, 16, 26, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -91,63 +90,71 @@ class _ECardScreenState extends State<ECardScreen> {
                   ),
                 ),
 
-                /// Contenido principal escroleable
+                /// Contenido escroleable
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     child: Column(
                       children: [
                         const SizedBox(height: 16),
-                        const Text(
-                          'E-card',
-                          style: TextStyle(
-                            fontFamily: Fonts.medium,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textTitle,
+                        
+                        /// Seccion Titulo (360x86px con gap: 14px segun CSS)
+                        SizedBox(
+                          width: 360,
+                          child: Column(
+                            children: const [
+                              Text(
+                                'E-card',
+                                style: TextStyle(
+                                  fontFamily: Fonts.medium,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF141414),
+                                ),
+                              ),
+                              SizedBox(height: 14), // gap: 14px del CSS
+                              Text(
+                                'Utilice este código para identificarse y conectar con otros asistentes.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: Fonts.regular,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  height: 20 / 16,
+                                  color: Color(0xFF6B6B6B),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 48),
-                          child: Text(
-                            'Utilice este código para identificarse y conectar con otros asistentes.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: Fonts.regular,
-                              fontSize: 13,
-                              color: AppColors.textSubtle,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 28),
+                        
+                        const SizedBox(height: 24),
 
-                        /// Tarjeta QR con vCard dinámico
+                        /// Tarjeta E-Card Widget
                         ECardWidget(
                           visibilityConfig: _visibilityConfig,
                         ),
 
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 24),
 
-                        /// Botones de acción inferiores
+                        /// Botones de accion (gap: 24px entre ellos del CSS)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ECardActionButton(
-                              icon: Icons.share_outlined,
+                              icon: Icons.ios_share,
                               label: 'Compartir',
                               onTap: () {},
                             ),
-                            const SizedBox(width: 40),
+                            const SizedBox(width: 24),
                             ECardActionButton(
-                              icon: Icons.download_outlined,
+                              icon: Icons.save_alt_outlined,
                               label: 'Guardar',
                               onTap: () {},
                             ),
                           ],
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
@@ -155,7 +162,7 @@ class _ECardScreenState extends State<ECardScreen> {
               ],
             ),
 
-            /// Notification Toast Flotante de confirmación
+            /// Notification Toast Flotante
             if (_showNotification)
               Positioned(
                 top: 25,
@@ -246,5 +253,5 @@ class _ECardScreenState extends State<ECardScreen> {
         ),
       ),
     );
-  }
+  }  
 }
