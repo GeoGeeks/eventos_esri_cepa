@@ -37,13 +37,12 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         width: 358,
-        // Eliminamos height: 378 rígido para permitir que se adapte al contenido sin desbordarse
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Se ajusta al tamaño vertical necesario
+          mainAxisSize: MainAxisSize.min,
           children: [
             /// --- HEADER ---
             Container(
@@ -66,7 +65,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
                       'Configure su e-card',
                       style: TextStyle(
                         fontFamily: Fonts.medium,
-                        fontSize: 22, // Ajustado ligeramente para evitar saltos de línea bruscos
+                        fontSize: 22,
                         fontWeight: FontWeight.w500,
                         height: 28 / 22,
                         color: Color(0xFF141414),
@@ -90,7 +89,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
               ),
             ),
 
-            /// --- CONTENT (Flexible + Scrollable si la pantalla es muy pequeña) ---
+            /// --- BODY ---
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
@@ -98,7 +97,6 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Subtítulo / Label explicativo (SizedBox sin alto fijo para adaptarse a N líneas)
                     const Text(
                       'Seleccione qué información desea mostrar cuando alguien escanee su tarjeta digital.',
                       style: TextStyle(
@@ -109,10 +107,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
                         color: Color(0xFF141414),
                       ),
                     ),
-                    
                     const SizedBox(height: 16),
-
-                    // Lista de Opciones
                     _ConfigToggleRow(
                       label: 'Cargo',
                       value: _cargo,
@@ -141,7 +136,7 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
             /// --- FOOTER ---
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -197,7 +192,6 @@ class _ECardConfigModalState extends State<ECardConfigModal> {
   }
 }
 
-/// Fila individual de Switch alineada al layout del CSS
 class _ConfigToggleRow extends StatelessWidget {
   final String label;
   final bool value;
@@ -212,7 +206,7 @@ class _ConfigToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -234,21 +228,19 @@ class _ConfigToggleRow extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeInOut,
-              width: 32.0,  // Ancho exacto
-              height: 16.0, // Alto exacto
-              padding: const EdgeInsets.all(2.0), // Padding interno para la bolita
+              width: 32.0,
+              height: 16.0,
+              padding: const EdgeInsets.all(2.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
-                color: value 
-                    ? const Color(0xFF007AC2) // Azul activo
-                    : const Color(0xFFD6D6D6), // Gris inactivo
+                color: value ? const Color(0xFF007AC2) : const Color(0xFFD6D6D6),
               ),
               child: AnimatedAlign(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeInOut,
                 alignment: value ? Alignment.centerRight : Alignment.centerLeft,
                 child: Container(
-                  width: 12.0,  // Tamaño del thumb/círculo interno
+                  width: 12.0,
                   height: 12.0,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,

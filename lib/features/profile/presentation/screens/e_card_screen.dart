@@ -21,8 +21,7 @@ class ECardScreen extends StatefulWidget {
 class _ECardScreenState extends State<ECardScreen> {
   bool _showNotification = false;
 
-  ECardVisibilityConfig _visibilityConfig =
-      const ECardVisibilityConfig();
+  ECardVisibilityConfig _visibilityConfig = const ECardVisibilityConfig();
 
   Future<void> _openConfig() async {
     final result = await showDialog<ECardVisibilityConfig>(
@@ -50,12 +49,11 @@ class _ECardScreenState extends State<ECardScreen> {
           children: [
             Column(
               children: [
+                /// App Bar superior / Header botones
                 Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
                         onTap: widget.onBack,
@@ -93,51 +91,48 @@ class _ECardScreenState extends State<ECardScreen> {
                   ),
                 ),
 
+                /// Contenido principal escroleable
                 Expanded(
                   child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
                     child: Column(
                       children: [
                         const SizedBox(height: 16),
-
                         const Text(
                           'E-card',
                           style: TextStyle(
-                            fontFamily: Fonts.light,
+                            fontFamily: Fonts.medium,
                             fontSize: 26,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textTitle,
                           ),
                         ),
-
                         const SizedBox(height: 8),
-
                         const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 48,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 48),
                           child: Text(
                             'Utilice este código para identificarse y conectar con otros asistentes.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontFamily: Fonts.light,
+                              fontFamily: Fonts.regular,
                               fontSize: 13,
                               color: AppColors.textSubtle,
                               height: 1.5,
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 28),
 
+                        /// Tarjeta QR con vCard dinámico
                         ECardWidget(
                           visibilityConfig: _visibilityConfig,
                         ),
 
                         const SizedBox(height: 28),
 
+                        /// Botones de acción inferiores
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ECardActionButton(
                               icon: Icons.share_outlined,
@@ -152,7 +147,6 @@ class _ECardScreenState extends State<ECardScreen> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 40),
                       ],
                     ),
@@ -161,8 +155,8 @@ class _ECardScreenState extends State<ECardScreen> {
               ],
             ),
 
-            // ======= NOTIFICACIÓN =======
-                        if (_showNotification)
+            /// Notification Toast Flotante de confirmación
+            if (_showNotification)
               Positioned(
                 top: 25,
                 left: 0,
@@ -181,29 +175,23 @@ class _ECardScreenState extends State<ECardScreen> {
                     ),
                     child: Row(
                       children: [
-                        /// ICONO
-                        SizedBox(
+                        const SizedBox(
                           width: 36,
                           height: 56,
                           child: Center(
                             child: Icon(
                               Icons.check_circle,
                               size: 16,
-                              color: const Color(0xFF288835),
+                              color: Color(0xFF288835),
                             ),
                           ),
                         ),
-
-                        /// TEXTO
                         Expanded(
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 11),
+                            padding: const EdgeInsets.symmetric(horizontal: 11),
                             child: Column(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: const [
                                 Text(
                                   'Configuración actualizada.',
@@ -230,8 +218,6 @@ class _ECardScreenState extends State<ECardScreen> {
                             ),
                           ),
                         ),
-
-                        /// BOTÓN CERRAR
                         SizedBox(
                           width: 44,
                           height: 32,

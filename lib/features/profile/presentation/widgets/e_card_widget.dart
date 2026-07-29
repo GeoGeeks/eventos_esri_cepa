@@ -40,22 +40,30 @@ class ECardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Construimos la línea de subtítulo dinámicamente según la visibilidad configurada
+    final List<String> subtitleParts = [];
+    if (visibilityConfig.cargo) subtitleParts.add(EcardMockData.cargo);
+    if (visibilityConfig.empresa) subtitleParts.add(EcardMockData.empresa);
+    final String subtitleText = subtitleParts.join(' · ');
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 32),
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          /// Avatar con Iniciales
           Container(
             width: 64,
             height: 64,
@@ -67,40 +75,47 @@ class ECardWidget extends StatelessWidget {
             child: const Text(
               'ML',
               style: TextStyle(
-                fontFamily: Fonts.light,
+                fontFamily: Fonts.medium,
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
             ),
           ),
-
           const SizedBox(height: 12),
 
+          /// Nombre Principal
           const Text(
-            'María López',
+            EcardMockData.nombre,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: Fonts.light,
-              fontSize: 18,
+              fontFamily: Fonts.medium,
+              fontSize: 20,
               fontWeight: FontWeight.w600,
               color: AppColors.textTitle,
+              height: 1.2,
             ),
           ),
 
-          const SizedBox(height: 4),
-
-          const Text(
-            'Ingeniera Civil · Procalculo',
-            style: TextStyle(
-              fontFamily: Fonts.light,
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSubtle,
+          /// Subtítulo Dinámico (Cargo · Empresa)
+          if (subtitleText.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              subtitleText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: Fonts.regular,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSubtle,
+                height: 1.3,
+              ),
             ),
-          ),
+          ],
 
           const SizedBox(height: 24),
 
+          /// Código QR Generado con vCard
           QrImageView(
             data: _buildVCard(),
             version: QrVersions.auto,
