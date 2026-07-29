@@ -1,13 +1,18 @@
 class Images {
   Images._();
+
+  // background_inicio.svg y esri_blanco.svg no son vectores: son un PNG
+  // embebido en base64 dentro de una cáscara SVG, y flutter_svg ignora los
+  // elementos <image>, así que no dibujaba nada. Se apunta al PNG extraído
+  // de esos mismos archivos (mismos píxeles). Los .svg se conservan en disco.
   static const String backgroundInicio =
-    'assets/images/login/background_inicio.svg';
+    'assets/images/login/background_inicio.png';
 
 static const String logoApp =
     'assets/images/login/logo_app.svg';
 
 static const String esriBlanco =
-    'assets/images/login/esri_blanco.svg';
+    'assets/images/login/esri_blanco.png';
 
   static const String esriEventos = 'assets/images/cards/esri_eventos.png';
 
