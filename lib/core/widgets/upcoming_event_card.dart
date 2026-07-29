@@ -36,163 +36,162 @@ class UpcomingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Card principal (width: 360px, height: 122px) - CORREGIDO
+    // Card con altura DINÁMICA - se ajusta al contenido
     return SizedBox(
       width: 360,
-      height: 122,
       child: Stack(
         children: [
-          // card-container
+          // card-container con IntrinsicHeight para que imagen se estire dinámicamente
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: Container(
               width: 360,
-              height: 122,
-              color: const Color(0xFFFFFFFF), // background: #FFFFFF
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // IMAGE (.comunidad-pe-2 1)
-                  Image.asset(
-                    image,
-                    width: 138,
-                    height: 122, // CORREGIDO: era 146
-                    fit: BoxFit.cover,
-                  ),
+              color: const Color(0xFFFFFFFF),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // IMAGE - SE ESTIRA a la altura total del card (align-self: stretch)
+                    Image.asset(
+                      image,
+                      width: 138,
+                      fit: BoxFit.cover,
+                    ),
 
-                  // CONTENT CONTAINER (content-container)
-                  Container(
-                    width: 222,
-                    height: 122, // CORREGIDO: era 146
-                    color: const Color(0xFFFFFFFF),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // HEADER (header / header-text-container)
-                        Container(
-                          width: 222,
-                          height: 82, // CORREGIDO: era 106
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // padding: 8px 12px
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Frame 1461: Contiene Título y Chip en Fila
-                              SizedBox(
-                                width: 198,
-                                height: 24, // CORREGIDO: era 48, solo 1 línea de título
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                    // CONTENT CONTAINER - altura dinámica
+                    Container(
+                      width: 222,
+                      color: const Color(0xFFFFFFFF),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // HEADER - altura dinámica según contenido
+                          Container(
+                            width: 222,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Frame 1461: Título + Chip (altura se ajusta al título)
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Card title - maxLines: 1
-                                    SizedBox(
-                                      width: 97, // Según CSS: 97px
-                                      height: 24,
+                                    // Card title - FLEXIBLE, se ajusta al contenido
+                                    Expanded(
                                       child: Text(
                                         title,
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontFamily: Fonts.medium,
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xFF141414),
-                                          height: 24 / 18, // line-height: 24px
+                                          height: 24 / 18,
                                         ),
                                       ),
                                     ),
                                     
-                                    // Chip (.Frame 73)
+                                    const SizedBox(width: 6),
+                                    
+                                    // Chip - tamaño fijo
                                     _ModeChip(label: mode),
                                   ],
                                 ),
-                              ),
-                              
-                              const SizedBox(height: 6), // gap: 6px
+                                
+                                const SizedBox(height: 6),
 
-                              // Frame 1460 (Column de filas de info con gap de 4px)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _InfoRow(
-                                    iconPath: 'assets/icons/date-time.svg',
-                                    text: date,
-                                  ),
-                                  const SizedBox(height: 4), // gap: 4px
-                                  _InfoRow(
-                                    iconPath: 'assets/icons/lugar.svg',
-                                    text: location,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // FOOTER (footer) - height: 40px
-                        Container(
-                          width: 222,
-                          height: 40,
-                          padding: const EdgeInsets.only(right: 12, bottom: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Si es historial, agregamos el estado a la izquierda
-                              if (isHistorial && estado != null) ...[
-                                Expanded(
-                                  child: Row(
+                                // Frame 1460: Info rows - FIJO (width: 182px, height: 36px)
+                                SizedBox(
+                                  width: 182,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(
-                                        Icons.info_outline,
-                                        size: 13,
-                                        color: Color(0xFFF39C12),
+                                      _InfoRow(
+                                        iconPath: 'assets/icons/date-time.svg',
+                                        text: date,
                                       ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          estado!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontFamily: Fonts.regular,
-                                            fontSize: 12,
-                                            color: Color(0xFFF39C12),
-                                          ),
-                                        ),
+                                      const SizedBox(height: 4),
+                                      _InfoRow(
+                                        iconPath: 'assets/icons/lugar.svg',
+                                        text: location,
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 4),
                               ],
-
-                              // Boton secundario "Ver más"
-                              _OutlineButton(
-                                label: "Ver más",
-                                onPressed: isDisabled || isLoading ? () {} : onViewMore,
-                              ),
-                              
-                              // Boton primario "Registrarse" (Sólo si no es historial)
-                              if (!isHistorial) ...[
-                                const SizedBox(width: 8), // gap: 8px entre botones
-                                _PrimaryButton(
-                                  label: "Registrarse",
-                                  onPressed: isDisabled || isLoading ? () {} : onRegister,
-                                ),
-                              ],
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+
+                          // FOOTER - altura: 40px, padding: 0px 12px 8px 0px, gap: 11px
+                          SizedBox(
+                            width: 222,
+                            height: 40,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 12, bottom: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Estado (historial)
+                                  if (isHistorial && estado != null) ...[
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.info_outline,
+                                            size: 13,
+                                            color: Color(0xFFF39C12),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              estado!,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: Fonts.regular,
+                                                fontSize: 12,
+                                                color: Color(0xFFF39C12),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                  ],
+
+                                  // Button: Ver más
+                                  _OutlineButton(
+                                    label: "Ver más",
+                                    onPressed: isDisabled || isLoading ? () {} : onViewMore,
+                                  ),
+                                  
+                                  const SizedBox(width: 11), // gap: 11px según CSS
+                                  
+                                  // Button: Registrarse (solo si no es historial)
+                                  if (!isHistorial) ...[
+                                    _PrimaryButton(
+                                      label: "Registrarse",
+                                      onPressed: isDisabled || isLoading ? () {} : onRegister,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
 
-          // DISABLED STATE MASK (disabled-state-mask)
+          // DISABLED MASK
           if (isDisabled && !isLoading)
             Positioned.fill(
               child: ClipRRect(
@@ -203,7 +202,7 @@ class UpcomingEventCard extends StatelessWidget {
               ),
             ),
 
-          // LOADER CONTAINER (loader-container)
+          // LOADER
           if (isLoading)
             Positioned(
               top: 1,
@@ -239,7 +238,6 @@ class _ModeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Chip
     return Container(
       width: 72,
       height: 24,
@@ -277,11 +275,10 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 182,
       height: 16,
       child: Row(
         children: [
-          // SVG Icon (16x16)
+          // SVG Icon
           SizedBox(
             width: 16,
             height: 16,
@@ -293,7 +290,7 @@ class _InfoRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 2), // gap: 2px
+          const SizedBox(width: 2),
           Expanded(
             child: Text(
               text,
@@ -389,3 +386,4 @@ class _PrimaryButton extends StatelessWidget {
     );
   }
 }
+
