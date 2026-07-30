@@ -37,7 +37,9 @@ class _MenuState extends State<Menu> {
   Widget _buildPage(int index) {
     switch (index) {
       case 0:
-        return const InicioApp();
+        return InicioApp(
+          onGoToNotifications: () => _onNavTap(3),
+        );
 
       case 1:
         return const HistorialScreen();
@@ -66,10 +68,10 @@ class _MenuState extends State<Menu> {
       body: _buildPage(currentIndex),
       bottomNavigationBar: SafeArea(
         top: false,
-        child: CustomBottomNav
-        (currentIndex: currentIndex,
-         onTap: _onNavTap
-         ),
+        child: CustomBottomNav(
+          currentIndex: currentIndex,
+          onTap: _onNavTap,
+        ),
       ),
     );
   }
