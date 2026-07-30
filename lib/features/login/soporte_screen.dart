@@ -1,5 +1,3 @@
-// lib/features/login/soporte_screen.dart
-
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -27,8 +25,6 @@ class _SoporteScreenState extends State<SoporteScreen> {
     super.dispose();
   }
 
-  /// Al enviar, el flujo de Figma vuelve a la pantalla 1 (Iniciar Sesión),
-  /// no a Verificación. Se descartan las rutas intermedias hasta la raíz.
   void enviarSolicitud() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Solicitud enviada correctamente')),
@@ -79,8 +75,7 @@ class _SoporteScreenState extends State<SoporteScreen> {
             color: AppColors.white,
             borderRadius: BorderRadius.circular(2),
           ),
-          // El desplazamiento lo gestiona FondoInicio; un scroll
-          // anidado aquí rompería el cálculo de altura intrínseca.
+         
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
