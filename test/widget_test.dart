@@ -28,7 +28,7 @@ void main() {
       await _arrancarApp(tester);
 
       expect(find.byType(LoginScreen), findsOneWidget);
-      expect(find.text('Iniciar sesión'), findsOneWidget);
+      expect(find.text('Iniciar Sesión'), findsOneWidget);
       expect(find.text('Número de Identificación'), findsOneWidget);
       expect(find.text('Ingresar'), findsOneWidget);
     },

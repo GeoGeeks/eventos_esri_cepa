@@ -4,4 +4,5 @@ class EcardMockData {
   static const String empresa = 'Porcalculo S.A.S.';
   static const String correo = 'maria.lopez@procalculo.com';
   static const String telefono = '+573000000000';
+  static const String documento = '1234567890';
 }
