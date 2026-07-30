@@ -31,4 +31,5 @@ static const String avisoBorde =
   static const String compartir = 'assets/icons/compartir.svg';
   static const String eliminar = 'assets/icons/eliminar.svg';
   static const String filtro = 'assets/icons/filtro.svg';
+  static const String guardar = 'assets/icons/guardar.svg';
 }

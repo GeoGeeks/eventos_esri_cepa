@@ -39,6 +39,7 @@ flutter:
       - assets/images/profile/
       - assets/images/experiencias/
       - assets/images/post_evento/
+      - assets/images/notificaciones/
 
   fonts:
     - family: AvenirNextUltraLight

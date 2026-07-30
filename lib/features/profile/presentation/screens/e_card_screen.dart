@@ -165,34 +165,39 @@ class _ECardScreenState extends State<ECardScreen> {
             /// Notification Toast Flotante
             if (_showNotification)
               Positioned(
-                top: 25,
+                top: 15,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: Container(
                     width: 360,
                     height: 92,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: const Color(0xFFF6FBF6), // Fondo verde muy claro
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: const Color(0x8035AC46),
+                        color: const Color(0x8035AC46), // Borde verde con opacidad
                         width: 1,
                       ),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(
+                        /// Icono Check
+                        Container(
                           width: 36,
                           height: 56,
-                          child: Center(
-                            child: Icon(
-                              Icons.check_circle,
-                              size: 16,
-                              color: Color(0xFF288835),
-                            ),
+                          padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.check_circle,
+                            size: 16,
+                            color: Color(0xFF288835),
                           ),
                         ),
+
+                        /// Textos
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 11),
@@ -202,6 +207,8 @@ class _ECardScreenState extends State<ECardScreen> {
                               children: const [
                                 Text(
                                   'Configuración actualizada.',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontFamily: Fonts.medium,
                                     fontSize: 16,
@@ -210,9 +217,11 @@ class _ECardScreenState extends State<ECardScreen> {
                                     color: Color(0xFF141414),
                                   ),
                                 ),
-                                SizedBox(height: 4),
+                                SizedBox(height: 2),
                                 Text(
                                   'Los cambios ya están disponibles al escanear el código QR.',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontFamily: Fonts.regular,
                                     fontSize: 14,
@@ -225,22 +234,24 @@ class _ECardScreenState extends State<ECardScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(
-                          width: 44,
-                          height: 32,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(2),
-                            onTap: () {
-                              setState(() {
-                                _showNotification = false;
-                              });
-                            },
-                            child: const Center(
-                              child: Icon(
-                                Icons.close,
-                                size: 16,
-                                color: Color(0xFF6B6B6B),
-                              ),
+
+                        /// Botón Cerrar (X)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showNotification = false;
+                            });
+                          },
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            width: 44,
+                            height: 32,
+                            padding: const EdgeInsets.only(right: 6),
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Color(0xFF6B6B6B),
                             ),
                           ),
                         ),
