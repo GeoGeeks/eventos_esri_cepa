@@ -33,6 +33,7 @@ flutter:
       - assets/icons/
       - assets/images/cards/
       - assets/images/inicio/
+      - assets/images/login/
       - assets/images/invitados/
       - assets/images/onboarding/
       - assets/images/profile/

@@ -1,5 +1,11 @@
 class SvgIcon {
   SvgIcon._();
+  
+  static const String avisoRojo =
+    'assets/icons/aviso_rojo.svg';
+
+static const String avisoBorde =
+    'assets/icons/aviso_borde.svg';
 
   static const String alertas = 'assets/icons/alertas.svg';
   static const String historial = 'assets/icons/historial.svg';
