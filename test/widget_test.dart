@@ -8,9 +8,8 @@ import 'package:esri_eventos/features/login/verificacion_screen.dart';
 import 'package:esri_eventos/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:esri_eventos/main.dart';
 
-/// Las pantallas están diseñadas para el frame de Figma de 412x917.
-/// El lienzo por defecto de flutter_test es 800x600 y provoca overflow,
-/// dejando los botones fuera del área visible.
+import 'fuentes_de_prueba.dart';
+
 Future<void> _arrancarApp(WidgetTester tester) async {
   tester.view.physicalSize = const Size(412, 917);
   tester.view.devicePixelRatio = 1.0;
@@ -22,6 +21,10 @@ Future<void> _arrancarApp(WidgetTester tester) async {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(cargarFuentesReales);
+
   testWidgets(
     'la app arranca en la pantalla de Iniciar Sesión',
     (WidgetTester tester) async {

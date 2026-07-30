@@ -11,6 +11,9 @@ class AppColors {
 
   static const Color textTitle = Color(0xFF141414);
   static const Color textSubtle = Color(0xFF949494);
+  static const Color textMuted = Color(0xFF6B6B6B);
+
+  static const Color surface3 = Color(0xFFF2F2F2);
 
   static const Color chipBg = Color(0xFFD6EFFF);
 

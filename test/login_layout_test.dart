@@ -1,32 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:esri_eventos/features/login/login_screen.dart';
 
-/// Comprueba la geometría de "Iniciar Sesión" contra el frame de Figma de
-/// 412x917. Las medidas no se ven leyendo el código: un panel puede compilar
-/// limpio y aun así quedar 48 px más abajo de lo que marca el diseño.
-///
-/// Sin cargar las fuentes reales esta comprobación no sirve: flutter_test
-/// dibuja con una tipografía de prueba en la que cada glifo es un cuadrado del
-/// tamaño de la fuente, así que "Eventos Esri" a 40 px ocuparía 480 px, se
-/// partiría en dos líneas y desplazaría todo lo de abajo.
-Future<void> _cargarFuentes() async {
-  const familias = {
-    'AvenirNextBold': 'assets/fonts/AvenirNextLTPro-Bold.ttf',
-    'AvenirNextMedium': 'assets/fonts/AvenirNextLTPro-Medium.ttf',
-    'AvenirNextRegular': 'assets/fonts/AvenirNextLTPro-Regular.ttf',
-    'AvenirNextLight': 'assets/fonts/AvenirNextLTPro-Light.otf',
-  };
-
-  for (final familia in familias.entries) {
-    final cargador = FontLoader(familia.key)
-      ..addFont(rootBundle.load(familia.value));
-    await cargador.load();
-  }
-}
+import 'fuentes_de_prueba.dart';
 
 Future<void> _montarLogin(WidgetTester tester) async {
   tester.view.physicalSize = const Size(412, 917);
@@ -41,7 +19,7 @@ Future<void> _montarLogin(WidgetTester tester) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(_cargarFuentes);
+  setUpAll(cargarFuentesReales);
 
   testWidgets('logo, título y panel caen donde los pone Figma', (tester) async {
     await _montarLogin(tester);

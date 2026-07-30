@@ -6,9 +6,16 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
 
 class FondoInicio extends StatelessWidget {
-  const FondoInicio({super.key, required this.child});
+  const FondoInicio({
+    super.key,
+    required this.child,
+    this.aviso,
+    this.espacioSuperior = 160,
+  });
 
   final Widget child;
+  final Widget? aviso;
+  final double espacioSuperior;
 
   @override
   Widget build(BuildContext context) {
@@ -18,25 +25,25 @@ class FondoInicio extends StatelessWidget {
           child: Image.asset(Images.backgroundInicio, fit: BoxFit.cover),
         ),
 
-        
         SafeArea(
           top: false,
           child: Column(
             children: [
               Expanded(
                 child: SingleChildScrollView(
-              
                   child: SizedBox(
                     width: double.infinity,
                     child: Column(
                       children: [
-                        const SizedBox(height: 160),
+                        if (aviso == null)
+                          SizedBox(height: espacioSuperior)
+                        else ...[
+                          const SizedBox(height: 36),
+                          aviso!,
+                          const SizedBox(height: 10),
+                        ],
 
-                        SvgPicture.asset(
-                          Images.logoApp,
-                          width: 65,
-                          height: 74,
-                        ),
+                        SvgPicture.asset(Images.logoApp, width: 65, height: 74),
 
                         const SizedBox(height: 20),
 
@@ -62,11 +69,7 @@ class FondoInicio extends StatelessWidget {
                 ),
               ),
 
-              Image.asset(
-                Images.esriBlanco,
-                width: 158,
-                cacheWidth: 640,
-              ),
+              Image.asset(Images.esriBlanco, width: 158, cacheWidth: 640),
 
               const SizedBox(height: 24),
             ],
