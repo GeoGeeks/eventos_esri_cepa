@@ -75,50 +75,56 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Título: "Notificaciones" / Chip "Borrar todo"
+            // Header según CSS Figma
             Padding(
               padding: const EdgeInsets.fromLTRB(26, 36, 26, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Notificaciones',
-                    style: TextStyle(
-                      fontFamily: _fontFamily,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w500,
-                      height: 32 / 26,
-                      color: _textDark,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: notifications.isEmpty
-                        ? null
-                        : () => setState(() => notifications.clear()),
-                    child: Container(
-                      height: 32,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: _chipBg,
-                        borderRadius: BorderRadius.circular(9999),
+              child: SizedBox(
+                height: 32,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center, // Propiedad corregida
+                  children: [
+                    const Text(
+                      'Notificaciones',
+                      style: TextStyle(
+                        fontFamily: _fontFamily,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w500,
+                        height: 32 / 26,
+                        color: _textDark,
                       ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Borrar todo',
-                        style: TextStyle(
-                          fontFamily: _fontFamily,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          height: 16 / 14,
-                          color: _azul,
+                    ),
+                    GestureDetector(
+                      onTap: notifications.isEmpty
+                          ? null
+                          : () => setState(() => notifications.clear()),
+                      child: Container(
+                        height: 32,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: _chipBg,
+                          border: Border.all(color: _chipBg),
+                          borderRadius: BorderRadius.circular(9999),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Borrar todo',
+                          style: TextStyle(
+                            fontFamily: _fontFamily,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            height: 16 / 14,
+                            color: _azul,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
+            // Contenido dinámico
             Expanded(
               child: notifications.isEmpty
                   ? const EmptyNotifications()

@@ -5,21 +5,21 @@ class EmptyNotifications extends StatelessWidget {
 
   static const _fontFamily = 'Avenir Next LT Pro';
   static const _azul = Color(0xFF1B8ADD);
+  static const String _notificacionesImg = 'assets/images/notificaciones/notificaciones.png';
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Imagen central del diseño (tarjeta_no_notications.png)
           Image.asset(
-            'assets/images/cards/tarjeta_no_notications.png',
+            _notificacionesImg,
             width: 249,
             height: 317,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              // Fallback en caso de que la imagen aún no esté vinculada en pubspec.yaml
               return Container(
                 width: 249,
                 height: 317,
@@ -32,7 +32,7 @@ class EmptyNotifications extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           const Text(
             'No tiene notificaciones',
             textAlign: TextAlign.center,
@@ -45,15 +45,18 @@ class EmptyNotifications extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Cuando reciba una notificación,\nla verá aquí.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: _fontFamily,
-              fontSize: 20,
-              fontWeight: FontWeight.w400,
-              height: 24 / 20,
-              color: _azul,
+          const SizedBox(
+            width: 290,
+            child: Text(
+              'Cuando reciba una notificación,\nla verá aquí.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: _fontFamily,
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+                height: 24 / 20,
+                color: _azul,
+              ),
             ),
           ),
         ],

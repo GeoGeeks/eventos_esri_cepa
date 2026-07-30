@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class NotificationItem extends StatelessWidget {
   final String title;
@@ -15,7 +14,9 @@ class NotificationItem extends StatelessWidget {
     this.isNew = false,
   });
 
+  // Colores exactos del CSS de Figma
   static const _azul = Color(0xFF007AC2);
+  static const _azulOscuro = Color(0xFF00619B);
   static const _circleBg = Color(0xFFD6EFFF);
   static const _textDark = Color(0xFF141414);
   static const _textGray = Color(0xFF4A4A4A);
@@ -31,7 +32,10 @@ class NotificationItem extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 88),
       padding: isNew
           ? const EdgeInsets.all(16)
-          : const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          : const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 16,
+            ),
       decoration: BoxDecoration(
         color: isNew ? _newBg : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
@@ -39,7 +43,7 @@ class NotificationItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Círculo azul claro con el asset 'date-time.svg'
+          // icon (Group 3 / Ellipse 7 + date-time)
           Container(
             width: 44,
             height: 44,
@@ -48,21 +52,21 @@ class NotificationItem extends StatelessWidget {
               color: _circleBg,
               shape: BoxShape.circle,
             ),
-            child: SvgPicture.asset(
-              'assets/icons/date-time.svg',
-              width: 24,
-              height: 24,
+            child: const Icon(
+              Icons.event_note_outlined,
+              color: _azulOscuro,
+              size: 24,
             ),
           ),
 
           const SizedBox(width: 12),
 
-          // Contenedor de texto
+          // text-container
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Título + Dot de nuevo / Fecha
+                // Frame 1447 -> título + (dot nuevo | fecha)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -107,7 +111,7 @@ class NotificationItem extends StatelessWidget {
 
                 const SizedBox(height: 2),
 
-                // Mensaje + Fecha si es nuevo
+                // message -> descripción + (fecha si es nuevo)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -142,7 +146,7 @@ class NotificationItem extends StatelessWidget {
 
                 const SizedBox(height: 6),
 
-                // Link "Revise los detalles"
+                // Link "Revise los detalles" + indicator (línea azul opacity 0.4)
                 Text(
                   'Revise los detalles',
                   style: TextStyle(
