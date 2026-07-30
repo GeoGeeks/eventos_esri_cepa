@@ -8,10 +8,7 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 
 class ErrorBanner extends StatelessWidget {
-  const ErrorBanner({
-    super.key,
-    required this.message,
-  });
+  const ErrorBanner({super.key, required this.message});
 
   final String message;
 
@@ -22,20 +19,13 @@ class ErrorBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF4F4),
-        border: Border.all(
-          color: AppColors.requiredField,
-        ),
+        border: Border.all(color: AppColors.requiredField),
         borderRadius: BorderRadius.circular(2),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          SvgPicture.asset(
-            SvgIcon.avisoBorde,
-            width: 22,
-            height: 22,
-          ),
+          SvgPicture.asset(SvgIcon.avisoBorde, width: 22, height: 22),
 
           const SizedBox(width: 12),
 
