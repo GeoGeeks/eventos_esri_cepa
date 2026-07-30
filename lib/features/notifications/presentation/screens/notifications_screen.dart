@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../widgets/empty_notifications.dart';
 import '../widgets/notification_item.dart';
@@ -7,119 +8,109 @@ class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() =>
-      _NotificationsScreenState();
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState
-    extends State<NotificationsScreen> {
-  final List<Map<String, dynamic>>
-      notifications = [
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  static const _fontFamily = 'Avenir Next LT Pro';
+  static const _azul = Color(0xFF007AC2);
+  static const _chipBg = Color(0xFFD6EFFF);
+  static const _textDark = Color(0xFF141414);
+  static const _textGray = Color(0xFF4A4A4A);
+  static const _bgScreen = Color(0xFFF7F7F7);
+  static const _deleteRed = Color(0xFFD83020);
+
+  final List<Map<String, dynamic>> notifications = [
     {
       'id': '1',
       'title': 'Actualización del evento',
-      'description':
-          'Se ha modificado la hora de inicio.',
+      'description': 'Se ha modificado la hora de inicio.',
       'date': '20/06',
       'isNew': true,
+      'group': 'Hoy',
     },
     {
       'id': '2',
       'title': 'Actualización del evento',
-      'description':
-          'Se ha modificado la hora de inicio.',
+      'description': 'Se ha modificado la hora de inicio.',
       'date': '19/06',
       'isNew': false,
+      'group': 'Hoy',
     },
     {
       'id': '3',
       'title': 'Actualización del evento',
-      'description':
-          'Se ha modificado la hora de inicio.',
+      'description': 'Se ha modificado la hora de inicio.',
       'date': '19/06',
       'isNew': false,
+      'group': 'Semana pasada',
     },
     {
       'id': '4',
       'title': 'Actualización del evento',
-      'description':
-          'Se ha modificado la hora de inicio.',
+      'description': 'Se ha modificado la hora de inicio.',
       'date': '19/06',
       'isNew': false,
+      'group': 'Semana pasada',
     },
     {
       'id': '5',
       'title': 'Actualización del evento',
-      'description':
-          'Se ha modificado la hora de inicio.',
+      'description': 'Se ha modificado la hora de inicio.',
       'date': '19/06',
       'isNew': false,
+      'group': 'Semana pasada',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
+    final groups = <String, List<Map<String, dynamic>>>{};
+    for (final n in notifications) {
+      groups.putIfAbsent(n['group'] as String, () => []).add(n);
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: _bgScreen,
       body: SafeArea(
         child: Column(
           children: [
+            // Título: "Notificaciones" / Chip "Borrar todo"
             Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(
-                24,
-                20,
-                24,
-                12,
-              ),
+              padding: const EdgeInsets.fromLTRB(26, 36, 26, 12),
               child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment
-                        .spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Notificaciones',
                     style: TextStyle(
-                      fontSize: 22,
-                      fontWeight:
-                          FontWeight.w600,
-                      color:
-                          Color(0xFF222222),
+                      fontFamily: _fontFamily,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w500,
+                      height: 32 / 26,
+                      color: _textDark,
                     ),
                   ),
-                  Container(
-                    height: 34,
-                    decoration:
-                        BoxDecoration(
-                      color: const Color(
-                        0xFFEAF5FF,
+                  GestureDetector(
+                    onTap: notifications.isEmpty
+                        ? null
+                        : () => setState(() => notifications.clear()),
+                    child: Container(
+                      height: 32,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: _chipBg,
+                        borderRadius: BorderRadius.circular(9999),
                       ),
-                      borderRadius:
-                          BorderRadius
-                              .circular(
-                        20,
-                      ),
-                    ),
-                    child: TextButton(
-                      onPressed:
-                          notifications
-                                  .isEmpty
-                              ? null
-                              : () {
-                                  setState(
-                                    () {
-                                      notifications
-                                          .clear();
-                                    },
-                                  );
-                                },
+                      alignment: Alignment.center,
                       child: const Text(
                         'Borrar todo',
                         style: TextStyle(
-                          color: Color(
-                            0xFF7D9AB5,
-                          ),
-                          fontSize: 12,
+                          fontFamily: _fontFamily,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 16 / 14,
+                          color: _azul,
                         ),
                       ),
                     ),
@@ -128,128 +119,70 @@ class _NotificationsScreenState
               ),
             ),
 
-            if (notifications
-                .isNotEmpty) ...[
-              const Padding(
-                padding:
-                    EdgeInsets.symmetric(
-                  horizontal: 24,
-                ),
-                child: Align(
-                  alignment:
-                      Alignment
-                          .centerLeft,
-                  child: Text(
-                    'Hoy',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          FontWeight
-                              .w500,
-                      color: Color(
-                        0xFF555555,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
-
             Expanded(
-              child: notifications
-                      .isEmpty
+              child: notifications.isEmpty
                   ? const EmptyNotifications()
-                  : ListView.builder(
-                      padding:
-                          const EdgeInsets
-                              .only(
-                        bottom: 24,
-                      ),
-                      itemCount:
-                          notifications
-                              .length,
-                      itemBuilder:
-                          (
-                            context,
-                            index,
-                          ) {
-                        final item =
-                            notifications[
-                                index];
-
-                        return Dismissible(
-                          key: Key(
-                            item['id'],
-                          ),
-                          direction:
-                              DismissDirection
-                                  .endToStart,
-                          background:
-                              Container(
-                            margin:
-                                const EdgeInsets
-                                    .symmetric(
-                              horizontal:
-                                  16,
-                              vertical:
-                                  6,
-                            ),
-                            alignment:
-                                Alignment
-                                    .centerRight,
-                            padding:
-                                const EdgeInsets
-                                    .only(
-                              right: 24,
-                            ),
-                            decoration:
-                                BoxDecoration(
-                              color:
-                                  Colors.red,
-                              borderRadius:
-                                  BorderRadius
-                                      .circular(
-                                14,
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                      children: [
+                        for (final entry in groups.entries) ...[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              entry.key,
+                              style: const TextStyle(
+                                fontFamily: _fontFamily,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                height: 20 / 16,
+                                color: _textGray,
                               ),
                             ),
-                            child:
-                                const Icon(
-                              Icons.delete,
-                              color: Colors
-                                  .white,
+                          ),
+                          for (final item in entry.value)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Dismissible(
+                                key: Key(item['id']),
+                                direction: DismissDirection.endToStart,
+                                background: Container(
+                                  alignment: Alignment.centerRight,
+                                  width: 48,
+                                  height: 88,
+                                  padding: const EdgeInsets.only(right: 12),
+                                  decoration: const BoxDecoration(
+                                    color: _deleteRed,
+                                    borderRadius: BorderRadius.horizontal(
+                                      right: Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/eliminar.svg',
+                                    width: 24,
+                                    height: 24,
+                                    colorFilter: const ColorFilter.mode(
+                                      Colors.white,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                                onDismissed: (_) {
+                                  setState(() {
+                                    notifications.removeWhere(
+                                      (n) => n['id'] == item['id'],
+                                    );
+                                  });
+                                },
+                                child: NotificationItem(
+                                  title: item['title'],
+                                  description: item['description'],
+                                  date: item['date'],
+                                  isNew: item['isNew'],
+                                ),
+                              ),
                             ),
-                          ),
-                          onDismissed:
-                              (_) {
-                            setState(
-                              () {
-                                notifications
-                                    .removeAt(
-                                  index,
-                                );
-                              },
-                            );
-                          },
-                          child:
-                              NotificationItem(
-                            title:
-                                item[
-                                    'title'],
-                            description:
-                                item[
-                                    'description'],
-                            date:
-                                item[
-                                    'date'],
-                            isNew:
-                                item[
-                                    'isNew'],
-                          ),
-                        );
-                      },
+                        ],
+                      ],
                     ),
             ),
           ],
