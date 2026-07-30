@@ -11,17 +11,19 @@ class ProfileSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+    return SizedBox(
+      width: 362,
+      height: 20,
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           title,
           style: const TextStyle(
-            fontFamily: Fonts.regular,
+            fontFamily: Fonts.medium,
             fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF202020),
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF141414),
+            height: 1.25,
           ),
         ),
       ),

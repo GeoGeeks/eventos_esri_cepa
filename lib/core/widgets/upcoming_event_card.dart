@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../constants/fonts.dart';
 
 class UpcomingEventCard extends StatelessWidget {
@@ -35,180 +36,179 @@ class UpcomingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Card principal (width: 360px, height: 146px)
+    // Card con altura DINÁMICA - se ajusta al contenido
     return SizedBox(
       width: 360,
-      height: 146,
       child: Stack(
         children: [
-          // card-container
+          // card-container con IntrinsicHeight para que imagen se estire dinámicamente
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: Container(
               width: 360,
-              height: 146,
-              color: const Color(0xFFFFFFFF), // background: #FFFFFF
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // IMAGE (.comunidad-pe-2 1)
-                  Image.asset(
-                    image,
-                    width: 138,
-                    height: 146,
-                    fit: BoxFit.cover,
-                  ),
+              color: const Color(0xFFFFFFFF),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // IMAGE - SE ESTIRA a la altura total del card (align-self: stretch)
+                    Image.asset(
+                      image,
+                      width: 138,
+                      fit: BoxFit.cover,
+                    ),
 
-                  // CONTENT CONTAINER (content-container)
-                  Container(
-                    width: 222,
-                    height: 146,
-                    color: const Color(0xFFFFFFFF),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // HEADER (header / header-text-container)
-                        Container(
-                          width: 222,
-                          height: 106,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // padding: 8px 12px
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Frame 1461: Contiene Título y Chip en Fila
-                              SizedBox(
-                                width: 198,
-                                height: 48,
-                                child: Row(
+                    // CONTENT CONTAINER - altura dinámica
+                    Container(
+                      width: 222,
+                      color: const Color(0xFFFFFFFF),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // HEADER - altura dinámica según contenido
+                          Container(
+                            width: 222,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Frame 1461: Título + Chip (altura se ajusta al título)
+                                Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Card title
-                                    SizedBox(
-                                      width: 110, // Ajustado dinámico para convivir con el Chip (Figma indica max 198 total)
-                                      height: 48,
+                                    // Card title - FLEXIBLE, se ajusta al contenido
+                                    Expanded(
                                       child: Text(
                                         title,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          fontFamily: Fonts.medium, // Avenir Next LT Pro
+                                          fontFamily: Fonts.medium,
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xFF141414),
-                                          height: 24 / 18, // line-height: 24px
+                                          height: 24 / 18,
                                         ),
                                       ),
                                     ),
                                     
-                                    // Chip (.Frame 73)
+                                    const SizedBox(width: 6),
+                                    
+                                    // Chip - tamaño fijo
                                     _ModeChip(label: mode),
                                   ],
                                 ),
-                              ),
-                              
-                              const SizedBox(height: 6), // gap: 6px
+                                
+                                const SizedBox(height: 6),
 
-                              // Frame 1460 (Column de filas de info con gap de 4px)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _InfoRow(
-                                    icon: Icons.access_time_outlined,
-                                    text: date,
-                                  ),
-                                  const SizedBox(height: 4), // gap: 4px
-                                  _InfoRow(
-                                    icon: Icons.location_on_outlined,
-                                    text: location,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // FOOTER (footer)
-                        Container(
-                          width: 222,
-                          height: 40,
-                          padding: const EdgeInsets.only(right: 12, bottom: 8), // padding: 0px 12px 8px 0px
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Si es historial, agregamos el estado a la izquierda
-                              if (isHistorial && estado != null) ...[
-                                Expanded(
-                                  child: Row(
+                                // Frame 1460: Info rows - FIJO (width: 182px, height: 36px)
+                                SizedBox(
+                                  width: 182,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(
-                                        Icons.info_outline,
-                                        size: 13,
-                                        color: Color(0xFFF39C12),
+                                      _InfoRow(
+                                        iconPath: 'assets/icons/date-time.svg',
+                                        text: date,
                                       ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          estado!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontFamily: Fonts.regular,
-                                            fontSize: 12,
-                                            color: Color(0xFFF39C12),
-                                          ),
-                                        ),
+                                      const SizedBox(height: 4),
+                                      _InfoRow(
+                                        iconPath: 'assets/icons/lugar.svg',
+                                        text: location,
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 4),
                               ],
-
-                              // Boton secundario "Ver más"
-                              _OutlineButton(
-                                label: "Ver más",
-                                onPressed: isDisabled || isLoading ? () {} : onViewMore,
-                              ),
-                              
-                              // Boton primario "Registrarse" (Sólo si no es historial)
-                              if (!isHistorial) ...[
-                                const SizedBox(width: 8), // gap: 8px entre botones
-                                _PrimaryButton(
-                                  label: "Registrarse",
-                                  onPressed: isDisabled || isLoading ? () {} : onRegister,
-                                ),
-                              ],
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+
+                          // FOOTER - altura: 40px, padding: 0px 12px 8px 0px, gap: 11px
+                          SizedBox(
+                            width: 222,
+                            height: 40,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 12, bottom: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  // Estado (historial)
+                                  if (isHistorial && estado != null) ...[
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.info_outline,
+                                            size: 13,
+                                            color: Color(0xFFF39C12),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              estado!,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontFamily: Fonts.regular,
+                                                fontSize: 12,
+                                                color: Color(0xFFF39C12),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                  ],
+
+                                  // Button: Ver más
+                                  _OutlineButton(
+                                    label: "Ver más",
+                                    onPressed: isDisabled || isLoading ? () {} : onViewMore,
+                                  ),
+                                  
+                                  const SizedBox(width: 11), // gap: 11px según CSS
+                                  
+                                  // Button: Registrarse (solo si no es historial)
+                                  if (!isHistorial) ...[
+                                    _PrimaryButton(
+                                      label: "Registrarse",
+                                      onPressed: isDisabled || isLoading ? () {} : onRegister,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
 
-          // DISABLED STATE MASK (disabled-state-mask)
+          // DISABLED MASK
           if (isDisabled && !isLoading)
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: Container(
-                  color: const Color(0xFFFFFFFF).withOpacity(0.5), // #FFFFFF con opacity: 0.5
+                  color: const Color(0xFFFFFFFF).withOpacity(0.5),
                 ),
               ),
             ),
 
-          // LOADER CONTAINER (loader-container)
+          // LOADER
           if (isLoading)
             Positioned(
               top: 1,
               left: 1,
               right: 1,
-              bottom: 1, // inset: 1px
+              bottom: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: Container(
@@ -238,15 +238,14 @@ class _ModeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Chip
     return Container(
       width: 72,
       height: 24,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 4), // padding: 0px 4px
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFEBEBEB), // background: #EBEBEB
-        borderRadius: BorderRadius.circular(9999), // border-radius: 9999px
+        color: const Color(0xFFEBEBEB),
+        borderRadius: BorderRadius.circular(9999),
       ),
       child: Text(
         label,
@@ -256,8 +255,8 @@ class _ModeChip extends StatelessWidget {
           fontFamily: Fonts.medium,
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF6B6B6B), // color: #6B6B6B
-          height: 16 / 12, // line-height: 16px
+          color: Color(0xFF6B6B6B),
+          height: 16 / 12,
         ),
       ),
     );
@@ -265,23 +264,33 @@ class _ModeChip extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  final IconData icon;
+  final String iconPath;
   final String text;
-  const _InfoRow({required this.icon, required this.text});
+  
+  const _InfoRow({
+    required this.iconPath,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 182,
       height: 16,
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 16, // width & height: 16px
-            color: const Color(0xFF949494),
+          // SVG Icon
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: SvgPicture.asset(
+              iconPath,
+              colorFilter: const ColorFilter.mode(
+                Color(0xFF949494),
+                BlendMode.srcIn,
+              ),
+            ),
           ),
-          const SizedBox(width: 2), // gap: 2px
+          const SizedBox(width: 2),
           Expanded(
             child: Text(
               text,
@@ -292,7 +301,7 @@ class _InfoRow extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 color: Color(0xFF949494),
-                height: 16 / 14, // line-height: 16px
+                height: 16 / 14,
               ),
             ),
           ),
@@ -316,8 +325,8 @@ class _OutlineButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 75, // width: 75px
-        height: 32, // height: 32px
+        width: 75,
+        height: 32,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
@@ -325,7 +334,7 @@ class _OutlineButton extends StatelessWidget {
             color: const Color(0xFF007AC2),
             width: 1,
           ),
-          borderRadius: BorderRadius.zero, // border-radius: 0.001px -> Recto
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           label,
@@ -334,7 +343,7 @@ class _OutlineButton extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: Color(0xFF007AC2),
-            height: 16 / 14, // line-height: 16px
+            height: 16 / 14,
           ),
         ),
       ),
@@ -356,12 +365,12 @@ class _PrimaryButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 95, // width: 95px
-        height: 32, // height: 32px
+        width: 95,
+        height: 32,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: Color(0xFF007AC2),
-          borderRadius: BorderRadius.zero, // border-radius: 0.001px -> Recto
+          borderRadius: BorderRadius.zero,
         ),
         child: Text(
           label,
@@ -370,10 +379,11 @@ class _PrimaryButton extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: Colors.white,
-            height: 16 / 14, // line-height: 16px
+            height: 16 / 14,
           ),
         ),
       ),
     );
   }
 }
+
