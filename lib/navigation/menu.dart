@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../core/widgets/bottom_nav.dart';
-
 import '../features/inicio/inicio.dart';
+import '../features/eventos/eventos_screen.dart';
 import '../features/historial/presentation/screens/historial_screen.dart';
 import '../features/reservas/reservas_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
@@ -19,30 +19,47 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
-  late int currentIndex = widget.initialIndex;
+  late int currentIndex;
 
-  // Sub-vista dentro del tab "Perfil" (index 4).
+  // Controla sub-vistas especiales
   bool _showEcard = false;
+  bool _showEventosFromInicio = false;
+
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = widget.initialIndex;
+  }
 
   void _onNavTap(int index) {
     setState(() {
       currentIndex = index;
+      _showEventosFromInicio = false; // Reset al tocar cualquier ícono del menú
       if (index == 4) {
-        // Al tocar el ícono "Perfil" siempre volvemos al menú raíz.
         _showEcard = false;
       }
     });
   }
 
   Widget _buildPage(int index) {
+    // Si viene desde "Ver todos" en Inicio
+    if (_showEventosFromInicio) {
+      return const EventosScreen();
+    }
+
     switch (index) {
       case 0:
         return InicioApp(
           onGoToNotifications: () => _onNavTap(3),
+          onGoToEventos: () {
+            setState(() {
+              _showEventosFromInicio = true;
+            });
+          },
         );
 
       case 1:
-        return const HistorialScreen();
+        return const HistorialScreen(); // O tu pantalla del tab 1
 
       case 2:
         return const ReservasScreen();
@@ -58,7 +75,7 @@ class _MenuState extends State<Menu> {
               );
 
       default:
-        return const SizedBox();
+        return const SizedBox.shrink();
     }
   }
 
@@ -69,7 +86,9 @@ class _MenuState extends State<Menu> {
       bottomNavigationBar: SafeArea(
         top: false,
         child: CustomBottomNav(
-          currentIndex: currentIndex,
+          // Si estamos mostrando Eventos desde Inicio, le enviamos -1 para desmarcar ítems,
+          // o puedes pasarle currentIndex (0) si deseas que 'Inicio' permanezca seleccionado.
+          currentIndex: _showEventosFromInicio ? -1 : currentIndex,
           onTap: _onNavTap,
         ),
       ),
