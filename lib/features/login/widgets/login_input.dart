@@ -26,7 +26,6 @@ class LoginInput extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         Text(
           label,
           style: TextStyle(
@@ -50,7 +49,6 @@ class LoginInput extends StatelessWidget {
           ),
 
           decoration: InputDecoration(
-
             prefixIcon: prefixIcon,
 
             hintText: hint,
@@ -71,22 +69,15 @@ class LoginInput extends StatelessWidget {
 
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(2),
-              borderSide: const BorderSide(
-                color: AppColors.inputBorder,
-              ),
+              borderSide: const BorderSide(color: AppColors.inputBorder),
             ),
 
             focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: AppColors.primary,
-                width: 1.3,
-              ),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.3),
             ),
 
             errorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: AppColors.requiredField,
-              ),
+              borderSide: BorderSide(color: AppColors.requiredField),
             ),
 
             focusedErrorBorder: const OutlineInputBorder(

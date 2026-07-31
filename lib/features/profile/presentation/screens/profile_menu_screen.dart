@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
+import '../../../login/login_screen.dart';
 import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/profile_section_title.dart';
@@ -33,7 +34,7 @@ class ProfileMenuScreen extends StatelessWidget {
               ),
               padding: const EdgeInsets.only(left: 26, top: 30, right: 26),
               alignment: Alignment.topLeft,
-              
+
               // ── Fotograma 4 ──
               child: SizedBox(
                 height: 68,
@@ -65,7 +66,6 @@ class ProfileMenuScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(width: 17), // gap: 17px
-
                       // Fotograma 1 (Texto) - Con Expanded para no truncar a 114px
                       const Expanded(
                         child: Column(
@@ -114,7 +114,6 @@ class ProfileMenuScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         // ── Perfil ──
                         const ProfileSectionTitle(title: 'Perfil'),
                         ProfileMenuItem(
@@ -178,8 +177,15 @@ class ProfileMenuScreen extends StatelessWidget {
 
                         const SizedBox(height: 24),
 
-                        // ── Cerrar Sesión + Logo ──
-                        LogoutButton(onPressed: () {}),
+                        LogoutButton(
+                          onPressed: () => Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          ),
+                        ),
                         const SizedBox(height: 10),
                         Center(
                           child: Image.asset(
