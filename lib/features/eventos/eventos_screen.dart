@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
@@ -57,121 +58,33 @@ class _EventosScreenState extends State<EventosScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Encabezado fuera del Frame 72
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              width: 36,
-                              height: 36,
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.chevron_left,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Eventos',
-                            style: TextStyle(
-                              fontFamily: Fonts.regular,
-                              fontSize: 26,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF141414),
-                              height: 32 / 26,
-                            ),
-                          ),
-                        ],
+                    children: const [
+                      Text(
+                        'Eventos',
+                        style: TextStyle(
+                          fontFamily: Fonts.regular,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF141414),
+                          height: 32 / 26,
+                        ),
                       ),
-
-                      const SizedBox(height: 14),
-
-                      const Text(
-                        'Encuentre aquí toda la información sobre los eventos en los que se encuentra registrado.',
+                      SizedBox(height: 14),
+                      Text(
+                        'Encuentre aquí toda la información sobre los '
+                        'eventos en los que se encuentra registrado.',
                         style: TextStyle(
                           fontFamily: Fonts.regular,
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF6B6B6B),
+                          color: Color(0xFF141414),
                           height: 20 / 16,
                         ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 32,
-                              child: TextField(
-                                onChanged: (v) =>
-                                    setState(() => _query = v),
-                                style: const TextStyle(
-                                  fontFamily: Fonts.regular,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF141414),
-                                ),
-                                decoration: const InputDecoration(
-                                  hintText: 'Buscar',
-                                  hintStyle: TextStyle(
-                                    fontFamily: Fonts.regular,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFF949494),
-                                  ),
-                                  prefixIcon: Icon(
-                                    Icons.search,
-                                    size: 16,
-                                    color: Color(0xFF949494),
-                                  ),
-                                  prefixIconConstraints: BoxConstraints(
-                                    minWidth: 36,
-                                    minHeight: 32,
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      vertical: 6),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
-                                    borderSide: BorderSide(
-                                        color: Color(0xFF949494)),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
-                                    borderSide: BorderSide(
-                                        color: Color(0xFF949494)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.zero,
-                                    borderSide: BorderSide(
-                                        color: Color(0xFF091F44)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          _SplitFilterButton(
-                            onTap: () => setState(
-                                () => _showFilter = !_showFilter),
-                          ),
-                        ],
                       ),
                     ],
                   ),
@@ -179,83 +92,187 @@ class _EventosScreenState extends State<EventosScreen> {
 
                 const SizedBox(height: 16),
 
+                // FRAME 72 (Figma Spec: 360px x 670px, top: 148px aprox, flex column, gap: 20px)
                 Expanded(
-                  child: _filtered.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No se encontraron eventos',
-                            style: TextStyle(
-                              fontFamily: Fonts.regular,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          itemCount: grouped.keys.length,
-                          itemBuilder: (context, index) {
-                            final mes = grouped.keys.elementAt(index);
-                            final eventos = grouped[mes]!;
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: 360,
+                      height: 670,
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // 1. Buscador + Filtro
+                            Row(
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Text(
-                                    mes,
-                                    style: const TextStyle(
-                                      fontFamily: Fonts.regular,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF141414),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 32,
+                                    child: TextField(
+                                      onChanged: (v) =>
+                                          setState(() => _query = v),
+                                      style: const TextStyle(
+                                        fontFamily: Fonts.regular,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF141414),
+                                      ),
+                                      decoration: const InputDecoration(
+                                        hintText: 'Buscar',
+                                        hintStyle: TextStyle(
+                                          fontFamily: Fonts.regular,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF949494),
+                                        ),
+                                        prefixIcon: Icon(
+                                          Icons.search,
+                                          size: 16,
+                                          color: Color(0xFF949494),
+                                        ),
+                                        prefixIconConstraints: BoxConstraints(
+                                          minWidth: 36,
+                                          minHeight: 32,
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(
+                                            vertical: 6),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        isDense: true,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.zero,
+                                          borderSide: BorderSide(
+                                              color: Color(0xFF949494)),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.zero,
+                                          borderSide: BorderSide(
+                                              color: Color(0xFF949494)),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.zero,
+                                          borderSide: BorderSide(
+                                              color: AppColors.primary),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                                ...eventos.map(
-                                  (e) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: UpcomingEventCard(
-                                      title: e.titulo,
-                                      date: '${e.fecha} - ${e.hora}',
-                                      location: e.direccion,
-                                      image: e.image,
-                                      mode: e.presencial
-                                          ? 'Presencial'
-                                          : 'Virtual',
-                                      onViewMore: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const InvitadosScreen(),
-                                          ),
-                                        );
-                                      },
-                                      onRegister: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) => DetalleEventoModal(
-                                            evento: e,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
+                                const SizedBox(width: 12),
+                                _SplitFilterButton(
+                                  onTap: () => setState(
+                                      () => _showFilter = !_showFilter),
                                 ),
-                                const SizedBox(height: 8),
                               ],
-                            );
-                          },
+                            ),
+
+                            const SizedBox(height: 20), // Gap del Frame 72
+
+                            // 2. Lista de eventos agrupados por mes
+                            if (_filtered.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 40),
+                                child: Center(
+                                  child: Text(
+                                    'No se encontraron eventos',
+                                    style: TextStyle(
+                                      fontFamily: Fonts.regular,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                itemCount: grouped.keys.length,
+                                itemBuilder: (context, index) {
+                                  final mes = grouped.keys.elementAt(index);
+                                  final eventos = grouped[mes]!;
+                                  final isLast =
+                                      index == grouped.keys.length - 1;
+
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: isLast ? 0 : 20,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          mes,
+                                          style: const TextStyle(
+                                            fontFamily: Fonts.regular,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            height: 20 / 16,
+                                            color: Color(0xFF4A4A4A),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        for (var i = 0;
+                                            i < eventos.length;
+                                            i++)
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: i == eventos.length - 1
+                                                  ? 0
+                                                  : 8,
+                                            ),
+                                            child: UpcomingEventCard(
+                                              title: eventos[i].titulo,
+                                              date:
+                                                  '${eventos[i].fecha} - ${eventos[i].hora}',
+                                              location: eventos[i].direccion,
+                                              image: eventos[i].image,
+                                              mode: eventos[i].presencial
+                                                  ? 'Presencial'
+                                                  : 'Virtual',
+                                              onViewMore: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        const InvitadosScreen(),
+                                                  ),
+                                                );
+                                              },
+                                              onRegister: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (_) =>
+                                                      DetalleEventoModal(
+                                                    evento: eventos[i],
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                          ],
                         ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
 
+            // Dropdown de Filtro desplegable
             if (_showFilter)
               Positioned(
-                top: 145,
-                right: 16,
+                top: 190,
+                right: (MediaQuery.of(context).size.width - 360) / 2,
                 child: Material(
                   elevation: 8,
                   borderRadius: BorderRadius.circular(8),
@@ -287,8 +304,8 @@ class _EventosScreenState extends State<EventosScreen> {
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Presencial'),
                           value: _presencialSelected,
-                          onChanged: (v) =>
-                              setState(() => _presencialSelected = v ?? false),
+                          onChanged: (v) => setState(
+                              () => _presencialSelected = v ?? false),
                         ),
                       ],
                     ),
@@ -318,12 +335,21 @@ class _SplitFilterButton extends StatelessWidget {
               onTap: onTap,
               child: Container(
                 height: 32,
-                color: const Color(0xFF091F44),
+                color: AppColors.primary,
                 alignment: Alignment.center,
-                child: const Icon(
-                  Icons.filter_list,
-                  color: Colors.white,
-                  size: 16,
+                child: SvgPicture.asset(
+                  'assets/icons/filtro.svg',
+                  width: 16,
+                  height: 16,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  placeholderBuilder: (context) => const Icon(
+                    Icons.filter_list,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ),
             ),
@@ -331,21 +357,28 @@ class _SplitFilterButton extends StatelessWidget {
           Container(
             width: 1,
             height: 32,
-            color: const Color(0xFF091F44),
-            alignment: Alignment.center,
-            child: Container(width: 1, height: 24, color: Colors.white),
+            color: Colors.white,
           ),
           GestureDetector(
             onTap: onTap,
             child: Container(
               width: 32,
               height: 32,
-              color: const Color(0xFF091F44),
+              color: AppColors.primary,
               alignment: Alignment.center,
-              child: const Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.white,
-                size: 16,
+              child: SvgPicture.asset(
+                'assets/icons/arrow.svg',
+                width: 16,
+                height: 16,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
+                placeholderBuilder: (context) => const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.white,
+                  size: 16,
+                ),
               ),
             ),
           ),

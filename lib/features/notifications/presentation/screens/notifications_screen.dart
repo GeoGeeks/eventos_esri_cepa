@@ -8,10 +8,12 @@ class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
+  State<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _NotificationsScreenState
+    extends State<NotificationsScreen> {
   static const _fontFamily = 'Avenir Next LT Pro';
   static const _azul = Color(0xFF007AC2);
   static const _chipBg = Color(0xFFD6EFFF);
@@ -19,6 +21,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   static const _textGray = Color(0xFF4A4A4A);
   static const _bgScreen = Color(0xFFF7F7F7);
   static const _deleteRed = Color(0xFFD83020);
+  static const _deleteRedLight = Color(0x0DD83020); // rgba(216,48,32,0.05)
+
+  static const _eliminarIcon = 'assets/icons/eliminar.svg';
 
   final List<Map<String, dynamic>> notifications = [
     {
@@ -65,9 +70,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Agrupa preservando el orden por 'group' (Hoy / Semana pasada)
     final groups = <String, List<Map<String, dynamic>>>{};
     for (final n in notifications) {
-      groups.putIfAbsent(n['group'] as String, () => []).add(n);
+      groups
+          .putIfAbsent(n['group'] as String, () => [])
+          .add(n);
     }
 
     return Scaffold(
@@ -75,65 +83,77 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header según CSS Figma
+            // Título: "Notificaciones" 26px / Chip "Borrar todo"
             Padding(
-              padding: const EdgeInsets.fromLTRB(26, 36, 26, 12),
-              child: SizedBox(
-                height: 32,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center, // Propiedad corregida
-                  children: [
-                    const Text(
-                      'Notificaciones',
-                      style: TextStyle(
-                        fontFamily: _fontFamily,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w500,
-                        height: 32 / 26,
-                        color: _textDark,
+              padding: const EdgeInsets.fromLTRB(
+                26,
+                36,
+                26,
+                12,
+              ),
+              child: Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Notificaciones',
+                    style: TextStyle(
+                      fontFamily: _fontFamily,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w500,
+                      height: 32 / 26,
+                      color: _textDark,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: notifications.isEmpty
+                        ? null
+                        : () => setState(
+                              () => notifications.clear(),
+                            ),
+                    child: Container(
+                      height: 32,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _chipBg,
+                        borderRadius:
+                            BorderRadius.circular(9999),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Borrar todo',
+                        style: TextStyle(
+                          fontFamily: _fontFamily,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 16 / 14,
+                          color: _azul,
+                        ),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: notifications.isEmpty
-                          ? null
-                          : () => setState(() => notifications.clear()),
-                      child: Container(
-                        height: 32,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: _chipBg,
-                          border: Border.all(color: _chipBg),
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Borrar todo',
-                          style: TextStyle(
-                            fontFamily: _fontFamily,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            height: 16 / 14,
-                            color: _azul,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-            // Contenido dinámico
             Expanded(
               child: notifications.isEmpty
                   ? const EmptyNotifications()
                   : ListView(
-                      padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                      padding: const EdgeInsets.fromLTRB(
+                        26,
+                        0,
+                        26,
+                        24,
+                      ),
                       children: [
                         for (final entry in groups.entries) ...[
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                            ),
                             child: Text(
                               entry.key,
                               style: const TextStyle(
@@ -147,30 +167,54 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ),
                           for (final item in entry.value)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
+                              padding:
+                                  const EdgeInsets.only(bottom: 4),
                               child: Dismissible(
                                 key: Key(item['id']),
-                                direction: DismissDirection.endToStart,
-                                background: Container(
-                                  alignment: Alignment.centerRight,
-                                  width: 48,
-                                  height: 88,
-                                  padding: const EdgeInsets.only(right: 12),
-                                  decoration: const BoxDecoration(
-                                    color: _deleteRed,
-                                    borderRadius: BorderRadius.horizontal(
-                                      right: Radius.circular(8),
+                                direction:
+                                    DismissDirection.endToStart,
+                                // rgba(216,48,32,0.05) del contenido +
+                                // panel rojo #D83020 con eliminar.svg
+                                background: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        decoration:
+                                            const BoxDecoration(
+                                          color: _deleteRedLight,
+                                          borderRadius:
+                                              BorderRadius
+                                                  .horizontal(
+                                            left: Radius.circular(8),
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  child: SvgPicture.asset(
-                                    'assets/icons/eliminar.svg',
-                                    width: 24,
-                                    height: 24,
-                                    colorFilter: const ColorFilter.mode(
-                                      Colors.white,
-                                      BlendMode.srcIn,
+                                    Container(
+                                      width: 48,
+                                      height: 88,
+                                      alignment: Alignment.center,
+                                      decoration:
+                                          const BoxDecoration(
+                                        color: _deleteRed,
+                                        borderRadius:
+                                            BorderRadius
+                                                .horizontal(
+                                          right: Radius.circular(8),
+                                        ),
+                                      ),
+                                      child: SvgPicture.asset(
+                                        _eliminarIcon,
+                                        width: 24,
+                                        height: 24,
+                                        colorFilter:
+                                            const ColorFilter.mode(
+                                          Colors.white,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                                 onDismissed: (_) {
                                   setState(() {
@@ -181,7 +225,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 },
                                 child: NotificationItem(
                                   title: item['title'],
-                                  description: item['description'],
+                                  description:
+                                      item['description'],
                                   date: item['date'],
                                   isNew: item['isNew'],
                                 ),
@@ -197,3 +242,4 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 }
+
