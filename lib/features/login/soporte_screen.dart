@@ -51,21 +51,7 @@ class _SoporteScreenState extends State<SoporteScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _cabecera(),
-              _bloqueCampo(
-                etiqueta: 'Correo electrónico',
-                fuenteEtiqueta: Fonts.light,
-                controller: correoController,
-                hint: 'correo@ejemplo.com',
-                teclado: TextInputType.emailAddress,
-              ),
-              _bloqueCampo(
-                etiqueta: 'Número de Identificación',
-                fuenteEtiqueta: Fonts.regular,
-                controller: documentoController,
-                hint: '00000000',
-                teclado: TextInputType.number,
-              ),
-              _bloqueMensaje(),
+              _bloqueCentral(),
               _pie(),
             ],
           ),
@@ -74,22 +60,56 @@ class _SoporteScreenState extends State<SoporteScreen> {
     );
   }
 
-  Widget _cabecera() {
+  Widget _bloqueCentral() {
     return Container(
-      height: 61,
+      width: 360,
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.surface3)),
+        border: Border(
+          top: BorderSide(color: AppColors.surface3),
+          bottom: BorderSide(color: AppColors.surface3),
+        ),
       ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _bloqueCampo(
+            etiqueta: 'Correo electrónico',
+            fuenteEtiqueta: Fonts.light,
+            controller: correoController,
+            hint: 'ejemplo@correo.com',
+            teclado: TextInputType.emailAddress,
+          ),
+          _bloqueCampo(
+            etiqueta: 'Número de Identificación',
+            fuenteEtiqueta: Fonts.regular,
+            controller: documentoController,
+            hint: 'Número con el que intento ingresar',
+            teclado: TextInputType.number,
+          ),
+          _bloqueMensaje(),
+        ],
+      ),
+    );
+  }
+
+  Widget _cabecera() {
+    return SizedBox(
+      height: 60,
       child: Stack(
         children: [
-          Center(
-            child: Text(
-              'Contactar a Soporte',
-              style: TextStyle(
-                fontFamily: Fonts.medium,
-                fontSize: 26,
-                height: 32 / 26,
-                color: AppColors.textTitle,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Text(
+                'Contactar a Soporte',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontFamily: Fonts.medium,
+                  fontSize: 26,
+                  height: 32 / 26,
+                  color: AppColors.textTitle,
+                ),
               ),
             ),
           ),
@@ -141,30 +161,35 @@ class _SoporteScreenState extends State<SoporteScreen> {
 
             Container(
               height: 40,
+              alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 border: Border.all(color: AppColors.textMuted),
               ),
-              child: TextField(
-                controller: controller,
-                keyboardType: teclado,
-                textAlignVertical: TextAlignVertical.center,
-                style: TextStyle(
-                  fontFamily: Fonts.regular,
-                  fontSize: 14,
-                  height: 16 / 14,
-                  color: AppColors.textTitle,
-                ),
-                decoration: InputDecoration(
-                  isCollapsed: true,
-                  border: InputBorder.none,
-                  hintText: hint,
-                  hintStyle: TextStyle(
+              child: SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  controller: controller,
+                  keyboardType: teclado,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
                     fontFamily: Fonts.regular,
                     fontSize: 14,
                     height: 16 / 14,
-                    color: AppColors.textMuted,
+                    color: AppColors.textTitle,
+                  ),
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.zero,
+                    border: InputBorder.none,
+                    hintText: hint,
+                    hintStyle: TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontSize: 14,
+                      height: 16 / 14,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
               ),
@@ -196,6 +221,7 @@ class _SoporteScreenState extends State<SoporteScreen> {
                   controller: mensajeController,
                   maxLines: null,
                   expands: true,
+                  textAlign: TextAlign.left,
                   textAlignVertical: TextAlignVertical.top,
                   style: TextStyle(
                     fontFamily: Fonts.regular,
@@ -205,6 +231,7 @@ class _SoporteScreenState extends State<SoporteScreen> {
                   ),
                   decoration: InputDecoration(
                     isCollapsed: true,
+                    contentPadding: EdgeInsets.zero,
                     border: InputBorder.none,
                     hintText: 'Describe su problema brevemente...',
                     hintStyle: TextStyle(
@@ -235,9 +262,9 @@ class _SoporteScreenState extends State<SoporteScreen> {
 
   Widget _pie() {
     return SizedBox(
-      height: 81,
+      height: 80,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 19),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
         child: SizedBox(
           width: double.infinity,
           height: 44,
