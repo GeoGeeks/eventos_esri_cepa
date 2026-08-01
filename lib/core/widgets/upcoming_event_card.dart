@@ -14,8 +14,8 @@ class UpcomingEventCard extends StatelessWidget {
   // Modo historial
   final bool isHistorial;
   final String? estado;
-  
-  // Estados de carga y deshabilitado según CSS
+
+  // Estados de carga y deshabilitado
   final bool isLoading;
   final bool isDisabled;
 
@@ -36,48 +36,51 @@ class UpcomingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Card con altura DINÁMICA - se ajusta al contenido
     return SizedBox(
       width: 360,
       child: Stack(
         children: [
-          // card-container con IntrinsicHeight para que imagen se estire dinámicamente
+          // Card Container
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: Container(
-              width: 360,
               color: const Color(0xFFFFFFFF),
               child: IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // IMAGE - SE ESTIRA a la altura total del card (align-self: stretch)
-                    Image.asset(
-                      image,
+                    // IMAGE - Ancho fijo según CSS (138px)
+                    SizedBox(
                       width: 138,
-                      fit: BoxFit.cover,
+                      child: Image.asset(
+                        image,
+                        fit: BoxFit.cover,
+                      ),
                     ),
 
-                    // CONTENT CONTAINER - altura dinámica
-                    Container(
-                      width: 222,
-                      color: const Color(0xFFFFFFFF),
+                    // CONTENT CONTAINER - Ocupa todo el espacio disponible sin desbordar
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // HEADER - altura dinámica según contenido
-                          Container(
-                            width: 222,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          // HEADER
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 12,
+                              top: 8,
+                              right: 12,
+                              bottom: 4,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Frame 1461: Título + Chip (altura se ajusta al título)
+                                // Título + Chip
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Card title - FLEXIBLE, se ajusta al contenido
                                     Expanded(
                                       child: Text(
                                         title,
@@ -92,94 +95,111 @@ class UpcomingEventCard extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    
-                                    const SizedBox(width: 6),
-                                    
-                                    // Chip - tamaño fijo
+                                    const SizedBox(width: 4),
                                     _ModeChip(label: mode),
                                   ],
                                 ),
-                                
                                 const SizedBox(height: 6),
 
-                                // Frame 1460: Info rows - FIJO (width: 182px, height: 36px)
-                                SizedBox(
-                                  width: 182,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _InfoRow(
-                                        iconPath: 'assets/icons/date-time.svg',
-                                        text: date,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _InfoRow(
-                                        iconPath: 'assets/icons/lugar.svg',
-                                        text: location,
-                                      ),
-                                    ],
-                                  ),
+                                // Filas de Información (Fecha y Ubicación)
+                                _InfoRow(
+                                  iconPath: 'assets/icons/date-time.svg',
+                                  text: date,
+                                ),
+                                const SizedBox(height: 4),
+                                _InfoRow(
+                                  iconPath: 'assets/icons/lugar.svg',
+                                  text: location,
                                 ),
                               ],
                             ),
                           ),
 
-                          // FOOTER - altura: 40px, padding: 0px 12px 8px 0px, gap: 11px
-                          SizedBox(
-                            width: 222,
-                            height: 40,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 12, bottom: 8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Estado (historial)
-                                  if (isHistorial && estado != null) ...[
-                                    Expanded(
+                          // FOOTER
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              right: 12,
+                              bottom: 8,
+                              left: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Estado Historial alineado abajo según CSS (align-items: flex-start con flex-direction: column / justify-content: flex-end equivalente)
+                                if (isHistorial)
+                                  SizedBox(
+                                    height: 32,
+                                    child: Align(
+                                      alignment: Alignment.bottomLeft,
                                       child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
-                                          const Icon(
-                                            Icons.info_outline,
-                                            size: 13,
-                                            color: Color(0xFFF39C12),
+                                          SizedBox(
+                                            width: 14,
+                                            height: 14,
+                                            child: SvgPicture.asset(
+                                              'assets/icons/vector.svg',
+                                              colorFilter: const ColorFilter.mode(
+                                                Color(0xFFDA7C0B),
+                                                BlendMode.srcIn,
+                                              ),
+                                              placeholderBuilder: (_) =>
+                                                  const Icon(
+                                                Icons.error_outline,
+                                                size: 14,
+                                                color: Color(0xFFDA7C0B),
+                                              ),
+                                            ),
                                           ),
                                           const SizedBox(width: 4),
-                                          Expanded(
-                                            child: Text(
-                                              estado!,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontFamily: Fonts.regular,
-                                                fontSize: 12,
-                                                color: Color(0xFFF39C12),
-                                              ),
+                                          Text(
+                                            estado ?? 'Finalizado',
+                                            style: const TextStyle(
+                                              fontFamily: Fonts.regular,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xFFDA7C0B),
+                                              height: 16 / 14,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(width: 4),
-                                  ],
+                                  )
+                                else
+                                  const SizedBox.shrink(),
 
-                                  // Button: Ver más
-                                  _OutlineButton(
+                                // Botones según el modo
+                                if (isHistorial)
+                                  _PrimaryButton(
                                     label: "Ver más",
-                                    onPressed: isDisabled || isLoading ? () {} : onViewMore,
+                                    onPressed: isDisabled || isLoading
+                                        ? () {}
+                                        : onViewMore,
+                                  )
+                                else
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _OutlineButton(
+                                        label: "Ver más",
+                                        onPressed: isDisabled || isLoading
+                                            ? () {}
+                                            : onViewMore,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _PrimaryButton(
+                                        label: "Registrarse",
+                                        onPressed: isDisabled || isLoading
+                                            ? () {}
+                                            : onRegister,
+                                      ),
+                                    ],
                                   ),
-                                  
-                                  const SizedBox(width: 11), // gap: 11px según CSS
-                                  
-                                  // Button: Registrarse (solo si no es historial)
-                                  if (!isHistorial) ...[
-                                    _PrimaryButton(
-                                      label: "Registrarse",
-                                      onPressed: isDisabled || isLoading ? () {} : onRegister,
-                                    ),
-                                  ],
-                                ],
-                              ),
+                              ],
                             ),
                           ),
                         ],
@@ -202,7 +222,7 @@ class UpcomingEventCard extends StatelessWidget {
               ),
             ),
 
-          // LOADER
+          // LOADER STATE
           if (isLoading)
             Positioned(
               top: 1,
@@ -219,7 +239,9 @@ class UpcomingEventCard extends StatelessWidget {
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007AC2)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF007AC2),
+                        ),
                       ),
                     ),
                   ),
@@ -239,10 +261,7 @@ class _ModeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 72,
-      height: 24,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFEBEBEB),
         borderRadius: BorderRadius.circular(9999),
@@ -266,7 +285,7 @@ class _ModeChip extends StatelessWidget {
 class _InfoRow extends StatelessWidget {
   final String iconPath;
   final String text;
-  
+
   const _InfoRow({
     required this.iconPath,
     required this.text,
@@ -274,39 +293,35 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 16,
-      child: Row(
-        children: [
-          // SVG Icon
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: SvgPicture.asset(
-              iconPath,
-              colorFilter: const ColorFilter.mode(
-                Color(0xFF949494),
-                BlendMode.srcIn,
-              ),
+    return Row(
+      children: [
+        SizedBox(
+          width: 16,
+          height: 16,
+          child: SvgPicture.asset(
+            iconPath,
+            colorFilter: const ColorFilter.mode(
+              Color(0xFF949494),
+              BlendMode.srcIn,
             ),
           ),
-          const SizedBox(width: 2),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: Fonts.regular,
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF949494),
-                height: 16 / 14,
-              ),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: Fonts.regular,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF949494),
+              height: 16 / 14,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -325,8 +340,8 @@ class _OutlineButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 75,
         height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
@@ -365,8 +380,8 @@ class _PrimaryButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 95,
         height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: Color(0xFF007AC2),
@@ -386,4 +401,3 @@ class _PrimaryButton extends StatelessWidget {
     );
   }
 }
-

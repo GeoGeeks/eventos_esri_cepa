@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../core/widgets/bottom_nav.dart';
-
 import '../features/inicio/inicio.dart';
+import '../features/eventos/eventos_screen.dart';
 import '../features/historial/presentation/screens/historial_screen.dart';
 import '../features/reservas/reservas_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
 import '../features/profile/presentation/screens/profile_menu_screen.dart';
 import '../features/profile/presentation/screens/e_card_screen.dart';
+import '../features/post_evento/presentation/screens/post_evento_screen.dart';
 
 class Menu extends StatefulWidget {
   final int initialIndex;
@@ -19,30 +20,58 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
-  late int currentIndex = widget.initialIndex;
+  late int currentIndex;
 
-  // Sub-vista dentro del tab "Perfil" (index 4).
+  // Controla sub-vistas especiales
   bool _showEcard = false;
+  bool _showPostEvento = false;
+  bool _showEventosFromInicio = false;
+
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = widget.initialIndex;
+  }
 
   void _onNavTap(int index) {
     setState(() {
       currentIndex = index;
+      _showEventosFromInicio = false; // Reset al tocar cualquier ícono del menú
+      _showPostEvento = false; // Reset al tocar cualquier ícono del menú
       if (index == 4) {
-        // Al tocar el ícono "Perfil" siempre volvemos al menú raíz.
         _showEcard = false;
       }
     });
   }
 
   Widget _buildPage(int index) {
+    // Si está mostrando PostEvento, lo prioriza
+    if (_showPostEvento) {
+      return PostEventoScreen(
+        onBack: () => setState(() => _showPostEvento = false),
+      );
+    }
+
+    // Si viene desde "Ver todos" en Inicio
+    if (_showEventosFromInicio) {
+      return const EventosScreen();
+    }
+
     switch (index) {
       case 0:
         return InicioApp(
           onGoToNotifications: () => _onNavTap(3),
+          onGoToEventos: () {
+            setState(() {
+              _showEventosFromInicio = true;
+            });
+          },
         );
 
       case 1:
-        return const HistorialScreen();
+        return HistorialScreen(
+          onOpenPostEvento: () => setState(() => _showPostEvento = true),
+        );
 
       case 2:
         return const ReservasScreen();
@@ -56,9 +85,11 @@ class _MenuState extends State<Menu> {
             : ProfileMenuScreen(
                 onOpenEcard: () => setState(() => _showEcard = true),
               );
+        
+      
 
       default:
-        return const SizedBox();
+        return const SizedBox.shrink();
     }
   }
 
@@ -69,7 +100,9 @@ class _MenuState extends State<Menu> {
       bottomNavigationBar: SafeArea(
         top: false,
         child: CustomBottomNav(
-          currentIndex: currentIndex,
+          // Si estamos mostrando Eventos desde Inicio o PostEvento, le enviamos -1 para desmarcar ítems,
+          // o puedes pasarle currentIndex si deseas que el ícono permanezca seleccionado.
+          currentIndex: (_showEventosFromInicio || _showPostEvento) ? -1 : currentIndex,
           onTap: _onNavTap,
         ),
       ),

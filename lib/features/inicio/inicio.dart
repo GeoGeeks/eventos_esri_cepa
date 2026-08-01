@@ -5,7 +5,6 @@ import '../../core/constants/images.dart';
 import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../invitados/invitados.dart';
-import '../eventos/eventos_screen.dart';
 
 class _ReservedEvent {
   final String title, date, location, image;
@@ -71,35 +70,33 @@ const _upcomingEvents = [
 
 class InicioApp extends StatelessWidget {
   final VoidCallback? onGoToNotifications;
+  final VoidCallback? onGoToEventos;
 
-  const InicioApp({super.key, this.onGoToNotifications});
+  const InicioApp({
+    super.key,
+    this.onGoToNotifications,
+    this.onGoToEventos,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background, // background: #F7F7F7
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // 1. HEADER CON BOTÓN ABSOLUTO CORRECTO
           _Header(onGoToNotifications: onGoToNotifications),
-
-          // 2. CUERPO CON SCROLL INDEPENDIENTE (Asegura que se vean todas las tarjetas abajo)
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Center(
                 child: SizedBox(
-                  width: 360, // Limita al ancho exacto del Frame 1420
+                  width: 360,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-
-                      // Título Sección 1
                       const _SectionTitle(title: 'Eventos reservados'),
-                      const SizedBox(height: 12), // gap: 12px
-
-                      // Carrusel Horizontal
+                      const SizedBox(height: 12),
                       _HorizontalCarousel(
                         itemCount: _reservedEvents.length,
                         itemWidth: 237,
@@ -122,27 +119,18 @@ class InicioApp extends StatelessWidget {
                           );
                         },
                       ),
-
                       const SizedBox(height: 24),
-
-                      // Título Sección 2 con botón "Ver todos"
                       _SectionTitle(
                         title: 'Próximos eventos',
                         action: _SeeAllChip(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const EventosScreen(),
-                              ),
-                            );
+                            if (onGoToEventos != null) {
+                              onGoToEventos!();
+                            }
                           },
                         ),
                       ),
-
-                      const SizedBox(height: 12), // gap: 12px
-
-                      // Listado vertical de tarjetas Próximos Eventos
+                      const SizedBox(height: 12),
                       ..._upcomingEvents.map(
                         (e) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -164,8 +152,7 @@ class InicioApp extends StatelessWidget {
                           ),
                         ),
                       ),
-
-                      const SizedBox(height: 24), // Espacio extra inferior
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -187,12 +174,10 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Tomamos la altura del área segura (Notch/Status Bar) para que no tape el contenido
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Container(
       width: double.infinity,
-      // Altura del Header según Figma (120px) + la barra de estado del celular
       height: 120 + statusBarHeight,
       clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
@@ -209,13 +194,12 @@ class _Header extends StatelessWidget {
         bottom: false,
         child: SizedBox(
           width: double.infinity,
-          height: 120, // Altura neta del contenido del Header
+          height: 120,
           child: Stack(
             children: [
-              // 1. TEXTOS DE BIENVENIDA (Alineados a la izquierda a 26px del borde)
               Positioned(
                 left: 26,
-                top: 26, // top aproximado para centrar verticalmente con la campana
+                top: 26,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -234,9 +218,9 @@ class _Header extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: Fonts.bold,
                         color: AppColors.white,
-                        fontSize: 32, // font-size: 32px de Figma
+                        fontSize: 32,
                         fontWeight: FontWeight.w700,
-                        height: 1.25, // line-height: 40px
+                        height: 1.25,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -244,18 +228,14 @@ class _Header extends StatelessWidget {
                       'Ingeniera Civil · Procalculo',
                       style: TextStyle(
                         fontFamily: Fonts.regular,
-                        color: const Color(0xFFD6EFFF), // color: #D6EFFF
+                        color: const Color(0xFFD6EFFF),
                         fontSize: 14,
-                        height: 1.14, // line-height: 16px
+                        height: 1.14,
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // 2. CAMPANA DE ALERTAS EN POSICIÓN EXACTA DE FIGMA
-              // left: 346px de un plano de 412px de ancho equivale a estar a 26px del borde derecho (right: 26)
-              // top: 30px del CSS de Figma
               Positioned(
                 right: 26,
                 top: 30,
@@ -281,15 +261,14 @@ class _NotificationBell extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40, // width: 40px en CSS
-        height: 40, // height: 40px en CSS
+        width: 40,
+        height: 40,
         decoration: const BoxDecoration(
-          color: AppColors.white, // background: #FFFFFF
+          color: AppColors.white,
           shape: BoxShape.circle,
-          // Traduciendo el drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.3)) de Figma
           boxShadow: [
             BoxShadow(
-              color: Color(0x4D000000), // Opacidad de 30% (0x4D) sobre negro
+              color: Color(0x4D000000),
               blurRadius: 4,
               offset: Offset(1, 2),
             ),
@@ -303,7 +282,6 @@ class _NotificationBell extends StatelessWidget {
               color: AppColors.primary,
               size: 22,
             ),
-            // Indicador de notificación rojo
             Positioned(
               top: 10,
               right: 11,
@@ -338,10 +316,10 @@ class _SectionTitle extends StatelessWidget {
           title,
           style: const TextStyle(
             fontFamily: Fonts.medium,
-            fontSize: 18, // font-size: 18px del CSS
-            fontWeight: FontWeight.w500, // font-weight: 500
-            color: Color(0xFF141414), // color: #141414
-            height: 24 / 18, // line-height: 24px
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF141414),
+            height: 24 / 18,
           ),
         ),
         if (action != null) action!,
@@ -393,13 +371,13 @@ class _HorizontalCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 360, // Sincroniza con el ancho de Figma
-      height: 262, // 257px de altura + 5px de tolerancia para sombras
+      width: 360,
+      height: 262,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (_, __) => const SizedBox(width: 24), // gap: 24px del CSS
+        separatorBuilder: (_, __) => const SizedBox(width: 24),
         itemBuilder: (context, index) =>
             SizedBox(width: itemWidth, child: itemBuilder(context, index)),
       ),

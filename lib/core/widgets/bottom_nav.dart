@@ -23,14 +23,14 @@ class CustomBottomNav extends StatelessWidget {
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.noScaling,
       ),
-      child: SizedBox(
+      child: Container(
         height: 70,
+        color: Colors.transparent,
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.bottomCenter,
           children: [
-
-            /// Barra azul
+            /// Barra azul de fondo
             Positioned.fill(
               child: Container(
                 decoration: const BoxDecoration(
@@ -46,7 +46,6 @@ class CustomBottomNav extends StatelessWidget {
             ),
 
             /// Botones — centrados verticalmente dentro de los 70px
-            /// (52px de contenido + 9px arriba + 9px abajo)
             Positioned.fill(
               child: Align(
                 alignment: Alignment.center,
@@ -56,7 +55,6 @@ class CustomBottomNav extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-
                       _NavButton(
                         icon: SvgIcon.inicio,
                         label: "Inicio",
@@ -92,8 +90,7 @@ class CustomBottomNav extends StatelessWidget {
               ),
             ),
 
-            /// Botón central Reservas — el círculo de 64x64 queda
-            /// centrado horizontalmente y la barra lo corta a la mitad
+            /// Botón central Reservas — flota sobre la barra
             Positioned(
               top: -32,
               child: _ReservasButton(
@@ -123,54 +120,49 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 54,
-        height: 52,
-        // Sin padding real: el "padding: 8px" del spec de Figma ya está
-        // reflejado en cómo se calculó el frame de 54x52 en el diseño.
-        // Ponerlo aquí como padding literal reduce el espacio disponible
-        // para el ícono+texto y provoca overflow (texto se parte en 2 líneas).
-        decoration: BoxDecoration(
-          // #00619B4D con 30% de opacidad, tal cual el spec.
-          color: active
-              ? AppColors.navActiveHighlight
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-
-            AppIcon(
-              icon,
-              width: 24,
-              height: 24,
-              color: AppColors.white,
-            ),
-
-            // Sin espacio: el ícono va pegado directamente al texto.
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.visible,
-              style: const TextStyle(
-                fontFamily: Fonts.regular,
-                fontSize: 12,
-                height: 20 / 12,
-                letterSpacing: 0,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 54,
+          height: 52,
+          decoration: BoxDecoration(
+            color: active
+                ? AppColors.navActiveHighlight
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              AppIcon(
+                icon,
+                width: 24,
+                height: 24,
                 color: AppColors.white,
-                fontWeight: FontWeight.w400,
               ),
-            ),
-          ],
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.visible,
+                style: const TextStyle(
+                  fontFamily: Fonts.regular,
+                  fontSize: 12,
+                  height: 20 / 12,
+                  letterSpacing: 0,
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -188,72 +180,69 @@ class _ReservasButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(40),
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              // Inactivo: fondo blanco. Activo: azul oscuro.
-              color: active
-                  ? AppColors.navActiveReservas
-                  : AppColors.white,
-              // El borde lightGray se mantiene siempre, activo o no.
-              border: Border.all(
-                color: AppColors.lightGray,
-                width: 1,
-              ),
-              boxShadow: active
-                  ? null
-                  : const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 12,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-            ),
-            child: Center(
-              child: AppIcon(
-                SvgIcon.reservas,
-                width: 24,
-                height: 24,
-                // Inactivo: ícono azul (primary). Activo: ícono blanco.
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(40),
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
                 color: active
-                    ? AppColors.white
-                    : AppColors.primary,
+                    ? AppColors.navActiveReservas
+                    : AppColors.white,
+                border: Border.all(
+                  color: AppColors.lightGray,
+                  width: 1,
+                ),
+                boxShadow: active
+                    ? null
+                    : const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 12,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+              ),
+              child: Center(
+                child: AppIcon(
+                  SvgIcon.reservas,
+                  width: 24,
+                  height: 24,
+                  color: active
+                      ? AppColors.white
+                      : AppColors.primary,
+                ),
               ),
             ),
-          ),
-
-          // Sin espacio: el texto va pegado directamente al círculo.
-          const SizedBox(
-            width: 49,
-            height: 20,
-            child: Text(
-              "Reservas",
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              softWrap: false,
-              style: TextStyle(
-                fontFamily: Fonts.regular,
-                fontSize: 12,
-                height: 20 / 12,
-                letterSpacing: 0,
-                color: AppColors.white,
-                fontWeight: FontWeight.w400,
+            const SizedBox(
+              width: 49,
+              height: 20,
+              child: Text(
+                "Reservas",
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                softWrap: false,
+                style: TextStyle(
+                  fontFamily: Fonts.regular,
+                  fontSize: 12,
+                  height: 20 / 12,
+                  letterSpacing: 0,
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
