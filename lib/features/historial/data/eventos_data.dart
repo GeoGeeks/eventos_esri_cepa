@@ -23,8 +23,8 @@ class Evento {
 final eventosMock = [
   Evento(
     titulo: 'Planeta Esri',
-    fecha: 'Oct 02',
-    hora: '11:00 a.m.',
+    fecha: 'Agosto 15',
+    hora: '10:00 a.m.',
     direccion: 'Calle 32 # 54-34',
     presencial: true,
     image: Images.planetaEsri,
@@ -32,8 +32,8 @@ final eventosMock = [
   ),
   Evento(
     titulo: 'Planeta Esri',
-    fecha: 'Oct 02',
-    hora: '11:00 a.m.',
+    fecha: 'Septiembre 10',
+    hora: '09:00 a.m.',
     direccion: 'Calle 32 # 54-34',
     presencial: true,
     image: Images.planetaEsri,
@@ -41,7 +41,7 @@ final eventosMock = [
   ),
   Evento(
     titulo: 'Planeta Esri',
-    fecha: 'Oct 02',
+    fecha: 'Octubre 02',
     hora: '11:00 a.m.',
     direccion: 'Calle 32 # 54-34',
     presencial: true,

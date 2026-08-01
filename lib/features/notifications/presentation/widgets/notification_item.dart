@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class NotificationItem extends StatelessWidget {
   final String title;
@@ -24,6 +25,7 @@ class NotificationItem extends StatelessWidget {
   static const _newBg = Color(0xFFEBEBEB);
 
   static const _fontFamily = 'Avenir Next LT Pro';
+  static const _dateTimeIcon = 'assets/icons/date-time.svg';
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,7 @@ class NotificationItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // icon (Group 3 / Ellipse 7 + date-time)
+          // icon (Group 3 / Ellipse 7 + date-time.svg)
           Container(
             width: 44,
             height: 44,
@@ -52,10 +54,14 @@ class NotificationItem extends StatelessWidget {
               color: _circleBg,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.event_note_outlined,
-              color: _azulOscuro,
-              size: 24,
+            child: SvgPicture.asset(
+              _dateTimeIcon,
+              width: 24,
+              height: 24,
+              colorFilter: const ColorFilter.mode(
+                _azulOscuro,
+                BlendMode.srcIn,
+              ),
             ),
           ),
 
