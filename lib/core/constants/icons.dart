@@ -37,5 +37,6 @@ static const String avisoBorde =
   static const String vector = 'assets/icons/vector.svg';
   static const String valorarevento = 'assets/icons/valorar_evento.svg';
   static const String certificado = 'assets/icons/certificado.svg';
+  static const String video = 'assets/icons/video.svg';
   
 }

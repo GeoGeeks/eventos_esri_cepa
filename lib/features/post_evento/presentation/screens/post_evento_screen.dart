@@ -21,6 +21,13 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   static const _tabs = ['Galería', 'Agendar con expertos'];
   int _tabIndex = 0;
   bool _showVideo = false;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   static const _expertos = [
     _Experto(
@@ -29,6 +36,27 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
       cargo: 'Gerente de Camacol',
       descripcion:
           'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
+    ),
+    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
+    _Experto(
+      imagenAsset: Images.fotoInvitado,
+      nombre: 'María Fernanda Ruiz',
+      cargo: 'Directora de Analítica ArcGIS',
+      descripcion: 'Analítica geoespacial aplicada a proyectos urbanos.',
+    ),
+    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
+    _Experto(
+      imagenAsset: Images.fotoInvitado,
+      nombre: 'Carlos Andrés Gómez',
+      cargo: 'Consultor SIG',
+      descripcion: 'Implementación de sistemas de información geográfica.',
+    ),
+    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
+    _Experto(
+      imagenAsset: Images.fotoInvitado,
+      nombre: 'Laura Patricia Méndez',
+      cargo: 'Especialista en Geointeligencia',
+      descripcion: 'Modelos predictivos con datos geoespaciales.',
     ),
   ];
 
@@ -86,42 +114,43 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
               ),
             ),
 
-            // 3. Contenedor blanco posicionado exactamente según el CSS (ancho 412, alto 821, abajo 0, centrado y con transform matrix)
+            // 3. Contenedor blanco posicionado exactamente según el CSS
             Positioned(
-  top: 96,
-  left: 0,
-  right: 0,
-  child: Center(
-    child: SizedBox(
-      width: 412,
-      height: 821,
-      child: Transform(
-        transform: Matrix4.identity()..scale(1.0, -1.0),
-        alignment: Alignment.center,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF7F7F7),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
+              top: 96,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  width: 412,
+                  height: 821,
+                  child: Transform(
+                    transform: Matrix4.identity()..scale(1.0, -1.0),
+                    alignment: Alignment.center,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF7F7F7),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    ),
-  ),
-),
 
-            // 4. Contenido (Texto, botones, pestañas y galería/expertos sobre el contenedor blanco)
+            // 4. Contenido (Texto, botones, pestañas y galería/expertos)
             Positioned(
               top: 102,
               left: 0,
               right: 0,
               bottom: 0,
               child: Center(
-                child: Container(
+                child: SizedBox(
                   width: 412,
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     padding: const EdgeInsets.only(top: 20, bottom: 100),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,6 +165,12 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                           onTab: (i) => setState(() {
                             _tabIndex = i;
                             _showVideo = false;
+                            // Forzamos el scroll a 0 al cambiar de pestaña
+                            // para que Galería y Agendar con expertos
+                            // siempre arranquen en la misma posición.
+                            if (_scrollController.hasClients) {
+                              _scrollController.jumpTo(0);
+                            }
                           }),
                         ),
                         const SizedBox(height: 11),
@@ -147,7 +182,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
               ),
             ),
 
-            // 5. Botón de retroceso (Independiente arriba del todo para mantener interactividad)
+            // 5. Botón de retroceso
             _HeaderBackBtn(onBack: widget.onBack),
           ],
         ),
@@ -208,7 +243,6 @@ class _HeaderBackBtn extends StatelessWidget {
   }
 }
 
-// ─── Info del evento ──────────────────────────────────────────────────────────
 // ─── Info del evento ──────────────────────────────────────────────────────────
 class _InfoEvento extends StatelessWidget {
   @override
@@ -687,105 +721,94 @@ class _EventVideoPlayerState extends State<_EventVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: SizedBox(
-            width: double.infinity,
-            height: 240,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned.fill(
-                  child: _initialized
-                      ? FittedBox(
-                          fit: BoxFit.cover,
-                          child: SizedBox(
-                            width: _controller.value.size.width,
-                            height: _controller.value.size.height,
-                            child: VideoPlayer(_controller),
-                          ),
-                        )
-                      : Container(color: Colors.black12),
-                ),
-                if (!_playing)
+    return Container(
+      width: 360,
+      constraints: const BoxConstraints(minHeight: 304.3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              width: 360,
+              height: 240.3,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
                   Positioned.fill(
-                    child: Container(color: Colors.black.withOpacity(0.2)),
+                    child: _playing && _initialized
+                        ? FittedBox(
+                            fit: BoxFit.cover,
+                            child: SizedBox(
+                              width: _controller.value.size.width,
+                              height: _controller.value.size.height,
+                              child: VideoPlayer(_controller),
+                            ),
+                          )
+                        : Container(
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage(Images.galeria1),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            child: Container(
+                              color: Colors.black.withOpacity(0.2),
+                            ),
+                          ),
                   ),
-                if (!_playing)
-                  GestureDetector(
-                    onTap: _togglePlay,
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEBEBEB),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/arrow.svg',
-                          width: 20,
-                          height: 20,
-                          colorFilter: const ColorFilter.mode(
-                            Color(0xFF007AC2),
-                            BlendMode.srcIn,
+                  if (!_playing)
+                    Positioned(
+                      child: GestureDetector(
+                        onTap: _togglePlay,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFEBEBEB),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: SvgPicture.asset(
+                              'assets/icons/video.svg',
+                              width: 14,
+                              height: 14,
+                              colorFilter: const ColorFilter.mode(
+                                Color(0xFF007AC2),
+                                BlendMode.srcIn,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: widget.onClose,
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/x.svg',
-                          width: 16,
-                          height: 16,
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                if (_playing)
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onTap: _togglePlay,
-                      behavior: HitTestBehavior.translucent,
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          widget.description,
-          style: const TextStyle(
-            fontFamily: Fonts.regular,
-            fontSize: 14,
-            fontWeight: FontWeight.w300,
-            color: Color(0xFF141414),
-            height: 16 / 14,
+          const SizedBox(height: 16),
+          SizedBox(
+            width: 360,
+            height: 48,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                widget.description,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: Fonts.light,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w300,
+                  height: 16 / 14,
+                  color: Color(0xFF141414),
+                ),
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -797,21 +820,175 @@ class _ExpertosTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+    return Padding(
       padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
-      itemCount: expertos.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, i) {
-        final e = expertos[i];
-        return InfoCard(
-          imagenAsset: e.imagenAsset,
-          titulo: e.nombre,
-          subtitulo: e.cargo,
-          onAgendar: () {},
-        );
-      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ...expertos.asMap().entries.map((entry) {
+            final index = entry.key;
+            final experto = entry.value;
+
+            return Padding(
+              padding: EdgeInsets.only(top: index > 0 ? 12 : 0),
+              child: _ExpertoCard(
+                imagenAsset: experto.imagenAsset,
+                nombre: experto.nombre,
+                cargo: experto.cargo,
+                onAgendar: () {},
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Experto Card (según Figma CSS) ───────────────────────────────────────────
+// ─── Experto Card (Ajuste final sin desbordamiento) ───────────────────────────
+class _ExpertoCard extends StatelessWidget {
+  final String imagenAsset;
+  final String nombre;
+  final String cargo;
+  final VoidCallback onAgendar;
+
+  const _ExpertoCard({
+    required this.imagenAsset,
+    required this.nombre,
+    required this.cargo,
+    required this.onAgendar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 360,
+      height: 114,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        border: Border.all(
+          color: const Color(0xFFF2F2F2),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // comunidad-pe-2 2 (Avatar 92x92)
+          ClipOval(
+            child: Image.asset(
+              imagenAsset,
+              width: 92,
+              height: 92,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 10),
+          // content-container ajustado con Expanded para evitar overflow
+          Expanded(
+            child: SizedBox(
+              height: 90,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // header (50px altura)
+                  Container(
+                    height: 50,
+                    alignment: Alignment.topLeft,
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Card title (18px, Medium, Color: #141414)
+                        SizedBox(
+                          height: 24,
+                          child: Text(
+                            nombre,
+                            style: const TextStyle(
+                              fontFamily: Fonts.medium,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              height: 24 / 18,
+                              color: Color(0xFF141414),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        // Subtitle (14px, Regular, Color: #6B6B6B)
+                        SizedBox(
+                          height: 16,
+                          child: Text(
+                            cargo,
+                            style: const TextStyle(
+                              fontFamily: Fonts.regular,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              height: 16 / 14,
+                              color: Color(0xFF6B6B6B),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // footer (40px altura, alineado a la derecha)
+                  Container(
+                    height: 40,
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      width: 109,
+                      height: 32,
+                      child: ElevatedButton(
+                        onPressed: onAgendar,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF007AC2),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(0.001),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(
+                              Icons.add,
+                              size: 16,
+                              color: Color(0xFFFFFFFF),
+                            ),
+                            SizedBox(width: 12),
+                            // Button text (14px, Regular, Color: #FFFFFF)
+                            Text(
+                              'Agendar',
+                              style: TextStyle(
+                                fontFamily: Fonts.regular,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                height: 16 / 14,
+                                color: Color(0xFFFFFFFF),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
