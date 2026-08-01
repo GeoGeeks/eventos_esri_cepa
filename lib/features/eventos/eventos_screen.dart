@@ -262,10 +262,9 @@ class _EventosScreenState extends State<EventosScreen> {
                                             i++)
                                           Padding(
                                             padding: EdgeInsets.only(
-                                              bottom: i == eventos.length - 1
-                                                  ? 0
-                                                  : 8,
-                                            ),
+                                                bottom: i == eventos.length - 1
+                                                    ? 0
+                                                    : 8),
                                             child: SizedBox(
                                               width: 360,
                                               height: 146,
@@ -300,7 +299,8 @@ class _EventosScreenState extends State<EventosScreen> {
                 ),
               ),
 
-              // --- DROPDOWN DE FILTRO (SEGÚN CSS) ---
+              // --- DROPDOWN DE FILTRO ---
+              // --- DROPDOWN DE FILTRO ---
               if (_showFilter)
                 Positioned(
                   top: 184,
@@ -309,7 +309,8 @@ class _EventosScreenState extends State<EventosScreen> {
                     color: Colors.transparent,
                     child: Container(
                       width: 259,
-                      height: 124,
+                      // Ajustado a 132px para dar espacio exacto y evitar el overflow
+                      height: 132, 
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 16,
@@ -350,7 +351,17 @@ class _EventosScreenState extends State<EventosScreen> {
                           ),
                           const SizedBox(height: 8),
 
-                          // Frame 1437: Opciones de filtro
+                          // Línea divisoria (219px y #EBEBEB)
+                          SizedBox(
+                            width: 219,
+                            height: 1,
+                            child: Container(
+                              color: const Color(0xFFEBEBEB),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Opciones de filtro
                           SizedBox(
                             width: 219,
                             height: 64,
@@ -548,3 +559,4 @@ class _SplitFilterButton extends StatelessWidget {
     );
   }
 }
+

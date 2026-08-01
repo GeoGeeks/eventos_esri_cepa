@@ -63,4 +63,6 @@ static const String logoqr =
     'assets/images/post_evento/logo_qr.png';
 
 static const String notificaciones = 'assets/images/notificaciones/notificaciones.png';
+
+static const String eventoVideo = 'assets/videos/evento_video.mp4';
 }
