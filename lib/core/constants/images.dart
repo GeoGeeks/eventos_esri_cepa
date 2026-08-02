@@ -29,8 +29,6 @@ static const String esriBlanco =
   static const String profile1 = 'assets/images/profile/profile_1.png';
 
   static const String headerInvitados = 'assets/images/invitados/invitados.png';
-
-  static const String logoCue = 'assets/images/invitados/cue.png';
   
   static const String fotoInvitado = 'assets/images/invitados/foto_invitados.png';
 

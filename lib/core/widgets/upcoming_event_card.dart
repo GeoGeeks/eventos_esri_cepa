@@ -19,6 +19,11 @@ class UpcomingEventCard extends StatelessWidget {
   final bool isLoading;
   final bool isDisabled;
 
+  final String secondaryLabel;
+  final double actionsGap;
+  final double? viewMoreWidth;
+  final double? secondaryWidth;
+
   const UpcomingEventCard({
     super.key,
     required this.title,
@@ -32,6 +37,10 @@ class UpcomingEventCard extends StatelessWidget {
     this.estado,
     this.isLoading = false,
     this.isDisabled = false,
+    this.secondaryLabel = 'Registrarse',
+    this.actionsGap = 8,
+    this.viewMoreWidth,
+    this.secondaryWidth,
   });
 
   @override
@@ -186,13 +195,15 @@ class UpcomingEventCard extends StatelessWidget {
                                     children: [
                                       _OutlineButton(
                                         label: "Ver más",
+                                        width: viewMoreWidth,
                                         onPressed: isDisabled || isLoading
                                             ? () {}
                                             : onViewMore,
                                       ),
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: actionsGap),
                                       _PrimaryButton(
-                                        label: "Registrarse",
+                                        label: secondaryLabel,
+                                        width: secondaryWidth,
                                         onPressed: isDisabled || isLoading
                                             ? () {}
                                             : onRegister,
@@ -329,10 +340,12 @@ class _InfoRow extends StatelessWidget {
 class _OutlineButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final double? width;
 
   const _OutlineButton({
     required this.label,
     required this.onPressed,
+    this.width,
   });
 
   @override
@@ -340,8 +353,11 @@ class _OutlineButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
+        width: width,
         height: 32,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: width == null
+            ? const EdgeInsets.symmetric(horizontal: 12)
+            : EdgeInsets.zero,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
@@ -359,6 +375,7 @@ class _OutlineButton extends StatelessWidget {
             fontWeight: FontWeight.w400,
             color: Color(0xFF007AC2),
             height: 16 / 14,
+            letterSpacing: 0,
           ),
         ),
       ),
@@ -369,10 +386,12 @@ class _OutlineButton extends StatelessWidget {
 class _PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final double? width;
 
   const _PrimaryButton({
     required this.label,
     required this.onPressed,
+    this.width,
   });
 
   @override
@@ -380,8 +399,11 @@ class _PrimaryButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
+        width: width,
         height: 32,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: width == null
+            ? const EdgeInsets.symmetric(horizontal: 12)
+            : EdgeInsets.zero,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: Color(0xFF007AC2),
@@ -395,6 +417,7 @@ class _PrimaryButton extends StatelessWidget {
             fontWeight: FontWeight.w400,
             color: Colors.white,
             height: 16 / 14,
+            letterSpacing: 0,
           ),
         ),
       ),

@@ -27,12 +27,15 @@ static const String avisoBorde =
   static const String preguntas = 'assets/icons/preguntas.svg';
   static const String whatsapp = 'assets/icons/whatsapp.svg';
   static const String arrow = 'assets/icons/arrow.svg';
+  static const String back = 'assets/icons/back.svg';
+  static const String agenda = 'assets/icons/agenda.svg';
 
   static const String x = 'assets/icons/x.svg';
 
   static const String compartir = 'assets/icons/compartir.svg';
   static const String eliminar = 'assets/icons/eliminar.svg';
   static const String filtro = 'assets/icons/filtro.svg';
+  static const String search = 'assets/icons/search.svg';
   static const String guardar = 'assets/icons/guardar.svg';
   static const String vector = 'assets/icons/vector.svg';
   static const String valorarevento = 'assets/icons/valorar_evento.svg';
