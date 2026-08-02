@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
+import '../../../../core/widgets/app_icons.dart';
+import '../../../../core/widgets/info_card.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
 
 class PostEventoScreen extends StatefulWidget {
@@ -34,21 +39,21 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
       descripcion:
           'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
     ),
-    
+    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'María Fernanda Ruiz',
       cargo: 'Directora de Analítica ArcGIS',
       descripcion: 'Analítica geoespacial aplicada a proyectos urbanos.',
     ),
-   
+    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Carlos Andrés Gómez',
       cargo: 'Consultor SIG',
       descripcion: 'Implementación de sistemas de información geográfica.',
     ),
-    
+    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Laura Patricia Méndez',
@@ -188,7 +193,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   }
 }
 
-// ─── Botón de retroceso del Header ────────────────────────────────────────────
+// ─── Botón de retroceso del Header (igual al de Invitados) ───────────────────
 class _HeaderBackBtn extends StatelessWidget {
   final VoidCallback? onBack;
 
@@ -199,7 +204,7 @@ class _HeaderBackBtn extends StatelessWidget {
     return Positioned(
       top: 36,
       left: 26,
-      child: InkWell(
+      child: GestureDetector(
         onTap: () {
           if (onBack != null) {
             onBack!();
@@ -207,32 +212,19 @@ class _HeaderBackBtn extends StatelessWidget {
             Navigator.pop(context);
           }
         },
-        borderRadius: BorderRadius.circular(18),
         child: Container(
           width: 36,
           height: 36,
           decoration: const BoxDecoration(
-            color: Color(0xFF007AC2),
+            color: AppColors.primary,
             shape: BoxShape.circle,
           ),
-          child: Center(
-            child: SizedBox(
-              width: 8.41,
-              height: 14,
-              child: Transform.rotate(
-                angle: 1.5708,
-                child: SvgPicture.asset(
-                  'assets/icons/arrow.svg',
-                  width: 8.41,
-                  height: 14,
-                  fit: BoxFit.contain,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-            ),
+          alignment: Alignment.center,
+          child: const AppIcon(
+            SvgIcon.back,
+            width: 8.414,
+            height: 14,
+            color: AppColors.white,
           ),
         ),
       ),

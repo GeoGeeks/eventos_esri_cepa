@@ -292,7 +292,7 @@ class _SplitFilterButton extends StatelessWidget {
             child: Container(
               width: 1,
               height: 24,
-              color: Colors.white,
+              color: const Color(0xFFFFFFFF),
             ),
           ),
 

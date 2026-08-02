@@ -41,5 +41,7 @@ static const String avisoBorde =
   static const String valorarevento = 'assets/icons/valorar_evento.svg';
   static const String certificado = 'assets/icons/certificado.svg';
   static const String video = 'assets/icons/video.svg';
-  
+  static const String mensaje = 'assets/icons/mensaje.svg';
+  static const String cuadro = 'assets/icons/cuadro.svg';
+  static const String calificacionevento = 'assets/icons/calificacion_evento.svg';
 }
