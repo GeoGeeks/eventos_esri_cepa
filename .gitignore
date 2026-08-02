@@ -46,7 +46,9 @@ app.*.map.json
 
 .vscode/
 docs/
+CLAUDE.md
 
 # Exportaciones de Figma usadas solo como referencia visual al maquetar.
 # No van en pubspec.yaml: no se empaquetan en la app.
 assets/views/
+

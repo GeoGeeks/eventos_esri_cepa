@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_player/video_player.dart';
-
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
-import '../../../../core/widgets/info_card.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
 
 class PostEventoScreen extends StatefulWidget {
@@ -37,21 +34,21 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
       descripcion:
           'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
     ),
-    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
+    
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'María Fernanda Ruiz',
       cargo: 'Directora de Analítica ArcGIS',
       descripcion: 'Analítica geoespacial aplicada a proyectos urbanos.',
     ),
-    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
+   
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Carlos Andrés Gómez',
       cargo: 'Consultor SIG',
       descripcion: 'Implementación de sistemas de información geográfica.',
     ),
-    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
+    
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Laura Patricia Méndez',

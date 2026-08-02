@@ -1,11 +1,35 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/fonts.dart';
+import '../../core/constants/icons.dart';
 import '../../core/constants/images.dart';
-import '../../core/widgets/info_card.dart'; 
+import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/bottom_nav.dart';
+import '../../core/widgets/info_card.dart';
+import '../../navigation/menu.dart';
 import '../agenda/agenda.dart';
 import '../favoritos/favoritos.dart';
 
 class InvitadosScreen extends StatefulWidget {
-  const InvitadosScreen({super.key});
+  final String fecha;
+  final String hora;
+  final String lugar;
+  final String descripcion;
+  final String aviso;
+
+  const InvitadosScreen({
+    super.key,
+    this.fecha = 'Octubre 01, 2026',
+    this.hora = '8:00 - 11:00',
+    this.lugar = 'Universidad Central Cra 36 # 24 – 45',
+    this.descripcion =
+        'Es un evento presencial gratuito donde podrá conocer historias, '
+            'soluciones e innovaciones en el campo de la tecnología y los SIG.',
+    this.aviso = 'Información sujeta a cambios sin aviso.',
+  });
 
   @override
   State<InvitadosScreen> createState() => _InvitadosScreenState();
@@ -101,6 +125,13 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     if (_tabIndex < _tabs.length - 1) setState(() => _tabIndex++);
   }
 
+  void _irAMenu(int index) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => Menu(initialIndex: index)),
+      (route) => false,
+    );
+  }
+
   Widget _buildTabContent() {
     switch (_tabIndex) {
       case 0:
@@ -120,15 +151,15 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.only(top: 12, bottom: 24),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (_, i) => InfoCard(
         imagenAsset: items[i].imagenAsset,
         titulo: items[i].titulo,
         subtitulo: items[i].subtitulo,
         descripcion: items[i].descripcion,
-        onExpandir: () {/* navegar al detalle */},
+        onExpandir: () {},
       ),
     );
   }
@@ -137,9 +168,9 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.only(top: 12, bottom: 24),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (_, i) => _SesionCard(sesion: items[i]),
     );
   }
@@ -147,71 +178,127 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
-      body: Column(
+      backgroundColor: AppColors.background,
+      body: Stack(
         children: [
-          _Header(),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _InfoEvento(),
-                  const SizedBox(height: 16),
-                  _BotonesAccion(),
-                  const SizedBox(height: 16),
-                  _TabBar(
-                    tabs: _tabs,
-                    tabIndex: _tabIndex,
-                    onTab: (i) => setState(() => _tabIndex = i),
-                    onPrev: _prevTab,
-                    onNext: _nextTab,
-                  ),
-                  _buildTabContent(),
-                ],
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: 122,
+              width: double.infinity,
+              child: Image.asset(
+                Images.headerInvitados,
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
               ),
             ),
           ),
+
+          Positioned(
+            top: 96,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: 360,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 26, bottom: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _InfoEvento(
+                            fecha: widget.fecha,
+                            hora: widget.hora,
+                            lugar: widget.lugar,
+                            descripcion: widget.descripcion,
+                            aviso: widget.aviso,
+                            onAgenda: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AgendaScreen(),
+                              ),
+                            ),
+                            onFavoritos: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const FavoritosScreen(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _TabBar(
+                            key: const Key('invitados-tabs'),
+                            tabs: _tabs,
+                            tabIndex: _tabIndex,
+                            onTab: (i) => setState(() => _tabIndex = i),
+                            onPrev: _prevTab,
+                            onNext: _nextTab,
+                          ),
+                          _buildTabContent(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: 36,
+            left: 26,
+            child: _BotonVolver(
+              key: const Key('invitados-volver'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: CustomBottomNav(currentIndex: -1, onTap: _irAMenu),
       ),
     );
   }
 }
 
-// ─── Header ───────────────────────────────────────────────────────────────────
-class _Header extends StatelessWidget {
+// ─── Botón circular de volver ────────────────────────────────────────────────
+class _BotonVolver extends StatelessWidget {
+  final VoidCallback onTap;
+  const _BotonVolver({super.key, required this.onTap});
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 122,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(Images.headerInvitados, fit: BoxFit.cover),
-          ),
-          Positioned(
-            top: 36,
-            left: 24,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF091F44),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.chevron_left,
-                    color: Colors.white, size: 24),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 36,
-            left: 72,
-            child: Image.asset(Images.logoCue, height: 48, fit: BoxFit.fitHeight),
-          ),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: const BoxDecoration(
+          color: AppColors.primary,
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: const AppIcon(
+          SvgIcon.back,
+          width: 8.414,
+          height: 14,
+          color: AppColors.white,
+        ),
       ),
     );
   }
@@ -219,98 +306,171 @@ class _Header extends StatelessWidget {
 
 // ─── Info del evento ──────────────────────────────────────────────────────────
 class _InfoEvento extends StatelessWidget {
+  final String fecha;
+  final String hora;
+  final String lugar;
+  final String descripcion;
+  final String aviso;
+  final VoidCallback onAgenda;
+  final VoidCallback onFavoritos;
+
+  const _InfoEvento({
+    required this.fecha,
+    required this.hora,
+    required this.lugar,
+    required this.descripcion,
+    required this.aviso,
+    required this.onAgenda,
+    required this.onFavoritos,
+  });
+
   @override
   Widget build(BuildContext context) {
-    const iconColor = Color(0xFF091F44);
-    const textoStyle = TextStyle(
-      fontFamily: 'AvenirNext',
-      fontSize: 18,
-      fontWeight: FontWeight.w500,
-      color: Color(0xFF141414),
-      height: 24 / 18,
-    );
-
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(26, 16, 26, 16),
+    return SizedBox(
+      width: 360,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      const Icon(Icons.calendar_today, size: 16, color: iconColor),
-                      const SizedBox(width: 8),
-                      Text('Octubre 02, 2026', style: textoStyle),
-                    ]),
-                    const SizedBox(height: 6),
-                    Row(children: [
-                      const Icon(Icons.access_time, size: 16, color: iconColor),
-                      const SizedBox(width: 8),
-                      Text('8:00 - 11:00', style: textoStyle),
-                    ]),
-                    const SizedBox(height: 6),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 2),
-                          child: Icon(Icons.location_on, size: 16, color: iconColor),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Universidad Central Cra 36 # 24 - 45',
-                            style: textoStyle,
-                          ),
-                        ),
-                      ],
-                    ),
+                    _FilaDato(icono: SvgIcon.date, texto: fecha),
+                    const SizedBox(height: 5),
+                    _FilaDato(icono: SvgIcon.time, texto: hora),
+                    const SizedBox(height: 5),
+                    _FilaDato(icono: SvgIcon.lugar, texto: lugar),
                   ],
                 ),
               ),
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF091F44),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 4,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
+              const _BotonQr(),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+          Text(
+            descripcion,
+            style: const TextStyle(
+              fontFamily: Fonts.light,
+              fontSize: Fonts.text0h,
+              fontWeight: Fonts.wLight,
+              height: 20 / 16,
+              letterSpacing: 0,
+              color: AppColors.textTitle,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+          Text.rich(
+            TextSpan(
+              text: aviso,
+              children: const [
+                TextSpan(
+                  text: '*',
+                  style: TextStyle(color: AppColors.requiredField),
                 ),
-                child: const Icon(Icons.qr_code, color: Colors.white, size: 24),
+              ],
+            ),
+            style: const TextStyle(
+              fontFamily: Fonts.medium,
+              fontSize: 14,
+              fontWeight: Fonts.wMedium,
+              fontStyle: FontStyle.italic,
+              height: 16 / 14,
+              letterSpacing: 0,
+              color: AppColors.textTitle,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _BotonAccion(
+                width: 125,
+                label: 'Agenda',
+                icono: SvgIcon.agenda,
+                relleno: true,
+                onTap: onAgenda,
+              ),
+              const SizedBox(width: 12),
+              _BotonAccion(
+                width: 160,
+                label: 'Mis Favoritos',
+                icono: SvgIcon.favoritos,
+                relleno: false,
+                onTap: onFavoritos,
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          const Text(
-            'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
-            style: TextStyle(
-              fontFamily: 'AvenirNext',
-              fontSize: 16,
-              fontWeight: FontWeight.w300,
-              color: Color(0xFF141414),
-              height: 20 / 16,
+        ],
+      ),
+    );
+  }
+}
+
+class _BotonQr extends StatelessWidget {
+  const _BotonQr();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        boxShadow: [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.25),
+            blurRadius: 4,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: const Icon(Icons.qr_code, color: AppColors.white, size: 24),
+    );
+  }
+}
+
+class _FilaDato extends StatelessWidget {
+  final String icono;
+  final String texto;
+
+  const _FilaDato({required this.icono, required this.texto});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: AppIcon(
+                icono,
+                width: 16,
+                height: 16,
+                color: AppColors.primary,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Información sujeta a cambios sin aviso.*',
-            style: TextStyle(
-              fontFamily: 'AvenirNext',
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              fontStyle: FontStyle.italic,
-              color: Color(0xFF141414),
-              height: 16 / 14,
+          Expanded(
+            child: Text(
+              texto,
+              style: const TextStyle(
+                fontFamily: Fonts.medium,
+                fontSize: Fonts.text1h,
+                fontWeight: Fonts.wMedium,
+                height: 24 / 18,
+                letterSpacing: 0,
+                color: AppColors.textTitle,
+              ),
             ),
           ),
         ],
@@ -319,69 +479,52 @@ class _InfoEvento extends StatelessWidget {
   }
 }
 
-// ─── Botones Agenda / Mis Favoritos ──────────────────────────────────────────
-class _BotonesAccion extends StatelessWidget {
+class _BotonAccion extends StatelessWidget {
+  final double width;
+  final String label;
+  final String icono;
+  final bool relleno;
+  final VoidCallback onTap;
+
+  const _BotonAccion({
+    required this.width,
+    required this.label,
+    required this.icono,
+    required this.relleno,
+    required this.onTap,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 26),
-      child: Row(
-        children: [
-          Expanded(
-            child: SizedBox(
-              height: 44,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AgendaScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.person_add_alt_1, size: 24),
-                label: const Text('Agenda'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF091F44),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
+    final color = relleno ? AppColors.white : AppColors.primary;
+
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        height: 44,
+        decoration: BoxDecoration(
+          color: relleno ? AppColors.primary : AppColors.white,
+          border: Border.all(color: AppColors.primary, width: 1),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AppIcon(icono, width: 24, height: 24, color: color),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: Fonts.regular,
+                fontSize: Fonts.text0h,
+                fontWeight: Fonts.wRegular,
+                height: 20 / 16,
+                letterSpacing: 0,
+                color: color,
               ),
             ),
-          ),
-
-          const SizedBox(width: 16),
-
-          Expanded(
-            child: SizedBox(
-              height: 44,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const FavoritosScreen(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.star_border, size: 22),
-                label: const Text('Mis Favoritos'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF091F44),
-                  side: const BorderSide(
-                    color: Color(0xFF091F44),
-                  ),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -396,6 +539,7 @@ class _TabBar extends StatelessWidget {
   final VoidCallback onNext;
 
   const _TabBar({
+    super.key,
     required this.tabs,
     required this.tabIndex,
     required this.onTab,
@@ -405,47 +549,77 @@ class _TabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int start = (tabIndex - 1).clamp(0, tabs.length - 3);
-    final end = (start + 3).clamp(0, tabs.length);
-    final visibles = tabs.sublist(start, end);
+    final hayPrev = tabIndex > 0;
+    final hayNext = tabIndex < tabs.length - 1;
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left, size: 20),
-            color: tabIndex > 0 ? const Color(0xFF6B6B6B) : const Color(0xFFCCCCCC),
-            onPressed: tabIndex > 0 ? onPrev : null,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 38),
+    final start = math.max(0, math.min(tabIndex - 1, tabs.length - 3));
+    final visibles = tabs.sublist(start, math.min(start + 3, tabs.length));
+
+    return SizedBox(
+      width: 360,
+      height: 34,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: AppColors.lightGray, width: 1),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: visibles.map((label) {
-                  final i = tabs.indexOf(label);
-                  return _TabItem(
-                    label: label,
-                    active: i == tabIndex,
-                    onTap: () => onTab(i),
-                  );
-                }).toList(),
+        ),
+        child: Row(
+          children: [
+            if (hayPrev)
+              _FlechaTab(haciaAtras: true, onTap: onPrev)
+            else
+              const SizedBox.shrink(),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: visibles.map((label) {
+                    final i = tabs.indexOf(label);
+                    return _TabItem(
+                      label: label,
+                      active: i == tabIndex,
+                      onTap: () => onTab(i),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
+            if (hayNext)
+              _FlechaTab(haciaAtras: false, onTap: onNext)
+            else
+              const SizedBox.shrink(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FlechaTab extends StatelessWidget {
+  final bool haciaAtras;
+  final VoidCallback onTap;
+
+  const _FlechaTab({required this.haciaAtras, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 40,
+        height: 34,
+        child: Center(
+          child: Transform.rotate(
+            angle: haciaAtras ? 0 : math.pi,
+            child: const AppIcon(
+              SvgIcon.back,
+              width: 8.414,
+              height: 14,
+              color: AppColors.textMuted,
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right, size: 20),
-            color: tabIndex < tabs.length - 1
-                ? const Color(0xFF6B6B6B)
-                : const Color(0xFFCCCCCC),
-            onPressed: tabIndex < tabs.length - 1 ? onNext : null,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 38),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -456,35 +630,38 @@ class _TabItem extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-  const _TabItem({required this.label, required this.active, required this.onTap});
+  const _TabItem({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        height: 34,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? const Color(0xFFEBEBEB) : Colors.transparent,
+          color: active ? AppColors.lightGray : Colors.transparent,
           border: active
-              ? const Border(bottom: BorderSide(color: Color(0xFF091F44), width: 2))
-              : null,
-          borderRadius: active
-              ? const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
+              ? const Border(
+                  bottom: BorderSide(color: AppColors.primary, width: 2),
                 )
               : null,
         ),
         child: Text(
           label,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: 'AvenirNext',
-            fontSize: 16,
-            fontWeight: active ? FontWeight.w500 : FontWeight.w400,
-            color: active ? const Color(0xFF141414) : const Color(0xFF6B6B6B),
+            fontFamily: active ? Fonts.medium : Fonts.regular,
+            fontSize: Fonts.text0h,
+            fontWeight: active ? Fonts.wMedium : Fonts.wRegular,
             height: 20 / 16,
+            letterSpacing: 0,
+            color: active ? AppColors.textTitle : AppColors.textMuted,
           ),
         ),
       ),
@@ -498,10 +675,11 @@ class _SesionCard extends StatelessWidget {
   const _SesionCard({required this.sesion});
 
   static const _metaStyle = TextStyle(
-    fontFamily: 'AvenirNext',
+    fontFamily: Fonts.regular,
     fontSize: 13,
-    fontWeight: FontWeight.w400,
-    color: Color(0xFF6B6B6B),
+    fontWeight: Fonts.wRegular,
+    letterSpacing: 0,
+    color: AppColors.textMuted,
     height: 18 / 13,
   );
 
@@ -510,8 +688,8 @@ class _SesionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFFF2F2F2)),
+        color: AppColors.white,
+        border: Border.all(color: AppColors.surface3),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
@@ -524,34 +702,58 @@ class _SesionCard extends StatelessWidget {
                 child: Text(
                   sesion.titulo,
                   style: const TextStyle(
-                    fontFamily: 'AvenirNext',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF141414),
+                    fontFamily: Fonts.demi,
+                    fontSize: Fonts.text0h,
+                    fontWeight: Fonts.wDemi,
+                    letterSpacing: 0,
+                    color: AppColors.textTitle,
                     height: 22 / 16,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.star_border, color: Color(0xFF6B6B6B), size: 22),
+              const AppIcon(
+                SvgIcon.favoritos,
+                width: 22,
+                height: 22,
+                color: AppColors.textMuted,
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          Row(children: [
-            const Icon(Icons.calendar_today, size: 14, color: Color(0xFF6B6B6B)),
-            const SizedBox(width: 6),
-            Text(sesion.fecha, style: _metaStyle),
-          ]),
+          Row(
+            children: [
+              const AppIcon(
+                SvgIcon.date,
+                width: 14,
+                height: 14,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: 6),
+              Text(sesion.fecha, style: _metaStyle),
+            ],
+          ),
           const SizedBox(height: 4),
-          Row(children: [
-            const Icon(Icons.location_on, size: 14, color: Color(0xFF6B6B6B)),
-            const SizedBox(width: 6),
-            Text(sesion.lugar, style: _metaStyle),
-          ]),
+          Row(
+            children: [
+              const AppIcon(
+                SvgIcon.lugar,
+                width: 14,
+                height: 14,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: 6),
+              Text(sesion.lugar, style: _metaStyle),
+            ],
+          ),
           const Align(
             alignment: Alignment.centerRight,
-            child: Icon(Icons.keyboard_arrow_down,
-                color: Color(0xFF6B6B6B), size: 24),
+            child: AppIcon(
+              SvgIcon.arrow,
+              width: 12,
+              height: 8,
+              color: AppColors.textMuted,
+            ),
           ),
         ],
       ),
