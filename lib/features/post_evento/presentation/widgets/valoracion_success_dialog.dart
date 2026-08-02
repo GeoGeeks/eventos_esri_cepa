@@ -86,8 +86,12 @@ class ValoracionSuccessDialog extends StatelessWidget {
                   /// action-container 40x40 con icono "x": lleva a inicio
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context)
-                          .popUntil((route) => route.isFirst);
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const Menu(initialIndex: 0),
+                        ),
+                        (route) => false,
+                      );
                     },
                     child: SizedBox(
                       width: 40,
@@ -170,12 +174,12 @@ class ValoracionSuccessDialog extends StatelessWidget {
                       elevation: 0,
                     ),
                     onPressed: () {
-                      // cerrar popup
-                      Navigator.pop(context);
-                      // cerrar paso2
-                      Navigator.pop(context);
-                      // cerrar paso1
-                      Navigator.pop(context);
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const Menu(initialIndex: 2),
+                        ),
+                        (route) => false,
+                      );
                     },
                     child: const Text(
                       'Ir a mis eventos',
