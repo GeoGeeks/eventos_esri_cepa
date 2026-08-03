@@ -12,4 +12,20 @@ class OnboardingState {
       currentPage: currentPage ?? this.currentPage,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is OnboardingState &&
+        other.currentPage == currentPage;
+  }
+
+  @override
+  int get hashCode => currentPage.hashCode;
+
+  @override
+  String toString() {
+    return 'OnboardingState(currentPage: $currentPage)';
+  }
 }

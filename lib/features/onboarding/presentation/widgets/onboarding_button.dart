@@ -20,22 +20,29 @@ class OnboardingButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF007AC2),
-          foregroundColor: Colors.white,
           elevation: 0,
-          padding: EdgeInsets.zero,
+          shadowColor: Colors.transparent,
+          backgroundColor: const Color(0xFF007AC2),
+          foregroundColor: const Color(0xFFF7F7F7),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
+          ),
+          minimumSize: const Size(360, 44),
+          maximumSize: const Size(360, 44),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
         ),
         child: Text(
           text,
+          textAlign: TextAlign.center,
           style: const TextStyle(
-            fontFamily: Fonts.regular,
+            fontFamily: Fonts.medium,
+            fontWeight: FontWeight.w500,
             fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFFF7F7F7),
             height: 20 / 16,
+            color: Color(0xFFF7F7F7),
           ),
         ),
       ),

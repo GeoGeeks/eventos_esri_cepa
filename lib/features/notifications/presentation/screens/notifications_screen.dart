@@ -75,143 +75,146 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background, // #F7F7F7
       body: SafeArea(
-        child: Column(
-          children: [
-            // Título "Notificaciones" 26px + Chip "Borrar todo"
-            // CSS: contenido -> left 26, top 36, gap 12 -> resuelto con
-            // el padding inferior (12) de este bloque.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(26, 36, 26, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Notificaciones',
-                    style: TextStyle(
-                      fontFamily: Fonts.medium,
-                      fontWeight: Fonts.wMedium,
-                      fontSize: Fonts.text3h, // 26px
-                      height: 32 / 26,
-                      color: AppColors.textTitle, // #141414
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: notifications.isEmpty
-                        ? null
-                        : () => setState(() => notifications.clear()),
-                    child: Container(
-                      height: 32,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.chipBg, // #D6EFFF
-                        border: Border.all(
-                          color: AppColors.chipBg,
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(9999),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Borrar todo',
-                        style: TextStyle(
-                          fontFamily: Fonts.medium,
-                          fontWeight: Fonts.wMedium,
-                          fontSize: 14,
-                          height: 16 / 14,
-                          color: AppColors.primary, // #007AC2
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Expanded(
-              child: notifications.isEmpty
-                  ? const EmptyNotifications()
-                  : ListView(
-                      padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
-                      children: [
-                        for (final entry in groups.entries) ...[
-                          // Etiqueta de grupo ("Hoy" / "Semana pasada")
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Text(
-                              entry.key,
-                              style: const TextStyle(
-                                fontFamily: Fonts.medium,
-                                fontWeight: Fonts.wMedium,
-                                fontSize: Fonts.text0h, // 16px
-                                height: 20 / 16,
-                                color: AppColors.modalSubtitle, // #4A4A4A
+        child: notifications.isEmpty
+            ? const EmptyNotifications()
+            : SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: 360,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 36, bottom: 80),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Título "Notificaciones" + Chip "Borrar todo"
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Notificaciones',
+                                style: TextStyle(
+                                  fontFamily: Fonts.medium,
+                                  fontWeight: Fonts.wMedium,
+                                  fontSize: Fonts.text3h, // 26px
+                                  height: 32 / 26,
+                                  color: AppColors.textTitle, // #141414
+                                ),
                               ),
-                            ),
+                              GestureDetector(
+                                onTap: () =>
+                                    setState(() => notifications.clear()),
+                                child: Container(
+                                  height: 32,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.chipBg, // #D6EFFF
+                                    border: Border.all(
+                                      color: AppColors.chipBg,
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(9999),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: const Text(
+                                    'Borrar todo',
+                                    style: TextStyle(
+                                      fontFamily: Fonts.medium,
+                                      fontWeight: Fonts.wMedium,
+                                      fontSize: 14,
+                                      height: 16 / 14,
+                                      color: AppColors.primary, // #007AC2
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          for (final item in entry.value)
+
+                          const SizedBox(height: 12),
+
+                          // Lista de notificaciones agrupadas
+                          for (final entry in groups.entries) ...[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: Dismissible(
-                                key: Key(item['id']),
-                                direction: DismissDirection.endToStart,
-                                // rgba(216,48,32,0.05) del contenido +
-                                // panel rojo #D83020 con eliminar.svg
-                                background: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: _deleteRedLight,
-                                          borderRadius:
-                                              const BorderRadius.horizontal(
-                                            left: Radius.circular(8),
+                              child: Text(
+                                entry.key,
+                                style: const TextStyle(
+                                  fontFamily: Fonts.medium,
+                                  fontWeight: Fonts.wMedium,
+                                  fontSize: Fonts.text0h, // 16px
+                                  height: 20 / 16,
+                                  color: AppColors.modalSubtitle, // #4A4A4A
+                                ),
+                              ),
+                            ),
+                            for (final item in entry.value)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Dismissible(
+                                  key: Key(item['id']),
+                                  direction: DismissDirection.endToStart,
+                                  background: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: _deleteRedLight,
+                                            borderRadius:
+                                                const BorderRadius.horizontal(
+                                              left: Radius.circular(8),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Container(
-                                      width: 48,
-                                      height: 88,
-                                      alignment: Alignment.center,
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.requiredField, // #D83020
-                                        borderRadius: BorderRadius.horizontal(
-                                          right: Radius.circular(8),
+                                      Container(
+                                        width: 48,
+                                        height: 88,
+                                        alignment: Alignment.center,
+                                        decoration: const BoxDecoration(
+                                          color: AppColors
+                                              .requiredField, // #D83020
+                                          borderRadius:
+                                              BorderRadius.horizontal(
+                                            right: Radius.circular(8),
+                                          ),
+                                        ),
+                                        child: SvgPicture.asset(
+                                          _eliminarIcon,
+                                          width: 24,
+                                          height: 24,
+                                          colorFilter: const ColorFilter.mode(
+                                            AppColors.white,
+                                            BlendMode.srcIn,
+                                          ),
                                         ),
                                       ),
-                                      child: SvgPicture.asset(
-                                        _eliminarIcon,
-                                        width: 24,
-                                        height: 24,
-                                        colorFilter: const ColorFilter.mode(
-                                          AppColors.white,
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                onDismissed: (_) {
-                                  setState(() {
-                                    notifications.removeWhere(
-                                      (n) => n['id'] == item['id'],
-                                    );
-                                  });
-                                },
-                                child: NotificationItem(
-                                  title: item['title'],
-                                  description: item['description'],
-                                  date: item['date'],
-                                  isNew: item['isNew'],
+                                    ],
+                                  ),
+                                  onDismissed: (_) {
+                                    setState(() {
+                                      notifications.removeWhere(
+                                        (n) => n['id'] == item['id'],
+                                      );
+                                    });
+                                  },
+                                  child: NotificationItem(
+                                    title: item['title'],
+                                    description: item['description'],
+                                    date: item['date'],
+                                    isNew: item['isNew'],
+                                  ),
                                 ),
                               ),
-                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-            ),
-          ],
-        ),
+                  ),
+                ),
+              ),
       ),
     );
   }

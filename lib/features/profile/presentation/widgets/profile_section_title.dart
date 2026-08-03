@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 
 class ProfileSectionTitle extends StatelessWidget {
@@ -22,7 +24,7 @@ class ProfileSectionTitle extends StatelessWidget {
             fontFamily: Fonts.medium,
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF141414),
+            color: AppColors.textTitle,
             height: 1.25,
           ),
         ),
@@ -30,3 +32,4 @@ class ProfileSectionTitle extends StatelessWidget {
     );
   }
 }
+

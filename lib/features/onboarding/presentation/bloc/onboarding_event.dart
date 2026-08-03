@@ -1,7 +1,9 @@
-abstract class OnboardingEvent {}
+abstract class OnboardingEvent {
+  const OnboardingEvent();
+}
 
 class OnboardingPageChanged extends OnboardingEvent {
   final int page;
 
-  OnboardingPageChanged(this.page);
+  const OnboardingPageChanged(this.page);
 }

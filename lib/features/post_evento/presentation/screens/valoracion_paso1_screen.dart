@@ -44,6 +44,7 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
       backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(), // ✅ agregado
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 
 class LogoutButton extends StatelessWidget {
@@ -11,24 +13,22 @@ class LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryRed = Color(0xFFD83020);
-
     return SizedBox(
-      width: 362, // ✅ Ancho exacto de Figma
-      height: 44, // ✅ Altura exacta de Figma
+      width: 362, // Ancho exacto de Figma
+      height: 44, // Altura exacta de Figma
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          splashColor: primaryRed.withOpacity(0.12),
-          highlightColor: primaryRed.withOpacity(0.06),
+          splashColor: AppColors.requiredField.withOpacity(0.12),
+          highlightColor: AppColors.requiredField.withOpacity(0.06),
           borderRadius: BorderRadius.circular(0.001),
           child: Ink(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white, // Fondo blanco (revisar si aplica según diseño final)
+              color: AppColors.white,
               border: Border.all(
-                color: primaryRed, // Borde Rojo (#D83020)
+                color: AppColors.requiredField,
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(0.001),
@@ -40,8 +40,8 @@ class LogoutButton extends StatelessWidget {
                   fontFamily: Fonts.regular,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
-                  color: primaryRed, 
-                  height: 1.25, // ✅ line-height 20px (125%)
+                  color: AppColors.requiredField,
+                  height: 1.25, // line-height 20px (125%)
                 ),
               ),
             ),

@@ -152,6 +152,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                   width: 412,
                   child: SingleChildScrollView(
                     controller: _scrollController,
+                    physics: const BouncingScrollPhysics(), // ✅ agregado
                     padding: const EdgeInsets.only(top: 20, bottom: 100),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -995,3 +996,4 @@ class _Experto {
     required this.descripcion,
   });
 }
+
