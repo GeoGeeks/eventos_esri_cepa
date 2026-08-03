@@ -7,7 +7,6 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/widgets/app_icons.dart';
-import '../../../../core/widgets/info_card.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
 
 class PostEventoScreen extends StatefulWidget {
