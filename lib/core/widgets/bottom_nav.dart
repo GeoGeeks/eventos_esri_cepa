@@ -37,7 +37,7 @@ class CustomBottomNav extends StatelessWidget {
                   color: AppColors.primary,
                   border: Border(
                     top: BorderSide(
-                      color: Colors.white24,
+                      color: AppColors.lightGray,
                       width: 1,
                     ),
                   ),
@@ -206,9 +206,9 @@ class _ReservasButton extends StatelessWidget {
                     ? null
                     : const [
                         BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 12,
-                          offset: Offset(0, 3),
+                          color: Color(0x2B000000),
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
                         ),
                       ],
               ),

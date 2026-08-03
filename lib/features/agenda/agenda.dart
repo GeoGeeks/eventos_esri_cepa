@@ -1,302 +1,182 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/fonts.dart';
-import 'valoracion_modal.dart';
+import '../../core/widgets/alerta_guardado.dart';
+import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/filtro_modal.dart';
+import '../../navigation/menu.dart';
+import '../favoritos/favoritos.dart';
+import 'data/agenda_mock_data.dart';
+import 'valoracion_modal.dart';
+import 'widgets/actividad_card.dart';
+import 'widgets/cabecera_actividades.dart';
 
 class AgendaScreen extends StatefulWidget {
-  const AgendaScreen({super.key});
+  final List<Actividad> actividades;
+
+  const AgendaScreen({super.key, this.actividades = AgendaMockData.actividades});
 
   @override
   State<AgendaScreen> createState() => _AgendaScreenState();
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
-  final List<bool> expanded = [false, false, true];
+  late final List<Actividad> _actividades = List.of(widget.actividades);
+  final Set<int> _expandidas = {};
+  String _busqueda = '';
+  bool _alertaVisible = false;
+  Map<String, Set<String>> _filtros = const {};
+
+  List<int> get _visibles {
+    final termino = _normalizar(_busqueda.trim());
+    return [
+      for (var i = 0; i < _actividades.length; i++)
+        if (_coincideBusqueda(_actividades[i], termino) &&
+            _coincideFiltro(_actividades[i]))
+          i,
+    ];
+  }
+
+  bool _coincideBusqueda(Actividad actividad, String termino) {
+    if (termino.isEmpty) return true;
+    return _normalizar(actividad.titulo).contains(termino) ||
+        _normalizar(actividad.ponente).contains(termino) ||
+        _normalizar(actividad.lugar).contains(termino);
+  }
+
+  bool _coincideFiltro(Actividad actividad) {
+    for (final valores in _filtros.values) {
+      if (valores.isEmpty) continue;
+      final coincide = valores.any(
+        (valor) => valor == actividad.lugar || actividad.etiquetas.contains(valor),
+      );
+      if (!coincide) return false;
+    }
+    return true;
+  }
+
+  static String _normalizar(String texto) {
+    const conAcento = 'áàäâãéèëêíìïîóòöôõúùüûñÁÀÄÂÃÉÈËÊÍÌÏÎÓÒÖÔÕÚÙÜÛÑ';
+    const sinAcento = 'aaaaaeeeeiiiiooooouuuunAAAAAEEEEIIIIOOOOOUUUUN';
+    final buffer = StringBuffer();
+    for (final letra in texto.toLowerCase().runes) {
+      final caracter = String.fromCharCode(letra);
+      final indice = conAcento.indexOf(caracter);
+      buffer.write(indice == -1 ? caracter : sinAcento[indice]);
+    }
+    return buffer.toString();
+  }
+
+  void _alternarExpandida(int indice) {
+    setState(() {
+      if (!_expandidas.remove(indice)) _expandidas.add(indice);
+    });
+  }
+
+  void _alternarFavorita(int indice) {
+    final actividad = _actividades[indice];
+    setState(() {
+      _actividades[indice] = actividad.copyWith(favorita: !actividad.favorita);
+      _alertaVisible = !actividad.favorita;
+    });
+  }
+
+  Future<void> _abrirFiltro() async {
+    final seleccion = await showModalBottomSheet<Map<String, Set<String>>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: AppColors.modalOverlay,
+      builder: (_) => FiltroModal(seleccion: _filtros),
+    );
+    if (seleccion != null) setState(() => _filtros = seleccion);
+  }
+
+  void _abrirValoracion(Actividad actividad) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: AppColors.modalOverlay,
+      builder: (_) => ValoracionModal(actividad: actividad.titulo),
+    );
+  }
+
+  void _irAMenu(int index) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => Menu(initialIndex: index)),
+      (route) => false,
+    );
+  }
+
+  void _irAGuardados() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FavoritosScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final visibles = _visibles;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const CircleAvatar(
-            radius: 16,
-            backgroundColor: AppColors.primary,
-            child: Icon(
-              Icons.arrow_back_ios_new,
-              color: Colors.white,
-              size: 16,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Agenda',
-          style: TextStyle(
-            fontFamily: Fonts.regular,
-            color: Color(0xFF141414),
-            fontSize: Fonts.body,
-            fontWeight: FontWeight.w500,
-            height: 32 / 26,
-          ),
-        ),
-      ),
-
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        prefixIcon: Icon(
-                          Icons.search,
-                          size: 18,
-                          color: AppColors.textSubtle,
-                        ),
-                        hintText: 'Buscar',
-                        hintStyle: TextStyle(
-                          color: AppColors.textSubtle,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                GestureDetector(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      barrierColor: AppColors.modalOverlay,
-                      builder: (_) => const FiltroModal(),
-                    );
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    color: AppColors.primary,
-                    child: const Icon(
-                      Icons.filter_alt_outlined,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            Expanded(
-              child: ListView.builder(
-                itemCount: expanded.length,
-                itemBuilder: (_, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _AgendaCard(
-                      expanded: expanded[index],
-                      onTap: () {
-                        setState(() {
-                          expanded[index] = !expanded[index];
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AgendaCard extends StatelessWidget {
-  final bool expanded;
-  final VoidCallback onTap;
-
-  const _AgendaCard({required this.expanded, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Column(
             children: [
-              const Expanded(
-                child: Text(
-                  'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-                  style: TextStyle(
-                    fontFamily: Fonts.regular,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textTitle,
-                    height: 1.1,
-                  ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
+                child: CabeceraActividades(
+                  titulo: 'Agenda',
+                  onVolver: () => Navigator.pop(context),
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '10:00 · 11:00',
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 11),
-              ),
-              IconButton(
-                onPressed: onTap,
-                icon: Icon(
-                  expanded
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  color: AppColors.textSubtle,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 4),
-
-          const Row(
-            children: [
-              Icon(Icons.person_outline, size: 14, color: AppColors.textSubtle),
-              SizedBox(width: 4),
-              Text(
-                'Julian Gutiérrez',
-                style: TextStyle(color: AppColors.textSubtle, fontSize: 13),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 2),
-
-          const Row(
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                size: 14,
-                color: AppColors.textSubtle,
-              ),
-              SizedBox(width: 4),
-              Text(
-                'Auditorio 103',
-                style: TextStyle(color: AppColors.textSubtle, fontSize: 13),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 2),
-
-          const Row(
-            children: [
-              Icon(Icons.people_outline, size: 14, color: AppColors.textSubtle),
-              SizedBox(width: 4),
-              Text(
-                'Aforo 30 personas',
-                style: TextStyle(color: AppColors.textSubtle, fontSize: 13),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          Row(
-            children: [
-              _chip('Avanzado'),
-              const SizedBox(width: 6),
-              _chip('Tecnología'),
-              const SizedBox(width: 6),
-              _chip('GeoIA'),
-              const Spacer(),
-
-              GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    barrierColor: const Color(0x80000000),
-                    builder: (_) => const ValoracionModal(),
-                  );
-                },
-                child: const Text(
-                  'Valorar',
-                  style: TextStyle(color: AppColors.primary, fontSize: 13),
+              const SizedBox(height: 30),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                  children: [
+                    BuscadorActividades(
+                      onBuscar: (texto) => setState(() => _busqueda = texto),
+                      onFiltrar: _abrirFiltro,
+                    ),
+                    const SizedBox(height: 24),
+                    for (final indice in visibles) ...[
+                      ActividadCard(
+                        actividad: _actividades[indice],
+                        expandida: _expandidas.contains(indice),
+                        onExpandir: () => _alternarExpandida(indice),
+                        onFavorito: () => _alternarFavorita(indice),
+                        onValorar: () =>
+                            _abrirValoracion(_actividades[indice]),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ],
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 10),
-
-          Row(
-            children: [
-              const Spacer(),
-              Icon(Icons.star_border, color: Colors.grey.shade400),
-            ],
-          ),
-
-          if (expanded) ...[
-            const SizedBox(height: 12),
-
-            const Text(
-              'Integre modelos de Deep Learning para la detección de objetos en formularios de Survey123, conozca cómo la IA apoya los flujos de recolección de información.',
-              style: TextStyle(color: AppColors.textSubtle, fontSize: 13),
+          if (_alertaVisible)
+            Positioned(
+              left: 26,
+              right: 26,
+              bottom: 26,
+              child: AlertaGuardado(
+                key: const Key('alerta-guardado'),
+                mensaje: '¡Ha guardado una actividad!',
+                enlace: 'Ir a guardados',
+                onEnlace: _irAGuardados,
+                onCerrar: () => setState(() => _alertaVisible = false),
+              ),
             ),
-
-            const SizedBox(height: 12),
-
-            const Text(
-              'Objetivos',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-
-            const SizedBox(height: 8),
-
-            const Text(
-              '1. Integre modelos de Deep Learning para la detección de objetos.\n\n'
-              '2. Conozca cómo la IA apoya los flujos de recolección.\n\n'
-              '3. Aprenda a incorporar modelos en Survey123.',
-              style: TextStyle(color: AppColors.textSubtle, fontSize: 13),
-            ),
-          ],
         ],
       ),
-    );
-  }
-
-  static Widget _chip(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.chipBg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 11, color: AppColors.primary),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: CustomBottomNav(currentIndex: -1, onTap: _irAMenu),
       ),
     );
   }

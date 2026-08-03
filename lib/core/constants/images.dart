@@ -58,7 +58,7 @@ static const String videoCover =
     'assets/images/post_evento/video_cover.png';
 
 static const String logoqr =
-    'assets/images/post_evento/logo_qr.png';
+    'assets/images/profile/logo_qr.png';
 
 static const String notificaciones = 'assets/images/notificaciones/notificaciones.png';
 

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../constants/app_colors.dart';
 import '../constants/fonts.dart';
+import '../constants/icons.dart';
+import 'app_icons.dart';
 
 class InfoCard extends StatelessWidget {
   final String imagenAsset;
@@ -23,19 +27,18 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 360,
-      constraints: const BoxConstraints(minHeight: 114),
+      constraints: const BoxConstraints(minHeight: 128),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        border: Border.all(color: const Color(0xFFF2F2F2)),
+        color: AppColors.white,
+        border: Border.all(color: AppColors.surface3),
         borderRadius: BorderRadius.circular(4),
       ),
-      padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // comunidad-pe-2 2 (92x92, border-radius 100px)
           ClipRRect(
-            borderRadius: BorderRadius.circular(100),
+            borderRadius: BorderRadius.circular(46),
             child: Image.asset(
               imagenAsset,
               width: 92,
@@ -44,104 +47,114 @@ class InfoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          // content-container
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // header (header-text-container: padding 8px 12px 0px)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 12, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        titulo,
-                        style: const TextStyle(
-                          fontFamily: Fonts.medium,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          height: 24 / 18,
-                          color: Color(0xFF141414),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitulo,
-                        style: const TextStyle(
-                          fontFamily: Fonts.regular,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          height: 16 / 14,
-                          color: Color(0xFF6B6B6B),
-                        ),
-                      ),
-                      if (descripcion != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          descripcion!,
-                          style: const TextStyle(
-                            fontFamily: Fonts.regular,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            height: 16 / 14,
-                            color: Color(0xFF141414),
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // footer
-                if (onAgendar != null || onExpandir != null)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8, 12, 0),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: onAgendar != null
-                          ? SizedBox(
-                              width: 109,
-                              height: 32,
-                              child: ElevatedButton.icon(
-                                onPressed: onAgendar,
-                                icon: const Icon(Icons.add, size: 16, color: Colors.white),
-                                label: const Text(
-                                  'Agendar',
-                                  style: TextStyle(
-                                    fontFamily: Fonts.regular,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF007AC2),
-                                  elevation: 0,
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(0.001),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : GestureDetector(
-                              onTap: onExpandir,
-                              child: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Color(0xFF6B6B6B),
-                                size: 24,
-                              ),
-                            ),
+                SizedBox(
+                  height: 24,
+                  child: Text(
+                    titulo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: Fonts.medium,
+                      fontSize: Fonts.text1h,
+                      fontWeight: Fonts.wMedium,
+                      height: 24 / 18,
+                      letterSpacing: 0,
+                      color: AppColors.textTitle,
                     ),
                   ),
+                ),
+                const SizedBox(height: 2),
+                SizedBox(
+                  height: 16,
+                  child: Text(
+                    subtitulo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontSize: Fonts.textSm,
+                      fontWeight: Fonts.wRegular,
+                      height: 16 / 14,
+                      letterSpacing: 0,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
+                if (descripcion != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    descripcion!,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: Fonts.light,
+                      fontSize: Fonts.textSm,
+                      fontWeight: Fonts.wLight,
+                      fontStyle: FontStyle.italic,
+                      height: 16 / 14,
+                      letterSpacing: 0,
+                      color: AppColors.textTitle,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: onAgendar != null
+                      ? _BotonAgendar(onTap: onAgendar!)
+                      : Padding(
+                          padding: const EdgeInsets.only(right: 5),
+                          child: GestureDetector(
+                            onTap: onExpandir,
+                            child: const AppIcon(
+                              SvgIcon.arrow,
+                              width: 14,
+                              height: 8.4,
+                              fit: BoxFit.fill,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ),
+                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BotonAgendar extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _BotonAgendar({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 109,
+        height: 32,
+        color: AppColors.primary,
+        alignment: Alignment.center,
+        child: const Text(
+          'Agendar',
+          style: TextStyle(
+            fontFamily: Fonts.regular,
+            fontSize: Fonts.textSm,
+            fontWeight: Fonts.wRegular,
+            height: 20 / 14,
+            letterSpacing: 0,
+            color: AppColors.white,
+          ),
+        ),
       ),
     );
   }
