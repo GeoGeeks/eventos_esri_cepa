@@ -148,6 +148,34 @@ void main() {
     expect(find.textContaining('Combobox'), findsNothing);
   });
 
+  testWidgets('el pie del filtro reserva 116 y las opciones no lo invaden', (
+    tester,
+  ) async {
+    await _montarAgenda(tester);
+
+    await tester.tap(find.byKey(const Key('boton-filtro')));
+    await tester.pumpAndSettle();
+
+    final lista = tester.getRect(
+      find.descendant(
+        of: find.byType(FiltroModal),
+        matching: find.byType(ListView),
+      ),
+    );
+    expect(lista.top, moreOrLessEquals(328, epsilon: 0.5));
+    expect(lista.bottom, moreOrLessEquals(801, epsilon: 0.5));
+    expect(lista.height, moreOrLessEquals(473, epsilon: 0.5));
+
+    for (final etiqueta in const ['Limpiar filtros', 'Aplicar']) {
+      final boton = tester.getRect(
+        find.ancestor(of: find.text(etiqueta), matching: find.byType(Container)).first,
+      );
+      expect(boton.height, moreOrLessEquals(32, epsilon: 0.5));
+      expect(917 - boton.bottom, moreOrLessEquals(50, epsilon: 0.5));
+      expect(boton.top, greaterThanOrEqualTo(lista.bottom));
+    }
+  });
+
   testWidgets('la pantalla no desborda a 412x917', (tester) async {
     await _montarAgenda(tester);
     expect(tester.takeException(), isNull);

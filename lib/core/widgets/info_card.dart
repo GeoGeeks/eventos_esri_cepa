@@ -1,15 +1,21 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/fonts.dart';
 import '../constants/icons.dart';
 import 'app_icons.dart';
+import 'fila_meta.dart';
 
 class InfoCard extends StatelessWidget {
   final String imagenAsset;
   final String titulo;
   final String subtitulo;
   final String? descripcion;
+  final String? fecha;
+  final String? lugar;
+  final bool expandida;
   final VoidCallback? onExpandir;
   final VoidCallback? onAgendar;
 
@@ -19,9 +25,16 @@ class InfoCard extends StatelessWidget {
     required this.titulo,
     required this.subtitulo,
     this.descripcion,
+    this.fecha,
+    this.lugar,
+    this.expandida = false,
     this.onExpandir,
     this.onAgendar,
   });
+
+  static const double anchoDetalle = 140;
+  static const double altoDetalle = 36;
+  static const double tamanoIconoDetalle = 15.975;
 
   @override
   Widget build(BuildContext context) {
@@ -110,17 +123,44 @@ class InfoCard extends StatelessWidget {
                       : Padding(
                           padding: const EdgeInsets.only(right: 5),
                           child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
                             onTap: onExpandir,
-                            child: const AppIcon(
-                              SvgIcon.arrow,
-                              width: 14,
-                              height: 8.4,
-                              fit: BoxFit.fill,
-                              color: AppColors.textMuted,
+                            child: Transform.rotate(
+                              angle: expandida ? math.pi : 0,
+                              child: const AppIcon(
+                                SvgIcon.arrow,
+                                width: 14,
+                                height: 8.4,
+                                fit: BoxFit.fill,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
                         ),
                 ),
+                if (expandida && (fecha != null || lugar != null)) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    key: const Key('info-detalle'),
+                    width: anchoDetalle,
+                    height: altoDetalle,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (fecha != null)
+                          FilaMeta(
+                            icono: SvgIcon.datetime,
+                            texto: fecha!,
+                            tamanoIcono: tamanoIconoDetalle,
+                          ),
+                        if (fecha != null && lugar != null)
+                          const SizedBox(height: 4),
+                        if (lugar != null)
+                          FilaMeta(icono: SvgIcon.lugar, texto: lugar!),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

@@ -6,6 +6,9 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/fonts.dart';
 import '../../../core/constants/icons.dart';
 import '../../../core/widgets/app_icons.dart';
+import '../../../core/widgets/detalle_actividad.dart';
+import '../../../core/widgets/etiqueta_chip.dart';
+import '../../../core/widgets/fila_meta.dart';
 import '../data/agenda_mock_data.dart';
 
 class ActividadCard extends StatelessWidget {
@@ -23,24 +26,6 @@ class ActividadCard extends StatelessWidget {
     this.onFavorito,
     required this.onValorar,
   });
-
-  static const _metaStyle = TextStyle(
-    fontFamily: Fonts.regular,
-    fontSize: Fonts.textSm,
-    fontWeight: Fonts.wRegular,
-    height: 16 / 14,
-    letterSpacing: 0,
-    color: AppColors.textSubtle,
-  );
-
-  static const _detalleStyle = TextStyle(
-    fontFamily: Fonts.light,
-    fontSize: Fonts.textSm,
-    fontWeight: Fonts.wLight,
-    height: 16 / 14,
-    letterSpacing: 0,
-    color: AppColors.modalSubtitle,
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +120,7 @@ class ActividadCard extends StatelessWidget {
                     actividad.ponente,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: _metaStyle,
+                    style: FilaMeta.estiloTexto,
                   ),
                 ),
                 GestureDetector(
@@ -165,16 +150,16 @@ class ActividadCard extends StatelessWidget {
           ),
 
           const SizedBox(height: 2),
-          _FilaMeta(icono: SvgIcon.lugar, texto: actividad.lugar),
+          FilaMeta(icono: SvgIcon.lugar, texto: actividad.lugar),
           const SizedBox(height: 2),
-          _FilaMeta(icono: SvgIcon.aforo, texto: actividad.aforo),
+          FilaMeta(icono: SvgIcon.aforo, texto: actividad.aforo),
 
           const SizedBox(height: 10),
 
           Row(
             children: [
               for (final etiqueta in actividad.etiquetas) ...[
-                _Etiqueta(texto: etiqueta),
+                EtiquetaChip(texto: etiqueta),
                 const SizedBox(width: 8),
               ],
               const Spacer(),
@@ -197,99 +182,13 @@ class ActividadCard extends StatelessWidget {
 
           if (expandida) ...[
             const SizedBox(height: 10),
-            Text(actividad.descripcion, style: _detalleStyle),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 16,
-              child: Text(
-                actividad.tituloObjetivos,
-                style: const TextStyle(
-                  fontFamily: Fonts.medium,
-                  fontSize: Fonts.textSm,
-                  fontWeight: Fonts.wMedium,
-                  height: 16 / 14,
-                  letterSpacing: 0,
-                  color: AppColors.modalSubtitle,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(left: 5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < actividad.objetivos.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 16),
-                    Text(
-                      '${i + 1}. ${actividad.objetivos[i]}',
-                      style: _detalleStyle,
-                    ),
-                  ],
-                ],
-              ),
+            DetalleActividad(
+              descripcion: actividad.descripcion,
+              tituloObjetivos: actividad.tituloObjetivos,
+              objetivos: actividad.objetivos,
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _FilaMeta extends StatelessWidget {
-  final String icono;
-  final String texto;
-
-  const _FilaMeta({required this.icono, required this.texto});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 16,
-      child: Row(
-        children: [
-          AppIcon(icono, width: 16, height: 16, color: AppColors.textSubtle),
-          const SizedBox(width: 2),
-          Expanded(
-            child: Text(
-              texto,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: ActividadCard._metaStyle,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Etiqueta extends StatelessWidget {
-  final String texto;
-
-  const _Etiqueta({required this.texto});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 24,
-      padding: const EdgeInsets.symmetric(horizontal: 9),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.chipBg,
-        border: Border.all(color: const Color(0x14000000)),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        texto,
-        style: const TextStyle(
-          fontFamily: Fonts.medium,
-          fontSize: Fonts.textXs,
-          fontWeight: Fonts.wMedium,
-          height: 16 / 12,
-          letterSpacing: 0,
-          color: AppColors.primary,
-        ),
       ),
     );
   }

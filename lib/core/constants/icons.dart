@@ -31,6 +31,7 @@ static const String avisoBorde =
   static const String agenda = 'assets/icons/agenda.svg';
 
   static const String x = 'assets/icons/x.svg';
+  static const String check = 'assets/icons/check.svg';
 
   static const String qr = 'assets/icons/qr.svg';
   static const String aforo = 'assets/icons/aforo.svg';

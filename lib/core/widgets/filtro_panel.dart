@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/fonts.dart';
+import 'casilla_verificacion.dart';
 
 class FiltroPanel extends StatelessWidget {
   final String titulo;
@@ -77,19 +78,7 @@ class _Opcion extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 14),
-            Container(
-              width: 13,
-              height: 13,
-              decoration: BoxDecoration(
-                color: marcada ? AppColors.primary : AppColors.white,
-                border: Border.all(
-                  color: marcada ? AppColors.primary : AppColors.textSubtle,
-                ),
-              ),
-              child: marcada
-                  ? const CustomPaint(painter: _Marca())
-                  : null,
-            ),
+            CasillaVerificacion(marcada: marcada, lado: 13),
             const SizedBox(width: 13),
             Expanded(
               child: Text(
@@ -111,28 +100,4 @@ class _Opcion extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Marca extends CustomPainter {
-  const _Marca();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final trazo = Paint()
-      ..color = AppColors.white
-      ..strokeWidth = 1.6
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..style = PaintingStyle.stroke;
-
-    final camino = Path()
-      ..moveTo(size.width * 0.22, size.height * 0.52)
-      ..lineTo(size.width * 0.44, size.height * 0.74)
-      ..lineTo(size.width * 0.80, size.height * 0.30);
-
-    canvas.drawPath(camino, trazo);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

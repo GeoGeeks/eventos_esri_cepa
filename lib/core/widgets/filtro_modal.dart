@@ -23,6 +23,8 @@ class FiltroModal extends StatefulWidget {
 }
 
 class _FiltroModalState extends State<FiltroModal> {
+  static const double _altoPie = 116;
+
   late final Map<String, Set<String>> _seleccion = {
     for (final grupo in widget.grupos)
       grupo.etiqueta: {...?widget.seleccion[grupo.etiqueta]},
@@ -167,25 +169,29 @@ class _FiltroModalState extends State<FiltroModal> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 26, bottom: 50),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          _BotonFiltro(
-                            ancho: 115,
-                            etiqueta: 'Limpiar filtros',
-                            relleno: false,
-                            onTap: _limpiar,
-                          ),
-                          const SizedBox(width: 8),
-                          _BotonFiltro(
-                            ancho: 70,
-                            etiqueta: 'Aplicar',
-                            relleno: true,
-                            onTap: _aplicar,
-                          ),
-                        ],
+                    SizedBox(
+                      height: _altoPie,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 26, bottom: 50),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _BotonFiltro(
+                              ancho: 115,
+                              etiqueta: 'Limpiar filtros',
+                              relleno: false,
+                              onTap: _limpiar,
+                            ),
+                            const SizedBox(width: 8),
+                            _BotonFiltro(
+                              ancho: 70,
+                              etiqueta: 'Aplicar',
+                              relleno: true,
+                              onTap: _aplicar,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
