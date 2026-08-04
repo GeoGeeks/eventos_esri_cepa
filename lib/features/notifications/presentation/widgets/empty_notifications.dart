@@ -1,69 +1,75 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/fonts.dart';
+
 class EmptyNotifications extends StatelessWidget {
   const EmptyNotifications({super.key});
 
-  // Color exacto del CSS de "Sin Notificaciones"
-  static const _azulTexto = Color(0xFF1B8ADD);
-  static const _fontFamily = 'Avenir Next LT Pro';
-
-  static const _imagePath =
+  static const Color _azulTexto = Color(0xFF1B8ADD);
+  static const String _imagePath =
       'assets/images/notificaciones/notificaciones.png';
+
+
+  static const double _imageTop = 197 - 80; // 117
+  static const double _title1Top = 498 - 80; // 418
+  static const double _title2Top = 538 - 80; // 458
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // tarjeta_no_notications 1 -> 249x317
-            Image.asset(
-              _imagePath,
-              width: 249,
-              height: 317,
-              fit: BoxFit.contain,
-            ),
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
 
-            const SizedBox(height: 24),
-
-            // "No tiene notificaciones" -> 26px / 32 / weight 500 / #1B8ADD
-            const SizedBox(
-              width: 275,
-              child: Text(
-                'No tiene notificaciones',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: _fontFamily,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w500,
-                  height: 32 / 26,
-                  color: _azulTexto,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // "Cuando reciba una notificación, la verá aquí." -> 20px / 24 / weight 400 / #1B8ADD
-            const SizedBox(
-              width: 290,
-              child: Text(
-                'Cuando reciba una notificación,\nla verá aquí.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: _fontFamily,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
-                  height: 24 / 20,
-                  color: _azulTexto,
-                ),
-              ),
-            ),
-          ],
+        Positioned(
+          top: _imageTop,
+          child: Image.asset(
+            _imagePath,
+            width: 249,
+            height: 317,
+            fit: BoxFit.contain,
+          ),
         ),
-      ),
+
+        Positioned(
+          top: _title1Top,
+          child: const SizedBox(
+            width: 275,
+            child: Text(
+              'No tiene notificaciones',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.visible,
+              style: TextStyle(
+                fontFamily: Fonts.medium,
+                fontWeight: Fonts.wMedium,
+                fontSize: 26,
+                height: 32 / 26,
+                color: _azulTexto,
+              ),
+            ),
+          ),
+        ),
+
+        // "Cuando reciba una notificación, la verá aquí."
+        Positioned(
+          top: _title2Top,
+          child: const SizedBox(
+            width: 290,
+            child: Text(
+              'Cuando reciba una notificación, la verá aquí.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: Fonts.regular,
+                fontWeight: Fonts.wRegular,
+                fontSize: 20,
+                height: 24 / 20,
+                color: _azulTexto,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

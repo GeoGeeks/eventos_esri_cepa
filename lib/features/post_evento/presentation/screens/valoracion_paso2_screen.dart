@@ -1,6 +1,13 @@
+import 'dart:math' as math;
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
+// Constantes globales de tu arquitectura
+import '../../../../core/constants/fonts.dart';
+import '../../../../core/constants/icons.dart';
+import '../../../../core/widgets/app_icons.dart';
+
 import '../widgets/valoracion_success_dialog.dart';
 
 class ValoracionPaso2Screen extends StatefulWidget {
@@ -24,218 +31,210 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
   bool acepta1 = false;
   bool acepta2 = false;
 
-  final opciones = ['Sí', 'No'];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-
+      backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          physics: const BouncingScrollPhysics(), // ✅ agregado
+          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// BOTON ATRAS
+              /// BOTÓN ATRÁS ("Boton-chatbot": circle 36x36, azul #007AC2)
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   width: 36,
                   height: 36,
                   decoration: const BoxDecoration(
-                    color: AppColors.primary,
+                    color: Color(0xFF007AC2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.chevron_left, color: Colors.white),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              const Center(
-                child: Text(
-                  'Queremos saber tu opinión',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.modalSubtitle,
+                  alignment: Alignment.center,
+                  child: const AppIcon(
+                    SvgIcon.back,
+                    width: 8.414,
+                    height: 14,
+                    color: Color(0xFFFFFFFF),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 6),
+              const SizedBox(height: 16),
 
-              const Center(
-                child: Text(
-                  'CUE 2026',
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.w500),
+              /// TÍTULO / CABECERA
+              Center(
+                child: Column(
+                  children: [
+                    const Text(
+                      'Queremos saber su opinión',
+                      style: TextStyle(
+                        fontFamily: Fonts.regular,
+                        fontWeight: Fonts.wRegular,
+                        fontSize: Fonts.text0h,
+                        height: 20 / 16,
+                        color: Color(0xFF4A4A4A),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'CUE 2026',
+                      style: TextStyle(
+                        fontFamily: Fonts.medium,
+                        fontWeight: Fonts.wMedium,
+                        fontSize: Fonts.text3h,
+                        height: 32 / 26,
+                        color: Color(0xFF141414),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 28),
 
-              /// STEPPER
+              /// STEP-BARS (360x2, gap 12) — ambas barras completas (azul)
               Row(
                 children: [
                   Expanded(
-                    child: Container(height: 2, color: AppColors.primary),
+                    child: Container(
+                      height: 2,
+                      color: const Color(0xFF007AC2),
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Container(height: 2, color: AppColors.primary),
+                    child: Container(
+                      height: 2,
+                      color: const Color(0xFF007AC2),
+                    ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               /// Desea ser contactado
-              _dropdown(
-                titulo: 'Desea ser contactado',
+              _buildDropdown(
+                label: 'Desea ser contactado',
                 value: deseaContacto,
-                onChanged: (v) {
-                  setState(() {
-                    deseaContacto = v;
-                  });
-                },
+                onChanged: (v) => setState(() => deseaContacto = v),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
 
-              /// Volvería a participar
-              _dropdown(
-                titulo: 'Volvería a participar',
+              /// Volvería a participar (1)
+              _buildDropdown(
+                label: 'Volvería a participar',
                 value: volveria1,
-                onChanged: (v) {
-                  setState(() {
-                    volveria1 = v;
-                  });
-                },
+                onChanged: (v) => setState(() => volveria1 = v),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
 
-              /// Laboratorio
-              _dropdown(
-                titulo: 'Participó en los Laboratorios de entrenamiento',
+              /// Participó en los Laboratorios de entrenamiento (1)
+              _buildDropdown(
+                label: 'Participó en los Laboratorios de entrenamiento',
                 value: laboratorio1,
-                onChanged: (v) {
-                  setState(() {
-                    laboratorio1 = v;
-                  });
-                },
+                onChanged: (v) => setState(() => laboratorio1 = v),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
 
-              /// Laboratorio 2
-              _dropdown(
-                titulo: 'Participó en los Laboratorios de entrenamiento',
+              /// Participó en los Laboratorios de entrenamiento (2)
+              _buildDropdown(
+                label: 'Participó en los Laboratorios de entrenamiento',
                 value: laboratorio2,
-                onChanged: (v) {
-                  setState(() {
-                    laboratorio2 = v;
-                  });
-                },
+                onChanged: (v) => setState(() => laboratorio2 = v),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
 
-              const Text(
-                'Seleccione los días en los que participó',
-                style: TextStyle(fontSize: 15),
+              /// SELECCIONE LOS DÍAS EN LOS QUE PARTICIPÓ
+              RichText(
+                text: const TextSpan(
+                  style: TextStyle(
+                    fontFamily: Fonts.regular,
+                    fontWeight: Fonts.wRegular,
+                    fontSize: Fonts.text0h,
+                    height: 20 / 16,
+                    color: Color(0xFF141414),
+                  ),
+                  children: [
+                    TextSpan(
+                      text: 'Seleccione los días en los que participó',
+                    ),
+                    TextSpan(
+                      text: ' *',
+                      style: TextStyle(color: Color(0xFFD83020)),
+                    ),
+                  ],
+                ),
               ),
 
-              const SizedBox(height: 10),
-
-              CheckboxListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                value: dia1,
-                onChanged: (v) {
-                  setState(() => dia1 = v!);
-                },
-                title: const Text('Día 1'),
-                controlAffinity: ListTileControlAffinity.leading,
+              /// LISTA (checkboxes 16x16, icono: cuadro)
+              Column(
+                children: [
+                  _buildCheckboxTile(
+                    label: 'Día 1',
+                    value: dia1,
+                    onChanged: (v) => setState(() => dia1 = v),
+                  ),
+                  _buildCheckboxTile(
+                    label: 'Día 2',
+                    value: dia2,
+                    onChanged: (v) => setState(() => dia2 = v),
+                  ),
+                  _buildCheckboxTile(
+                    label: 'Día 3',
+                    value: dia3,
+                    onChanged: (v) => setState(() => dia3 = v),
+                  ),
+                ],
               ),
 
-              CheckboxListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                value: dia2,
-                onChanged: (v) {
-                  setState(() => dia2 = v!);
-                },
-                title: const Text('Día 2'),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
+              const SizedBox(height: 12),
 
-              CheckboxListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                value: dia3,
-                onChanged: (v) {
-                  setState(() => dia3 = v!);
-                },
-                title: const Text('Día 3'),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-
-              const SizedBox(height: 18),
-
-              /// Volvería
-              _dropdown(
-                titulo: 'Volvería a participar',
+              /// Volvería a participar (2)
+              _buildDropdown(
+                label: 'Volvería a participar',
                 value: volveria2,
-                onChanged: (v) {
-                  setState(() {
-                    volveria2 = v;
-                  });
-                },
+                onChanged: (v) => setState(() => volveria2 = v),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
 
-              CheckboxListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
+              /// CHECKBOX 1: Autorizo... (14x14, con enlace Términos y Condiciones)
+              _buildTermsCheckbox(
                 value: acepta1,
-                onChanged: (v) {
-                  setState(() {
-                    acepta1 = v!;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
-                title: const Text(
-                  'Autorizo el tratamiento de mis datos y acepto los Términos y Condiciones.',
-                  style: TextStyle(fontSize: 12),
-                ),
+                onChanged: (v) => setState(() => acepta1 = v),
+                showLink: true,
               ),
 
-              CheckboxListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
+              /// CHECKBOX 2: Autorizo... (14x14, sin gap-top adicional)
+              _buildTermsCheckbox(
                 value: acepta2,
-                onChanged: (v) {
-                  setState(() {
-                    acepta2 = v!;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
-                title: const Text(
-                  'Autorizo el tratamiento de mis datos y acepto los Términos y Condiciones.',
-                  style: TextStyle(fontSize: 12),
-                ),
+                onChanged: (v) => setState(() => acepta2 = v),
+                showLink: false,
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 28),
 
+              /// BOTÓN CONTINUAR (360x44, azul #007AC2, texto #F7F7F7)
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 44,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: const Color(0xFF007AC2),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    elevation: 0,
                   ),
                   onPressed: () {
                     showDialog(
@@ -247,12 +246,18 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                   },
                   child: const Text(
                     'Continuar',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontWeight: Fonts.wRegular,
+                      fontSize: Fonts.text0h,
+                      height: 20 / 16,
+                      color: Color(0xFFF7F7F7),
+                    ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -260,8 +265,10 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
     );
   }
 
-  Widget _dropdown({
-    required String titulo,
+  /// Dropdown "Input Time Zone": label + combobox 360x44.
+  /// chevron-down: mismo asset del botón "atrás" (back.svg), rotado -90°.
+  Widget _buildDropdown({
+    required String label,
     required String? value,
     required ValueChanged<String?> onChanged,
   }) {
@@ -270,32 +277,223 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
       children: [
         RichText(
           text: TextSpan(
-            style: const TextStyle(color: Colors.black, fontSize: 15),
+            style: const TextStyle(
+              fontFamily: Fonts.regular,
+              fontWeight: Fonts.wRegular,
+              fontSize: Fonts.text0h,
+              height: 20 / 16,
+              color: Color(0xFF141414),
+            ),
             children: [
-              TextSpan(text: titulo),
+              TextSpan(text: label),
               const TextSpan(
                 text: ' *',
-                style: TextStyle(color: AppColors.requiredField),
+                style: TextStyle(color: Color(0xFFD83020)),
               ),
             ],
           ),
         ),
-
         const SizedBox(height: 8),
-
-        DropdownButtonFormField<String>(
-          value: value,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFFFF),
+            border: Border.all(color: const Color(0xFF949494), width: 1),
           ),
-          hint: const Text('Seleccione'),
-          items: opciones
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: onChanged,
+          padding: const EdgeInsets.only(left: 16, right: 10),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: value,
+              isExpanded: true,
+              icon: SizedBox(
+                width: 24,
+                height: 24,
+                child: Center(
+                  child: Transform.rotate(
+                    angle: -math.pi / 2,
+                    child: const AppIcon(
+                      SvgIcon.back,
+                      width: 8.414,
+                      height: 14,
+                      color: Color(0xFF6B6B6B),
+                    ),
+                  ),
+                ),
+              ),
+              hint: const Text(
+                'Seleccione',
+                style: TextStyle(
+                  fontFamily: Fonts.light,
+                  fontWeight: Fonts.wLight,
+                  fontSize: Fonts.text0h,
+                  height: 20 / 16,
+                  color: Color(0xFF6B6B6B),
+                ),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: 'si',
+                  child: Text(
+                    'Sí',
+                    style: TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontSize: Fonts.text0h,
+                      color: Color(0xFF141414),
+                    ),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'no',
+                  child: Text(
+                    'No',
+                    style: TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontSize: Fonts.text0h,
+                      color: Color(0xFF141414),
+                    ),
+                  ),
+                ),
+              ],
+              onChanged: onChanged,
+            ),
+          ),
         ),
       ],
+    );
+  }
+
+  /// Checkbox 16x16 (icono: cuadro) para "Seleccione los días...".
+  Widget _buildCheckboxTile({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return SizedBox(
+      height: 32,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(!value),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 24,
+              child: Center(
+                child: value
+                    ? Container(
+                        width: 16,
+                        height: 16,
+                        color: const Color(0xFF007AC2),
+                        child: const Icon(
+                          Icons.check,
+                          size: 12,
+                          color: Color(0xFFFFFFFF),
+                        ),
+                      )
+                    : AppIcon(
+                        SvgIcon.cuadro,
+                        width: 16,
+                        height: 16,
+                        color: const Color(0xFF949494),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontFamily: Fonts.regular,
+                fontWeight: Fonts.wRegular,
+                fontSize: Fonts.text0h,
+                height: 20 / 16,
+                color: Color(0xFF141414),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Checkbox 14x14 (icono: cuadro) para "Autorizo el tratamiento...".
+  /// [showLink] resalta "Términos y Condiciones" en azul y lo hace tappable.
+  Widget _buildTermsCheckbox({
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    required bool showLink,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(!value),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: value
+                  ? Container(
+                      width: 14,
+                      height: 14,
+                      color: const Color(0xFF007AC2),
+                      child: const Icon(
+                        Icons.check,
+                        size: 11,
+                        color: Color(0xFFFFFFFF),
+                      ),
+                    )
+                  : AppIcon(
+                      SvgIcon.cuadro,
+                      width: 14,
+                      height: 14,
+                      color: const Color(0xFF949494),
+                    ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: showLink
+                  ? RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          fontFamily: Fonts.light,
+                          fontWeight: Fonts.wLight,
+                          fontSize: 14,
+                          height: 16 / 14,
+                          color: Color(0xFF141414),
+                        ),
+                        children: [
+                          const TextSpan(
+                            text:
+                                'Autorizo el tratamiento de mis datos y acepto los ',
+                          ),
+                          TextSpan(
+                            text: 'Términos y Condiciones.',
+                            style: const TextStyle(
+                              color: Color(0xFF007AC2),
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                // TODO: navegar a Términos y Condiciones
+                              },
+                          ),
+                        ],
+                      ),
+                    )
+                  : const Text(
+                      'Autorizo el tratamiento de mis datos y acepto los '
+                      'Términos y Condiciones.',
+                      style: TextStyle(
+                        fontFamily: Fonts.light,
+                        fontWeight: Fonts.wLight,
+                        fontSize: 14,
+                        height: 16 / 14,
+                        color: Color(0xFF141414),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

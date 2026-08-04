@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 
 class ProfileMenuItem extends StatelessWidget {
@@ -28,7 +30,7 @@ class ProfileMenuItem extends StatelessWidget {
           // List Item: 362px x 56px
           width: 362,
           height: 56,
-          // 🛑 Indentación de 16px hacia la derecha respecto al título de sección
+          // Indentación de 16px hacia la derecha respecto al título de sección
           padding: const EdgeInsets.only(left: 16),
           child: Container(
             // bordered-container: 346px x 56px (362 - 16 = 346)
@@ -36,7 +38,7 @@ class ProfileMenuItem extends StatelessWidget {
               border: showBorder
                   ? const Border(
                       bottom: BorderSide(
-                        color: Color(0xFFF2F2F2),
+                        color: AppColors.surface3,
                         width: 1,
                       ),
                     )
@@ -57,7 +59,7 @@ class ProfileMenuItem extends StatelessWidget {
                       height: 24,
                       fit: BoxFit.contain,
                       colorFilter: const ColorFilter.mode(
-                        Color(0xFF949494),
+                        AppColors.textSubtle,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -75,7 +77,7 @@ class ProfileMenuItem extends StatelessWidget {
                         fontFamily: Fonts.regular,
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF141414),
+                        color: AppColors.textTitle,
                         height: 1.25,
                       ),
                       maxLines: 1,

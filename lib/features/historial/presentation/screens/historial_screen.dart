@@ -40,32 +40,35 @@ class _HistorialScreenState extends State<HistorialScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final eventos = filteredEvents;
     final screenWidth = MediaQuery.of(context).size.width;
     final rightPadding = math.max(0.0, (screenWidth - 360) / 2);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: SizedBox(
-          width: 412,
-          height: 917,
-          child: SafeArea(
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // --- HEADER ---
-                    Container(
-                      width: 360,
-                      height: 86,
-                      margin: const EdgeInsets.fromLTRB(26, 36, 26, 0),
+    return GestureDetector(
+      onTap: () {
+        if (showFilter) {
+          setState(() => showFilter = false);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: 360,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 36, bottom: 80),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          SizedBox(
+                        children: [
+                          // --- HEADER ---
+                          const SizedBox(
                             width: 360,
-                            height: 32,
                             child: Text(
                               'Historial de Eventos',
                               style: TextStyle(
@@ -77,10 +80,9 @@ class _HistorialScreenState extends State<HistorialScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 14),
-                          SizedBox(
+                          const SizedBox(height: 14),
+                          const SizedBox(
                             width: 360,
-                            height: 40,
                             child: Text(
                               'Encuentre la información sobre los eventos pasados en los que ha participado.',
                               style: TextStyle(
@@ -92,26 +94,19 @@ class _HistorialScreenState extends State<HistorialScreen> {
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
 
-                    // --- CONTENEDOR PRINCIPAL DE BÚSQUEDA Y LISTA ---
-                    Container(
-                      width: 360,
-                      height: 470,
-                      margin: const EdgeInsets.fromLTRB(26, 26, 26, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          const SizedBox(height: 26),
+
+                          // --- BUSCADOR + FILTRO ---
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Input de Búsqueda
                               Expanded(
                                 child: SizedBox(
                                   height: 32,
                                   child: TextField(
-                                    onChanged: (v) => setState(() => query = v),
+                                    onChanged: (v) =>
+                                        setState(() => query = v),
                                     style: const TextStyle(
                                       fontFamily: Fonts.regular,
                                       fontSize: 16,
@@ -128,7 +123,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                                       ),
                                       prefixIcon: Padding(
                                         padding: EdgeInsets.only(
-                                            left: 12, right: 8),
+                                            left: 13, right: 8),
                                         child: Icon(
                                           Icons.search,
                                           size: 16,
@@ -136,12 +131,13 @@ class _HistorialScreenState extends State<HistorialScreen> {
                                         ),
                                       ),
                                       prefixIconConstraints: BoxConstraints(
-                                        minWidth: 36,
+                                        minWidth: 37,
                                         minHeight: 16,
                                       ),
-                                      contentPadding: EdgeInsets.symmetric(
-                                        vertical: 6,
-                                        horizontal: 0,
+                                      contentPadding: EdgeInsets.only(
+                                        top: 6,
+                                        bottom: 6,
+                                        right: 12,
                                       ),
                                       filled: true,
                                       fillColor: Colors.white,
@@ -171,72 +167,80 @@ class _HistorialScreenState extends State<HistorialScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 8),
                               _SplitFilterButton(
-                                onTap: () =>
-                                    setState(() => showFilter = !showFilter),
+                                onTap: () => setState(
+                                  () => showFilter = !showFilter,
+                                ),
                               ),
                             ],
                           ),
+
                           const SizedBox(height: 24),
-                          Expanded(
-                            child: filteredEvents.isEmpty
-                                ? const Center(
-                                    child: Text(
-                                      'No hay eventos pasados',
-                                      style: TextStyle(
-                                        fontFamily: Fonts.regular,
-                                        color: Color(0xFF6B6B6B),
-                                      ),
-                                    ),
-                                  )
-                                : ListView.separated(
-                                    padding: EdgeInsets.zero,
-                                    itemCount: filteredEvents.length,
-                                    separatorBuilder: (_, __) =>
-                                        const SizedBox(height: 12),
-                                    itemBuilder: (context, index) {
-                                      final evento = filteredEvents[index];
-                                      return UpcomingEventCard(
-                                        title: evento.titulo,
-                                        date: '${evento.fecha} - ${evento.hora}',
-                                        location: evento.direccion,
-                                        image: evento.image,
-                                        mode: evento.presencial
-                                            ? 'Presencial'
-                                            : 'Virtual',
-                                        isHistorial: true,
-                                        estado: evento.estado,
-                                        onViewMore: () {
-                                          if (widget.onOpenPostEvento != null) {
-                                            widget.onOpenPostEvento!();
-                                          }
-                                        },
-                                        onRegister: () {},
-                                      );
-                                    },
+
+                          // --- LISTA DE EVENTOS (dentro del mismo scroll) ---
+                          if (eventos.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 40),
+                              child: Center(
+                                child: Text(
+                                  'No hay eventos pasados',
+                                  style: TextStyle(
+                                    fontFamily: Fonts.regular,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFF6B6B6B),
                                   ),
-                          ),
+                                ),
+                              ),
+                            )
+                          else
+                            for (var i = 0; i < eventos.length; i++)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: i == eventos.length - 1 ? 0 : 12,
+                                ),
+                                child: UpcomingEventCard(
+                                  title: eventos[i].titulo,
+                                  date:
+                                      '${eventos[i].fecha} - ${eventos[i].hora}',
+                                  location: eventos[i].direccion,
+                                  image: eventos[i].image,
+                                  mode: eventos[i].presencial
+                                      ? 'Presencial'
+                                      : 'Virtual',
+                                  isHistorial: true,
+                                  estado: eventos[i].estado,
+                                  onViewMore: () {
+                                    if (widget.onOpenPostEvento != null) {
+                                      widget.onOpenPostEvento!();
+                                    }
+                                  },
+                                  onRegister: () {},
+                                ),
+                              ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-
-                // --- MENU DROPDOWN DE FILTRO ---
-                if (showFilter)
-                  Positioned(
-                    top: 184,
-                    right: rightPadding,
-                    child: _FilterDropdownContainer(
-                      virtualSelected: virtualSelected,
-                      presencialSelected: presencialSelected,
-                      onVirtualChanged: (val) => setState(() => virtualSelected = val),
-                      onPresencialChanged: (val) => setState(() => presencialSelected = val),
-                    ),
                   ),
-              ],
-            ),
+                ),
+              ),
+
+              // --- MENU DROPDOWN DE FILTRO ---
+              if (showFilter)
+                Positioned(
+                  top: 184,
+                  right: rightPadding,
+                  child: _FilterDropdownContainer(
+                    virtualSelected: virtualSelected,
+                    presencialSelected: presencialSelected,
+                    onVirtualChanged: (val) =>
+                        setState(() => virtualSelected = val),
+                    onPresencialChanged: (val) =>
+                        setState(() => presencialSelected = val),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -257,7 +261,6 @@ class _SplitFilterButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 1. Icono Filtro
           InkWell(
             onTap: onTap,
             child: Container(
@@ -282,8 +285,6 @@ class _SplitFilterButton extends StatelessWidget {
               ),
             ),
           ),
-
-          // 2. Línea divisoria
           Container(
             width: 1,
             height: 32,
@@ -292,11 +293,9 @@ class _SplitFilterButton extends StatelessWidget {
             child: Container(
               width: 1,
               height: 24,
-              color: Colors.white,
+              color: const Color(0xFFFFFFFF),
             ),
           ),
-
-          // 3. Dropdown Chevron
           InkWell(
             onTap: onTap,
             child: Container(
@@ -305,23 +304,21 @@ class _SplitFilterButton extends StatelessWidget {
               color: const Color(0xFF007AC2),
               alignment: Alignment.center,
               child: SizedBox(
-                width: 16,
-                height: 16,
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/icons/arrow.svg',
-                    width: 8,
-                    height: 5.41,
-                    fit: BoxFit.contain,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
-                    placeholderBuilder: (context) => const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white,
-                      size: 12,
-                    ),
+                width: 8,
+                height: 5.414,
+                child: SvgPicture.asset(
+                  'assets/icons/arrow.svg',
+                  width: 8,
+                  height: 5.414,
+                  fit: BoxFit.contain,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  placeholderBuilder: (context) => const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Colors.white,
+                    size: 12,
                   ),
                 ),
               ),
@@ -373,7 +370,6 @@ class _FilterDropdownContainer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Título "Modalidad"
             const SizedBox(
               width: 219,
               height: 16,
@@ -389,8 +385,6 @@ class _FilterDropdownContainer extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-
-            // Línea divisoria
             SizedBox(
               width: 219,
               height: 1,
@@ -399,8 +393,6 @@ class _FilterDropdownContainer extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-
-            // Opciones de filtro
             SizedBox(
               width: 219,
               height: 64,
@@ -448,7 +440,6 @@ class _FilterOptionItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
             children: [
-              // Cuadro Checkbox (16px x 16px)
               Container(
                 width: 16,
                 height: 16,
@@ -471,7 +462,6 @@ class _FilterOptionItem extends StatelessWidget {
                     : null,
               ),
               const SizedBox(width: 12),
-              // Texto de la opción
               Text(
                 label,
                 style: const TextStyle(

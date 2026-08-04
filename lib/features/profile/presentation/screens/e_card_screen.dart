@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../../../core/constants/icons.dart';
+import '../../../../core/widgets/app_icons.dart';
 import '../../data/ecard_visibility_config.dart';
 import '../widgets/e_card_action_button.dart';
 import '../widgets/e_card_config_modal.dart';
@@ -42,47 +46,54 @@ class _ECardScreenState extends State<ECardScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFEBEBEB),
+      color: AppColors.lightGray,
       child: SafeArea(
         child: Stack(
           children: [
             Column(
               children: [
-                /// Appbar superior con botones
+                /// Appbar superior con botones (36x36, círculo azul)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(26, 16, 26, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      /// Botón atrás
                       GestureDetector(
                         onTap: widget.onBack,
                         child: Container(
                           width: 36,
                           height: 36,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF007AC2),
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.chevron_left,
-                            color: Colors.white,
-                            size: 24,
+                          alignment: Alignment.center,
+                          child: const AppIcon(
+                            SvgIcon.back,
+                            width: 8.414,
+                            height: 14,
+                            color: AppColors.white,
                           ),
                         ),
                       ),
+
+                      /// Botón configuración
                       GestureDetector(
                         onTap: _openConfig,
                         child: Container(
                           width: 36,
                           height: 36,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF007AC2),
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.settings_outlined,
-                            color: Colors.white,
-                            size: 20,
+                          alignment: Alignment.center,
+                          child: const AppIcon(
+                            SvgIcon.configuracion,
+                            width: 16,
+                            height: 16,
+                            color: AppColors.white,
                           ),
                         ),
                       ),
@@ -97,8 +108,8 @@ class _ECardScreenState extends State<ECardScreen> {
                     child: Column(
                       children: [
                         const SizedBox(height: 16),
-                        
-                        /// Seccion Titulo (360x86px con gap: 14px segun CSS)
+
+                        /// Sección Título
                         SizedBox(
                           width: 360,
                           child: Column(
@@ -107,27 +118,28 @@ class _ECardScreenState extends State<ECardScreen> {
                                 'E-card',
                                 style: TextStyle(
                                   fontFamily: Fonts.medium,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF141414),
+                                  fontWeight: Fonts.wMedium,
+                                  fontSize: Fonts.text3h,
+                                  height: 32 / 26,
+                                  color: AppColors.textTitle,
                                 ),
                               ),
-                              SizedBox(height: 14), // gap: 14px del CSS
+                              SizedBox(height: 14),
                               Text(
                                 'Utilice este código para identificarse y conectar con otros asistentes.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: Fonts.regular,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: Fonts.wRegular,
+                                  fontSize: Fonts.text0h,
                                   height: 20 / 16,
-                                  color: Color(0xFF6B6B6B),
+                                  color: AppColors.textMuted,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
 
                         /// Tarjeta E-Card Widget
@@ -137,18 +149,18 @@ class _ECardScreenState extends State<ECardScreen> {
 
                         const SizedBox(height: 24),
 
-                        /// Botones de accion (gap: 24px entre ellos del CSS)
+                        /// Botones de acción
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ECardActionButton(
-                              icon: Icons.ios_share,
+                              iconAsset: SvgIcon.compartir,
                               label: 'Compartir',
                               onTap: () {},
                             ),
                             const SizedBox(width: 24),
                             ECardActionButton(
-                              icon: Icons.save_alt_outlined,
+                              iconAsset: SvgIcon.guardar,
                               label: 'Guardar',
                               onTap: () {},
                             ),
@@ -162,7 +174,7 @@ class _ECardScreenState extends State<ECardScreen> {
               ],
             ),
 
-            /// Notification Toast Flotante
+            /// Notification Toast Flotante (Calcite Notice Component Spec Exacto)
             if (_showNotification)
               Positioned(
                 top: 15,
@@ -170,40 +182,52 @@ class _ECardScreenState extends State<ECardScreen> {
                 right: 0,
                 child: Center(
                   child: Container(
-                    width: 360,
+                    width: 372,
                     height: 92,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF6FBF6), // Fondo verde muy claro
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: const Color(0x8035AC46), // Borde verde con opacidad
+                        color: const Color.fromRGBO(53, 172, 70, 0.5),
                         width: 1,
+                      ),
+                    ),
+                    foregroundDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: const LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Color.fromRGBO(53, 172, 70, 0.05),
+                          Color.fromRGBO(53, 172, 70, 0.05),
+                        ],
                       ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        /// Icono Check
-                        Container(
+                        /// ICONO IZQUIERDO (Check circle: vector 14.6px x 14.6px)
+                        const SizedBox(
                           width: 36,
-                          height: 56,
-                          padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: Color(0xFF288835),
+                          child: Center(
+                            child: AppIcon(
+                              SvgIcon.ecard1,
+                              width: 14.6,
+                              height: 14.6,
+                              color: Color(0xFF288835),
+                            ),
                           ),
                         ),
 
-                        /// Textos
+                        /// CONTENIDO DE TEXTO
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 11),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: const [
                                 Text(
                                   'Configuración actualizada.',
@@ -211,21 +235,21 @@ class _ECardScreenState extends State<ECardScreen> {
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontFamily: Fonts.medium,
+                                    fontWeight: Fonts.wMedium,
                                     fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.25,
+                                    height: 20 / 16,
                                     color: Color(0xFF141414),
                                   ),
                                 ),
-                                SizedBox(height: 2),
+                                SizedBox(height: 4),
                                 Text(
                                   'Los cambios ya están disponibles al escanear el código QR.',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontFamily: Fonts.regular,
+                                    fontWeight: Fonts.wRegular,
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w400,
                                     height: 16 / 14,
                                     color: Color(0xFF4A4A4A),
                                   ),
@@ -235,23 +259,23 @@ class _ECardScreenState extends State<ECardScreen> {
                           ),
                         ),
 
-                        /// Botón Cerrar (X)
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _showNotification = false;
-                            });
-                          },
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            width: 44,
-                            height: 32,
-                            padding: const EdgeInsets.only(right: 6),
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.close,
-                              size: 16,
-                              color: Color(0xFF6B6B6B),
+                        /// BOTÓN DE CIERRE (X: vector exacto Figma 8.04px x 8.02px)
+                        SizedBox(
+                          width: 44,
+                          height: 32,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _showNotification = false;
+                              });
+                            },
+                            child: const Center(
+                              child: AppIcon(
+                                SvgIcon.x,
+                                width: 8.04,
+                                height: 8.02,
+                                color: Color(0xFF6B6B6B),
+                              ),
                             ),
                           ),
                         ),
@@ -264,5 +288,5 @@ class _ECardScreenState extends State<ECardScreen> {
         ),
       ),
     );
-  }  
+  }
 }

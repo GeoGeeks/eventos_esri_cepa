@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/fonts.dart';
+
 class NotificationItem extends StatelessWidget {
   final String title;
   final String description;
@@ -15,23 +18,15 @@ class NotificationItem extends StatelessWidget {
     this.isNew = false,
   });
 
-  // Colores exactos del CSS de Figma
-  static const _azul = Color(0xFF007AC2);
-  static const _azulOscuro = Color(0xFF00619B);
-  static const _circleBg = Color(0xFFD6EFFF);
-  static const _textDark = Color(0xFF141414);
-  static const _textGray = Color(0xFF4A4A4A);
-  static const _textLightGray = Color(0xFF6B6B6B);
-  static const _newBg = Color(0xFFEBEBEB);
-
-  static const _fontFamily = 'Avenir Next LT Pro';
-  static const _dateTimeIcon = 'assets/icons/date-time.svg';
+  static const String _dateTimeIcon = 'assets/icons/date-time.svg';
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 360,
       constraints: const BoxConstraints(minHeight: 88),
+      // isNew: padding 16px (todos los lados) -> notificación #EBEBEB
+      // normal: padding 16px 12px -> notificación transparente
       padding: isNew
           ? const EdgeInsets.all(16)
           : const EdgeInsets.symmetric(
@@ -39,19 +34,19 @@ class NotificationItem extends StatelessWidget {
               vertical: 16,
             ),
       decoration: BoxDecoration(
-        color: isNew ? _newBg : Colors.transparent,
+        color: isNew ? AppColors.lightGray : Colors.transparent, // #EBEBEB
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // icon (Group 3 / Ellipse 7 + date-time.svg)
+          // Icono Avatar (Group 3 / Ellipse 7 + date-time icon)
           Container(
             width: 44,
             height: 44,
             alignment: Alignment.center,
             decoration: const BoxDecoration(
-              color: _circleBg,
+              color: AppColors.chipBg, // #D6EFFF
               shape: BoxShape.circle,
             ),
             child: SvgPicture.asset(
@@ -59,12 +54,11 @@ class NotificationItem extends StatelessWidget {
               width: 24,
               height: 24,
               colorFilter: const ColorFilter.mode(
-                _azulOscuro,
+                AppColors.filterButtonText, // #00619B
                 BlendMode.srcIn,
               ),
             ),
           ),
-
           const SizedBox(width: 12),
 
           // text-container
@@ -72,97 +66,139 @@ class NotificationItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Frame 1447 -> título + (dot nuevo | fecha)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontFamily: _fontFamily,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          height: 20 / 16,
-                          color: _textDark,
+                // === CSS: dos variantes distintas de layout ===
+                //
+                // Ítem NUEVO (Frame 1447, bg #EBEBEB):
+                //   header -> título + Ellipse 8 (punto azul), SIN fecha
+                //   message -> descripción + fecha (Frame 1448, justify:flex-end)
+                //
+                // Ítem NORMAL (Frame 1467):
+                //   header -> título + fecha (Frame 1448)
+                //   message -> solo descripción
+                if (isNew) ...[
+                  // Header: título + punto azul
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontFamily: Fonts.medium,
+                            fontWeight: Fonts.wMedium,
+                            fontSize: Fonts.text0h, // 16px
+                            height: 20 / 16,
+                            color: AppColors.textTitle, // #141414
+                          ),
                         ),
                       ),
-                    ),
-                    if (isNew)
                       Container(
                         width: 8,
                         height: 8,
-                        margin: const EdgeInsets.only(left: 8),
                         decoration: const BoxDecoration(
-                          color: _azul,
+                          color: AppColors.primary, // #007AC2
                           shape: BoxShape.circle,
                         ),
-                      )
-                    else
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
+                      ),
+                    ],
+                  ),
+                  // Message: descripción + fecha
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
                         child: Text(
-                          date,
+                          description,
                           style: const TextStyle(
-                            fontFamily: _fontFamily,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            height: 16 / 12,
-                            color: _textLightGray,
+                            fontFamily: Fonts.regular,
+                            fontWeight: Fonts.wRegular,
+                            fontSize: 14,
+                            height: 16 / 14,
+                            color: AppColors.modalSubtitle, // #4A4A4A
                           ),
                         ),
                       ),
-                  ],
-                ),
-
-                const SizedBox(height: 2),
-
-                // message -> descripción + (fecha si es nuevo)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        description,
+                      const SizedBox(width: 2),
+                      Text(
+                        date,
                         style: const TextStyle(
-                          fontFamily: _fontFamily,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          height: 16 / 14,
-                          color: _textGray,
+                          fontFamily: Fonts.regular,
+                          fontWeight: Fonts.wRegular,
+                          fontSize: 12,
+                          height: 16 / 12,
+                          color: AppColors.textMuted, // #6B6B6B
                         ),
                       ),
-                    ),
-                    if (isNew)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8),
+                    ],
+                  ),
+                ] else ...[
+                  // Header: título + fecha
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
                         child: Text(
-                          date,
+                          title,
                           style: const TextStyle(
-                            fontFamily: _fontFamily,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            height: 16 / 12,
-                            color: _textLightGray,
+                            fontFamily: Fonts.medium,
+                            fontWeight: Fonts.wMedium,
+                            fontSize: Fonts.text0h, // 16px
+                            height: 20 / 16,
+                            color: AppColors.textTitle, // #141414
                           ),
                         ),
                       ),
-                  ],
-                ),
+                      Text(
+                        date,
+                        style: const TextStyle(
+                          fontFamily: Fonts.regular,
+                          fontWeight: Fonts.wRegular,
+                          fontSize: 12,
+                          height: 16 / 12,
+                          color: AppColors.textMuted, // #6B6B6B
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Message: solo descripción
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontWeight: Fonts.wRegular,
+                      fontSize: 14,
+                      height: 16 / 14,
+                      color: AppColors.modalSubtitle, // #4A4A4A
+                    ),
+                  ),
+                ],
 
-                const SizedBox(height: 6),
-
-                // Link "Revise los detalles" + indicator (línea azul opacity 0.4)
-                Text(
-                  'Revise los detalles',
-                  style: TextStyle(
-                    fontFamily: _fontFamily,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    height: 16 / 14,
-                    color: _azul,
-                    decoration: TextDecoration.underline,
-                    decorationColor: _azul.withOpacity(0.4),
+                // Enlace "Revise los detalles" (igual en ambas variantes)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: IntrinsicWidth(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Revise los detalles',
+                          style: TextStyle(
+                            fontFamily: Fonts.medium,
+                            fontWeight: Fonts.wMedium,
+                            fontSize: 14,
+                            height: 16 / 14,
+                            color: AppColors.primary, // #007AC2
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Container(
+                          height: 1,
+                          // indicator: azul con opacity 0.4 (0.8 en variante "swipe abierto",
+                          // que no aplica aquí porque ese estilo pertenece al Dismissible)
+                          color: AppColors.primary.withOpacity(0.4),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
 import '../../../login/login_screen.dart';
@@ -14,7 +16,7 @@ class ProfileMenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -48,7 +50,7 @@ class ProfileMenuScreen extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: const BoxDecoration(
-                          color: Color(0xFFD6EFFF),
+                          color: AppColors.chipBg,
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -59,14 +61,14 @@ class ProfileMenuScreen extends StatelessWidget {
                             fontFamily: Fonts.bold,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF4A4A4A),
+                            color: AppColors.modalSubtitle,
                             height: 1.25,
                           ),
                         ),
                       ),
 
                       const SizedBox(width: 17), // gap: 17px
-                      // Fotograma 1 (Texto) - Con Expanded para no truncar a 114px
+                      // Fotograma 1 (Texto) - Con Expanded para no truncar
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +80,7 @@ class ProfileMenuScreen extends StatelessWidget {
                                 fontFamily: Fonts.bold,
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFFFFFFFF),
+                                color: AppColors.white,
                                 height: 1.20,
                               ),
                               maxLines: 1,
@@ -89,7 +91,7 @@ class ProfileMenuScreen extends StatelessWidget {
                                 fontFamily: Fonts.light,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w300,
-                                color: Color(0xFFFFFFFF),
+                                color: AppColors.white,
                                 height: 1.25,
                               ),
                               maxLines: 1,
@@ -107,6 +109,8 @@ class ProfileMenuScreen extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
+                // gap 20 del header al inicio de la lista (List top:130,
+                // header height:110 -> 20px de separación)
                 padding: const EdgeInsets.only(top: 20, bottom: 24),
                 child: Center(
                   child: SizedBox(
@@ -133,7 +137,10 @@ class ProfileMenuScreen extends StatelessWidget {
                           showBorder: false,
                         ),
 
-                        const SizedBox(height: 20),
+                        // gap real entre secciones = 10px (el último ítem
+                        // de cada sección lleva +10px de padding-bottom en
+                        // el spec, en vez de un gap independiente de 20)
+                        const SizedBox(height: 10),
 
                         // ── Eventos ──
                         const ProfileSectionTitle(title: 'Eventos'),
@@ -154,7 +161,7 @@ class ProfileMenuScreen extends StatelessWidget {
                           showBorder: false,
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
 
                         // ── Soporte ──
                         const ProfileSectionTitle(title: 'Soporte'),
@@ -175,7 +182,9 @@ class ProfileMenuScreen extends StatelessWidget {
                           showBorder: false,
                         ),
 
-                        const SizedBox(height: 24),
+                        // gap real entre Frame74 (secciones) y Frame1470
+                        // (logout+logo) = 16px, según "List" gap:16
+                        const SizedBox(height: 16),
 
                         LogoutButton(
                           onPressed: () => Navigator.pushAndRemoveUntil(

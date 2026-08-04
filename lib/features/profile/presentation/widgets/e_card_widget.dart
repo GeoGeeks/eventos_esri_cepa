@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
 import '../../data/ecard_mock_data.dart';
@@ -59,9 +61,9 @@ class ECardWidget extends StatelessWidget {
               height: 406,
               padding: const EdgeInsets.only(top: 45, left: 16, right: 16, bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: const Color(0xFFEBEBEB), width: 1),
+                border: Border.all(color: AppColors.lightGray, width: 1),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -70,7 +72,7 @@ class ECardWidget extends StatelessWidget {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      /// María López (24px Bold #007AC2)
+                      /// María López (24px Bold #007AC2, line-height 20/24)
                       const Text(
                         EcardMockData.nombre,
                         textAlign: TextAlign.center,
@@ -79,7 +81,7 @@ class ECardWidget extends StatelessWidget {
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                           height: 20 / 24,
-                          color: Color(0xFF007AC2),
+                          color: AppColors.primary,
                         ),
                       ),
                       if (subtitleText.isNotEmpty) ...[
@@ -92,7 +94,7 @@ class ECardWidget extends StatelessWidget {
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
                             height: 20 / 16,
-                            color: Color(0xFF4A4A4A),
+                            color: AppColors.modalSubtitle,
                           ),
                         ),
                       ],
@@ -107,15 +109,15 @@ class ECardWidget extends StatelessWidget {
                     version: QrVersions.auto,
                     size: 232,
                     gapless: false,
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.white,
                     errorCorrectionLevel: QrErrorCorrectLevel.H,
                     eyeStyle: const QrEyeStyle(
                       eyeShape: QrEyeShape.square,
-                      color: Color(0xFF007AC2),
+                      color: AppColors.primary,
                     ),
                     dataModuleStyle: const QrDataModuleStyle(
                       dataModuleShape: QrDataModuleShape.square,
-                      color: Color(0xFF007AC2),
+                      color: AppColors.primary,
                     ),
                     embeddedImage: const AssetImage(Images.logoqr),
                     embeddedImageStyle: const QrEmbeddedImageStyle(
@@ -127,14 +129,16 @@ class ECardWidget extends StatelessWidget {
             ),
           ),
 
-          /// Avatar (74x74px del CSS)
+          /// Avatar (74x74px del CSS, radio 4 -> cuadrado redondeado,
+          /// NO circular). Color exacto #D6EFFF (antes tenía un typo:
+          /// D6EEFF).
           Positioned(
             top: 0,
             child: Container(
               width: 74,
               height: 74,
               decoration: BoxDecoration(
-                color: const Color(0xFFD6EEFF),
+                color: AppColors.chipBg,
                 borderRadius: BorderRadius.circular(4),
               ),
               alignment: Alignment.center,
@@ -145,7 +149,7 @@ class ECardWidget extends StatelessWidget {
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                   height: 20 / 32,
-                  color: Color(0xFF4A4A4A),
+                  color: AppColors.modalSubtitle,
                 ),
               ),
             ),
