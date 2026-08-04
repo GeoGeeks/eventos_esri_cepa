@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_icons.dart';
 
