@@ -199,11 +199,11 @@ class _Contenido extends StatelessWidget {
             errorCorrectionLevel: QrErrorCorrectLevel.H,
             eyeStyle: const QrEyeStyle(
               eyeShape: QrEyeShape.square,
-              color: AppColors.qrCredencial,
+              color: AppColors.primary,
             ),
             dataModuleStyle: const QrDataModuleStyle(
               dataModuleShape: QrDataModuleShape.square,
-              color: AppColors.qrCredencial,
+              color: AppColors.primary,
             ),
             embeddedImage: const AssetImage(Images.logoqr),
             embeddedImageStyle: const QrEmbeddedImageStyle(

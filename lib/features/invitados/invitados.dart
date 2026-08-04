@@ -372,17 +372,20 @@ class BotonQr extends StatelessWidget {
           color: AppColors.primary,
           boxShadow: [
             BoxShadow(
-              color: Color(0x40000000),
+              color: AppColors.buttonShadow,
               blurRadius: 4,
               offset: Offset(2, 2),
             ),
           ],
         ),
-        child: const AppIcon(
-          SvgIcon.qr,
-          width: 24,
-          height: 24,
-          color: AppColors.white,
+        // Auto-layout horizontal centrado: con 40 de caja y 4 de padding, al
+        // ícono le quedan los 32x32 exactos que pide Figma.
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AppIcon(SvgIcon.qr, width: 32, height: 32, color: AppColors.white),
+          ],
         ),
       ),
     );

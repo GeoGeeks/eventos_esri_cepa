@@ -38,4 +38,7 @@ class AppColors {
 
   //Credencial
   static const Color qrCredencial = Color(0xFF803FFD);
+
+  // Sombras — rgba(0, 0, 0, 0.25)
+  static const Color buttonShadow = Color(0x40000000);
 }

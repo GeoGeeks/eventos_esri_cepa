@@ -4,11 +4,15 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import 'package:esri_eventos/core/constants/app_colors.dart';
 import 'package:esri_eventos/core/constants/fonts.dart';
+import 'package:esri_eventos/core/constants/images.dart';
+import 'package:esri_eventos/core/widgets/app_icons.dart';
 import 'package:esri_eventos/core/widgets/bottom_nav.dart';
 import 'package:esri_eventos/core/widgets/detalle_actividad.dart';
 import 'package:esri_eventos/core/widgets/etiqueta_chip.dart';
 import 'package:esri_eventos/core/widgets/info_card.dart';
+import 'package:esri_eventos/features/credencial/presentation/credencial_modal.dart';
 import 'package:esri_eventos/features/invitados/invitados.dart';
+import 'package:esri_eventos/features/profile/data/ecard_mock_data.dart';
 
 import 'fuentes_de_prueba.dart';
 
@@ -91,6 +95,37 @@ void main() {
     expect(qr.height, moreOrLessEquals(40, epsilon: 0.5));
     expect(qr.top, moreOrLessEquals(122, epsilon: 0.5));
     expect(qr.right, moreOrLessEquals(386, epsilon: 0.5));
+
+    // Relleno #007AC2 y sombra 2/2/4 en rgba(0,0,0,0.25).
+    final caja = tester.widget<Container>(
+      find
+          .descendant(
+            of: find.byKey(const Key('invitados-qr')),
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+    final decoracion = caja.decoration! as BoxDecoration;
+    expect(decoracion.color, AppColors.primary);
+    expect(caja.padding, const EdgeInsets.all(4));
+
+    final sombra = decoracion.boxShadow!.single;
+    expect(sombra.color, AppColors.buttonShadow);
+    expect(sombra.color.a, moreOrLessEquals(0.25, epsilon: 0.005));
+    expect(sombra.offset, const Offset(2, 2));
+    expect(sombra.blurRadius, 4);
+
+    // El ícono mide 32x32 y queda centrado en los 40 de la caja.
+    final icono = tester.getRect(
+      find.descendant(
+        of: find.byKey(const Key('invitados-qr')),
+        matching: find.byType(AppIcon),
+      ),
+    );
+    expect(icono.width, moreOrLessEquals(32, epsilon: 0.5));
+    expect(icono.height, moreOrLessEquals(32, epsilon: 0.5));
+    expect(icono.center.dx, moreOrLessEquals(qr.center.dx, epsilon: 0.5));
+    expect(icono.center.dy, moreOrLessEquals(qr.center.dy, epsilon: 0.5));
   });
 
   testWidgets('el QR abre la credencial en un panel de 412x581 desde 336', (
@@ -277,8 +312,14 @@ void main() {
     expect(find.text('Calle 32 # 54 -34'), findsOneWidget);
 
     final detalle = tester.getRect(find.byKey(const Key('info-detalle')));
-    expect(detalle.width, moreOrLessEquals(InfoCard.anchoDetalle, epsilon: 0.5));
-    expect(detalle.height, moreOrLessEquals(InfoCard.altoDetalle, epsilon: 0.5));
+    expect(
+      detalle.width,
+      moreOrLessEquals(InfoCard.anchoDetalle, epsilon: 0.5),
+    );
+    expect(
+      detalle.height,
+      moreOrLessEquals(InfoCard.altoDetalle, epsilon: 0.5),
+    );
 
     final fecha = tester.getRect(find.text('Oct 02 - 11:00 a.m.'));
     final lugar = tester.getRect(find.text('Calle 32 # 54 -34'));
@@ -305,10 +346,12 @@ void main() {
     expect(find.byType(DetalleActividad), findsNothing);
 
     await tester.tap(
-      find.descendant(
-        of: find.byType(SesionCard).first,
-        matching: find.byType(GestureDetector),
-      ).last,
+      find
+          .descendant(
+            of: find.byType(SesionCard).first,
+            matching: find.byType(GestureDetector),
+          )
+          .last,
     );
     await tester.pumpAndSettle();
 
@@ -362,14 +405,29 @@ void main() {
     });
   }
 
-  testWidgets('el QR de la credencial se dibuja en #803FFD', (tester) async {
+  testWidgets('el QR de la credencial se dibuja en #007AC2', (tester) async {
     await _montarInvitados(tester);
 
     await tester.tap(find.byKey(const Key('invitados-qr')));
     await tester.pumpAndSettle();
 
     final qr = tester.widget<QrImageView>(find.byType(QrImageView));
-    expect(qr.eyeStyle.color, AppColors.qrCredencial);
-    expect(qr.dataModuleStyle.color, AppColors.qrCredencial);
+    expect(qr.eyeStyle.color, AppColors.primary);
+    expect(qr.dataModuleStyle.color, AppColors.primary);
+
+    // Lo demás del generador queda igual: tamaño, corrección, logo y padding.
+    // (`data` es privado en QrImageView; el contenido se cubre abajo leyéndolo
+    // de la propia fuente de datos del modal.)
+    expect(qr.size, 232);
+    expect(qr.errorCorrectionLevel, QrErrorCorrectLevel.H);
+    expect(qr.embeddedImage, const AssetImage(Images.logoqr));
+    expect(qr.embeddedImageStyle?.size, const Size(40, 40));
+    expect(qr.backgroundColor, AppColors.white);
+    expect(qr.padding, const EdgeInsets.all(10));
+    expect(qr.gapless, isFalse);
+    expect(
+      CredencialModal.datosPorDefecto.codigo,
+      'CUE-2026-${EcardMockData.documento}',
+    );
   });
 }

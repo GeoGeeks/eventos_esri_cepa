@@ -11,11 +11,13 @@ import 'package:esri_eventos/features/login/verificacion_screen.dart';
 
 import 'fuentes_de_prueba.dart';
 
-/// Barra de estado del emulador `sdk gphone64 x86 64`.
-const double kBarraEstado = 24;
+/// Barra de estado medida en el emulador `sdk gphone16k x86 64`:
+/// `WindowInsets … statusBars:[0,128,0,0]` a densidad 420 → 128 / 2,625 = 48,76.
+/// Es el **doble** de los 24 dp que se suelen dar por hechos.
+const double kBarraEstado = 128 / 2.625;
 
-/// Barra de navegación por gestos.
-const double kBarraNavegacion = 24;
+/// Barra de navegación por gestos: `navigationBars:[0,0,0,63]` → 63 / 2,625 = 24.
+const double kBarraNavegacion = 63 / 2.625;
 
 /// Alto típico del teclado de Android en vertical.
 const double kTeclado = 300;
