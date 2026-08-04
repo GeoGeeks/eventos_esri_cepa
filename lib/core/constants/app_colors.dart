@@ -19,7 +19,7 @@ class AppColors {
   static const Color chipBorder = Color(0x14000000);
 
   // hover
-  static const Color navActiveHighlight = Color(0x4D00619B);
+  static const Color navActiveHighlight = Color(0xFF00619B);
   // hover reservas
   static const Color navActiveReservas = Color(0xFF053D72);
 

@@ -837,7 +837,7 @@ class _GaleriaTab extends StatelessWidget {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 25,
-                mainAxisSpacing: 18,
+                mainAxisSpacing: 25,
                 childAspectRatio: 167 / 111,
               ),
               itemCount: imagenes.length,

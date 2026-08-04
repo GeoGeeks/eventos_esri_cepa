@@ -46,6 +46,8 @@ class _VerificacionScreenState extends State<VerificacionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Ver login_screen.dart: el desplazamiento lo administra FondoInicio.
+      resizeToAvoidBottomInset: false,
       body: FondoInicio(
         aviso: _AvisoRegistro(
           onSoporte: irASoporte,

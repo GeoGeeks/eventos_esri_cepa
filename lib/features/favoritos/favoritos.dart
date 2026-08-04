@@ -99,38 +99,42 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
-            child: CabeceraActividades(
-              titulo: 'Favoritos del evento',
-              onVolver: () => Navigator.pop(context),
+      // bottom:false — del borde inferior ya se ocupa el bottomNavigationBar.
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
+              child: CabeceraActividades(
+                titulo: 'Favoritos del evento',
+                onVolver: () => Navigator.pop(context),
+              ),
             ),
-          ),
-          const SizedBox(height: 30),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
-              children: [
-                BuscadorActividades(
-                  onBuscar: (texto) => setState(() => _busqueda = texto),
-                  onFiltrar: _abrirFiltro,
-                ),
-                const SizedBox(height: 24),
-                for (final indice in visibles) ...[
-                  ActividadCard(
-                    actividad: _actividades[indice],
-                    expandida: _expandidas.contains(indice),
-                    onExpandir: () => _alternarExpandida(indice),
-                    onValorar: () => _abrirValoracion(_actividades[indice]),
+            const SizedBox(height: 30),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                children: [
+                  BuscadorActividades(
+                    onBuscar: (texto) => setState(() => _busqueda = texto),
+                    onFiltrar: _abrirFiltro,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 24),
+                  for (final indice in visibles) ...[
+                    ActividadCard(
+                      actividad: _actividades[indice],
+                      expandida: _expandidas.contains(indice),
+                      onExpandir: () => _alternarExpandida(indice),
+                      onValorar: () => _abrirValoracion(_actividades[indice]),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,

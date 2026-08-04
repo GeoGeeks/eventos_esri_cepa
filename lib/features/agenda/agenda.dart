@@ -14,7 +14,10 @@ import 'widgets/cabecera_actividades.dart';
 class AgendaScreen extends StatefulWidget {
   final List<Actividad> actividades;
 
-  const AgendaScreen({super.key, this.actividades = AgendaMockData.actividades});
+  const AgendaScreen({
+    super.key,
+    this.actividades = AgendaMockData.actividades,
+  });
 
   @override
   State<AgendaScreen> createState() => _AgendaScreenState();
@@ -48,7 +51,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
     for (final valores in _filtros.values) {
       if (valores.isEmpty) continue;
       final coincide = valores.any(
-        (valor) => valor == actividad.lugar || actividad.etiquetas.contains(valor),
+        (valor) =>
+            valor == actividad.lugar || actividad.etiquetas.contains(valor),
       );
       if (!coincide) return false;
     }
@@ -122,57 +126,61 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
-                child: CabeceraActividades(
-                  titulo: 'Agenda',
-                  onVolver: () => Navigator.pop(context),
+      // bottom:false — del borde inferior ya se ocupa el bottomNavigationBar.
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
+                  child: CabeceraActividades(
+                    titulo: 'Agenda',
+                    onVolver: () => Navigator.pop(context),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
-                  children: [
-                    BuscadorActividades(
-                      onBuscar: (texto) => setState(() => _busqueda = texto),
-                      onFiltrar: _abrirFiltro,
-                    ),
-                    const SizedBox(height: 24),
-                    for (final indice in visibles) ...[
-                      ActividadCard(
-                        actividad: _actividades[indice],
-                        expandida: _expandidas.contains(indice),
-                        onExpandir: () => _alternarExpandida(indice),
-                        onFavorito: () => _alternarFavorita(indice),
-                        onValorar: () =>
-                            _abrirValoracion(_actividades[indice]),
+                const SizedBox(height: 30),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                    children: [
+                      BuscadorActividades(
+                        onBuscar: (texto) => setState(() => _busqueda = texto),
+                        onFiltrar: _abrirFiltro,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 24),
+                      for (final indice in visibles) ...[
+                        ActividadCard(
+                          actividad: _actividades[indice],
+                          expandida: _expandidas.contains(indice),
+                          onExpandir: () => _alternarExpandida(indice),
+                          onFavorito: () => _alternarFavorita(indice),
+                          onValorar: () =>
+                              _abrirValoracion(_actividades[indice]),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
                     ],
-                  ],
+                  ),
+                ),
+              ],
+            ),
+            if (_alertaVisible)
+              Positioned(
+                left: 26,
+                right: 26,
+                bottom: 26,
+                child: AlertaGuardado(
+                  key: const Key('alerta-guardado'),
+                  mensaje: '¡Ha guardado una actividad!',
+                  enlace: 'Ir a guardados',
+                  onEnlace: _irAGuardados,
+                  onCerrar: () => setState(() => _alertaVisible = false),
                 ),
               ),
-            ],
-          ),
-          if (_alertaVisible)
-            Positioned(
-              left: 26,
-              right: 26,
-              bottom: 26,
-              child: AlertaGuardado(
-                key: const Key('alerta-guardado'),
-                mensaje: '¡Ha guardado una actividad!',
-                enlace: 'Ir a guardados',
-                onEnlace: _irAGuardados,
-                onCerrar: () => setState(() => _alertaVisible = false),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         top: false,

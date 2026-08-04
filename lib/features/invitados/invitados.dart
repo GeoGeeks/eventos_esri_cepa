@@ -122,6 +122,11 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // La cabecera sigue yendo a sangre por detrás de la barra de estado (mismo
+    // criterio que Inicio): crece lo que mida la barra y el contenido baja igual,
+    // así nada del diseño queda tapado.
+    final barraEstado = MediaQuery.paddingOf(context).top;
+
     return Scaffold(
       backgroundColor: AppColors.surface3,
       body: Stack(
@@ -131,7 +136,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
             left: 0,
             right: 0,
             child: SizedBox(
-              height: 122,
+              height: 122 + barraEstado,
               width: double.infinity,
               child: Image.asset(
                 Images.headerInvitados,
@@ -142,7 +147,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
           ),
 
           Positioned(
-            top: 96,
+            top: 96 + barraEstado,
             left: 0,
             right: 0,
             bottom: 0,
@@ -165,7 +170,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                         children: [
                           _InfoEvento(
                             evento: widget.evento,
-                            onCredencial: () => CredencialModal.mostrar(context),
+                            onCredencial: () =>
+                                CredencialModal.mostrar(context),
                             onAgenda: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -197,7 +203,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
           ),
 
           Positioned(
-            top: 36,
+            top: 36 + barraEstado,
             left: 26,
             child: BotonVolver(
               key: const Key('invitados-volver'),
@@ -551,11 +557,7 @@ class _BarraPestanasState extends State<BarraPestanas> {
             ),
           ),
           if (hayNext) ...[
-            Container(
-              width: 1,
-              height: 30,
-              color: AppColors.lightGray,
-            ),
+            Container(width: 1, height: 30, color: AppColors.lightGray),
             _FlechaTab(
               haciaAtras: false,
               onTap: () => widget.onPestana(widget.indice + 1),
