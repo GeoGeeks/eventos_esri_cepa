@@ -473,7 +473,10 @@ class _FilterOptionItem extends StatelessWidget {
 
 class _SplitFilterButton extends StatelessWidget {
   final VoidCallback onTap;
-  const _SplitFilterButton({super.key, required this.onTap});
+
+  const _SplitFilterButton({
+    required this.onTap,
+  });
   
   @override
   Widget build(BuildContext context) {
