@@ -58,9 +58,7 @@ class _ECardScreenState extends State<ECardScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      /// Botón atrás: mismo icono/patrón usado en el
-                      /// resto de la app (SvgIcon.back), no chevron
-                      /// genérico de Material.
+                      /// Botón atrás
                       GestureDetector(
                         onTap: widget.onBack,
                         child: Container(
@@ -80,8 +78,7 @@ class _ECardScreenState extends State<ECardScreen> {
                         ),
                       ),
 
-                      /// Botón configuración: icono real 16x16 (spec),
-                      /// no 20x20 de Material.
+                      /// Botón configuración
                       GestureDetector(
                         onTap: _openConfig,
                         child: Container(
@@ -112,12 +109,11 @@ class _ECardScreenState extends State<ECardScreen> {
                       children: [
                         const SizedBox(height: 16),
 
-                        /// Sección Título (360x86px con gap: 14px del spec)
+                        /// Sección Título
                         SizedBox(
                           width: 360,
                           child: Column(
                             children: const [
-                              /// "E-card" -> Avenir Medium 26px, no 24px
                               Text(
                                 'E-card',
                                 style: TextStyle(
@@ -128,7 +124,7 @@ class _ECardScreenState extends State<ECardScreen> {
                                   color: AppColors.textTitle,
                                 ),
                               ),
-                              SizedBox(height: 14), // gap: 14px del CSS
+                              SizedBox(height: 14),
                               Text(
                                 'Utilice este código para identificarse y conectar con otros asistentes.',
                                 textAlign: TextAlign.center,
@@ -153,8 +149,7 @@ class _ECardScreenState extends State<ECardScreen> {
 
                         const SizedBox(height: 24),
 
-                        /// Botones de acción (gap: 24px entre ellos del CSS)
-                        /// Iconos reales: compartir.svg / guardar.svg
+                        /// Botones de acción
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -179,7 +174,7 @@ class _ECardScreenState extends State<ECardScreen> {
               ],
             ),
 
-            /// Notification Toast Flotante
+            /// Notification Toast Flotante (Calcite Notice Component Spec Exacto)
             if (_showNotification)
               Positioned(
                 top: 15,
@@ -187,40 +182,52 @@ class _ECardScreenState extends State<ECardScreen> {
                 right: 0,
                 child: Center(
                   child: Container(
-                    width: 360,
+                    width: 372,
                     height: 92,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF6FBF6), // sin constante equivalente
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: const Color(0x8035AC46), // verde con opacidad, sin constante
+                        color: const Color.fromRGBO(53, 172, 70, 0.5),
                         width: 1,
+                      ),
+                    ),
+                    foregroundDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: const LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Color.fromRGBO(53, 172, 70, 0.05),
+                          Color.fromRGBO(53, 172, 70, 0.05),
+                        ],
                       ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        /// Icono Check
-                        Container(
+                        /// ICONO IZQUIERDO (Check circle: vector 14.6px x 14.6px)
+                        const SizedBox(
                           width: 36,
-                          height: 56,
-                          padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: AppColors.success,
+                          child: Center(
+                            child: AppIcon(
+                              SvgIcon.ecard1,
+                              width: 14.6,
+                              height: 14.6,
+                              color: Color(0xFF288835),
+                            ),
                           ),
                         ),
 
-                        /// Textos
+                        /// CONTENIDO DE TEXTO
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 11),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: const [
                                 Text(
                                   'Configuración actualizada.',
@@ -230,11 +237,11 @@ class _ECardScreenState extends State<ECardScreen> {
                                     fontFamily: Fonts.medium,
                                     fontWeight: Fonts.wMedium,
                                     fontSize: 16,
-                                    height: 1.25,
-                                    color: AppColors.textTitle,
+                                    height: 20 / 16,
+                                    color: Color(0xFF141414),
                                   ),
                                 ),
-                                SizedBox(height: 2),
+                                SizedBox(height: 4),
                                 Text(
                                   'Los cambios ya están disponibles al escanear el código QR.',
                                   maxLines: 2,
@@ -244,7 +251,7 @@ class _ECardScreenState extends State<ECardScreen> {
                                     fontWeight: Fonts.wRegular,
                                     fontSize: 14,
                                     height: 16 / 14,
-                                    color: AppColors.modalSubtitle,
+                                    color: Color(0xFF4A4A4A),
                                   ),
                                 ),
                               ],
@@ -252,24 +259,23 @@ class _ECardScreenState extends State<ECardScreen> {
                           ),
                         ),
 
-                        /// Botón Cerrar (X)
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _showNotification = false;
-                            });
-                          },
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            width: 44,
-                            height: 32,
-                            padding: const EdgeInsets.only(right: 6),
-                            alignment: Alignment.center,
-                            child: AppIcon(
-                              SvgIcon.x,
-                              width: 16,
-                              height: 16,
-                              color: AppColors.textMuted,
+                        /// BOTÓN DE CIERRE (X: vector exacto Figma 8.04px x 8.02px)
+                        SizedBox(
+                          width: 44,
+                          height: 32,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _showNotification = false;
+                              });
+                            },
+                            child: const Center(
+                              child: AppIcon(
+                                SvgIcon.x,
+                                width: 8.04,
+                                height: 8.02,
+                                color: Color(0xFF6B6B6B),
+                              ),
                             ),
                           ),
                         ),

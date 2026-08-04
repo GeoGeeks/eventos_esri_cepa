@@ -44,4 +44,6 @@ static const String avisoBorde =
   static const String mensaje = 'assets/icons/mensaje.svg';
   static const String cuadro = 'assets/icons/cuadro.svg';
   static const String calificacionevento = 'assets/icons/calificacion_evento.svg';
+  static const String ecard1 = 'assets/icons/e-card1.svg';
 }
+

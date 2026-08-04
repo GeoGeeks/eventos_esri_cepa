@@ -129,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         height: 44,
                         child: OnboardingButton(
                           text: state.currentPage == onboardingItems.length - 1
-                              ? 'Comenzar'
+                              ? 'Continuar'
                               : 'Continuar',
                           onPressed: () => _nextPage(state.currentPage),
                         ),
