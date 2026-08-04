@@ -11,24 +11,24 @@ import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/info_card.dart';
 import '../../navigation/menu.dart';
 import '../agenda/agenda.dart';
+import '../credencial/presentation/credencial_modal.dart';
 import '../favoritos/favoritos.dart';
+import 'data/invitados_mock_data.dart';
 
 class InvitadosScreen extends StatefulWidget {
-  final String fecha;
-  final String hora;
-  final String lugar;
-  final String descripcion;
-  final String aviso;
+  final EventoDetalle evento;
+  final List<PersonaEvento> speakers;
+  final List<PersonaEvento> experiencias;
+  final List<SesionEvento> stands;
+  final List<SesionEvento> laboratorios;
 
   const InvitadosScreen({
     super.key,
-    this.fecha = 'Octubre 01, 2026',
-    this.hora = '8:00 - 11:00',
-    this.lugar = 'Universidad Central Cra 36 # 24 – 45',
-    this.descripcion =
-        'Es un evento presencial gratuito donde podrá conocer historias, '
-            'soluciones e innovaciones en el campo de la tecnología y los SIG.',
-    this.aviso = 'Información sujeta a cambios sin aviso.',
+    this.evento = InvitadosMockData.evento,
+    this.speakers = InvitadosMockData.speakers,
+    this.experiencias = InvitadosMockData.experiencias,
+    this.stands = InvitadosMockData.stands,
+    this.laboratorios = InvitadosMockData.laboratorios,
   });
 
   @override
@@ -45,84 +45,9 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
 
   int _tabIndex = 0;
 
-  // ── Datos de ejemplo — reemplazar con modelos reales ───────────────────────
-  static const _speakers = [
-    _ItemCard(
-      imagenAsset: Images.fotoInvitado,
-      titulo: 'Edwin Chirivi',
-      subtitulo: 'Gerente de Camacol',
-      descripcion:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-    ),
-    _ItemCard(
-      imagenAsset: Images.fotoInvitado,
-      titulo: 'Edwin Chirivi',
-      subtitulo: 'Gerente de Camacol',
-      descripcion:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-    ),
-    _ItemCard(
-      imagenAsset: Images.fotoInvitado,
-      titulo: 'Edwin Chirivi',
-      subtitulo: 'Gerente de Camacol',
-      descripcion:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-    ),
-  ];
-
-  static const _experiencias = [
-    _ItemCard(
-      imagenAsset: Images.experienciaComunidad,
-      titulo: 'Comunidad',
-      subtitulo: 'comunidad@esri.co',
-      descripcion:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-    ),
-    _ItemCard(
-      imagenAsset: Images.experienciaGeoIA,
-      titulo: 'GeoIA',
-      subtitulo: 'geoia@esri.co',
-      descripcion:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-    ),
-  ];
-
-  static const _stands = [
-    _Sesion(
-      titulo:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-      fecha: 'Oct 02 - 11:00 a.m.',
-      lugar: 'Auditorio 103',
-    ),
-    _Sesion(
-      titulo:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-      fecha: 'Oct 02 - 11:00 a.m.',
-      lugar: 'Auditorio 103',
-    ),
-  ];
-
-  static const _laboratorios = [
-    _Sesion(
-      titulo:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-      fecha: 'Oct 02 - 11:00 a.m.',
-      lugar: 'Auditorio 103',
-    ),
-    _Sesion(
-      titulo:
-          'Encuestas avanzadas incorporando Inteligencia Artificial en ArcGIS Survey123',
-      fecha: 'Oct 02 - 11:00 a.m.',
-      lugar: 'Auditorio 103',
-    ),
-  ];
-
-  void _prevTab() {
-    if (_tabIndex > 0) setState(() => _tabIndex--);
-  }
-
-  void _nextTab() {
-    if (_tabIndex < _tabs.length - 1) setState(() => _tabIndex++);
+  void _cambiarTab(int i) {
+    if (i < 0 || i >= _tabs.length) return;
+    setState(() => _tabIndex = i);
   }
 
   void _irAMenu(int index) {
@@ -132,26 +57,26 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     );
   }
 
-  Widget _buildTabContent() {
+  Widget _contenidoTab() {
     switch (_tabIndex) {
       case 0:
-        return _infoCardList(_speakers);
+        return _listaPersonas(widget.speakers);
       case 1:
-        return _infoCardList(_experiencias);
+        return _listaPersonas(widget.experiencias);
       case 2:
-        return _sesionList(_stands);
+        return _listaSesiones(widget.stands);
       case 3:
-        return _sesionList(_laboratorios);
+        return _listaSesiones(widget.laboratorios);
       default:
-        return const SizedBox();
+        return const SizedBox.shrink();
     }
   }
 
-  Widget _infoCardList(List<_ItemCard> items) {
+  Widget _listaPersonas(List<PersonaEvento> items) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(top: 12, bottom: 24),
+      padding: const EdgeInsets.only(top: 12),
       itemCount: items.length,
       separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (_, i) => InfoCard(
@@ -164,21 +89,21 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     );
   }
 
-  Widget _sesionList(List<_Sesion> items) {
+  Widget _listaSesiones(List<SesionEvento> items) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(top: 12, bottom: 24),
+      padding: const EdgeInsets.only(top: 14),
       itemCount: items.length,
       separatorBuilder: (_, _) => const SizedBox(height: 16),
-      itemBuilder: (_, i) => _SesionCard(sesion: items[i]),
+      itemBuilder: (_, i) => SesionCard(sesion: items[i]),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surface3,
       body: Stack(
         children: [
           Positioned(
@@ -204,9 +129,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
             child: Container(
               decoration: const BoxDecoration(
                 color: AppColors.background,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               clipBehavior: Clip.antiAlias,
               child: SingleChildScrollView(
@@ -221,11 +144,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _InfoEvento(
-                            fecha: widget.fecha,
-                            hora: widget.hora,
-                            lugar: widget.lugar,
-                            descripcion: widget.descripcion,
-                            aviso: widget.aviso,
+                            evento: widget.evento,
+                            onCredencial: () => CredencialModal.mostrar(context),
                             onAgenda: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -239,16 +159,14 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          _TabBar(
+                          const SizedBox(height: 14),
+                          BarraPestanas(
                             key: const Key('invitados-tabs'),
-                            tabs: _tabs,
-                            tabIndex: _tabIndex,
-                            onTab: (i) => setState(() => _tabIndex = i),
-                            onPrev: _prevTab,
-                            onNext: _nextTab,
+                            pestanas: _tabs,
+                            indice: _tabIndex,
+                            onPestana: _cambiarTab,
                           ),
-                          _buildTabContent(),
+                          _contenidoTab(),
                         ],
                       ),
                     ),
@@ -261,7 +179,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
           Positioned(
             top: 36,
             left: 26,
-            child: _BotonVolver(
+            child: BotonVolver(
               key: const Key('invitados-volver'),
               onTap: () => Navigator.pop(context),
             ),
@@ -276,10 +194,10 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   }
 }
 
-// ─── Botón circular de volver ────────────────────────────────────────────────
-class _BotonVolver extends StatelessWidget {
+class BotonVolver extends StatelessWidget {
   final VoidCallback onTap;
-  const _BotonVolver({super.key, required this.onTap});
+
+  const BotonVolver({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -304,22 +222,15 @@ class _BotonVolver extends StatelessWidget {
   }
 }
 
-// ─── Info del evento ──────────────────────────────────────────────────────────
 class _InfoEvento extends StatelessWidget {
-  final String fecha;
-  final String hora;
-  final String lugar;
-  final String descripcion;
-  final String aviso;
+  final EventoDetalle evento;
+  final VoidCallback onCredencial;
   final VoidCallback onAgenda;
   final VoidCallback onFavoritos;
 
   const _InfoEvento({
-    required this.fecha,
-    required this.hora,
-    required this.lugar,
-    required this.descripcion,
-    required this.aviso,
+    required this.evento,
+    required this.onCredencial,
     required this.onAgenda,
     required this.onFavoritos,
   });
@@ -331,28 +242,35 @@ class _InfoEvento extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
+          SizedBox(
+            height: 84,
+            child: Stack(
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FilaDato(icono: SvgIcon.date, texto: fecha),
-                    const SizedBox(height: 5),
-                    _FilaDato(icono: SvgIcon.time, texto: hora),
-                    const SizedBox(height: 5),
-                    _FilaDato(icono: SvgIcon.lugar, texto: lugar),
+                    _FilaDato(icono: SvgIcon.date, texto: evento.fecha),
+                    const SizedBox(height: 6),
+                    _FilaDato(icono: SvgIcon.time, texto: evento.hora),
+                    const SizedBox(height: 6),
+                    _FilaDato(icono: SvgIcon.lugar, texto: evento.lugar),
                   ],
                 ),
-              ),
-              const _BotonQr(),
-            ],
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: BotonQr(
+                    key: const Key('invitados-qr'),
+                    onTap: onCredencial,
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
-            descripcion,
+            evento.descripcion,
             style: const TextStyle(
               fontFamily: Fonts.light,
               fontSize: Fonts.text0h,
@@ -363,10 +281,10 @@ class _InfoEvento extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text.rich(
             TextSpan(
-              text: aviso,
+              text: evento.aviso,
               children: const [
                 TextSpan(
                   text: '*',
@@ -375,9 +293,9 @@ class _InfoEvento extends StatelessWidget {
               ],
             ),
             style: const TextStyle(
-              fontFamily: Fonts.medium,
-              fontSize: 14,
-              fontWeight: Fonts.wMedium,
+              fontFamily: Fonts.light,
+              fontSize: Fonts.textSm,
+              fontWeight: Fonts.wLight,
               fontStyle: FontStyle.italic,
               height: 16 / 14,
               letterSpacing: 0,
@@ -385,7 +303,7 @@ class _InfoEvento extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
             children: [
               _BotonAccion(
@@ -395,7 +313,7 @@ class _InfoEvento extends StatelessWidget {
                 relleno: true,
                 onTap: onAgenda,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               _BotonAccion(
                 width: 160,
                 label: 'Mis Favoritos',
@@ -411,25 +329,36 @@ class _InfoEvento extends StatelessWidget {
   }
 }
 
-class _BotonQr extends StatelessWidget {
-  const _BotonQr();
+class BotonQr extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const BotonQr({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.25),
-            blurRadius: 4,
-            offset: Offset(2, 2),
-          ),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        padding: const EdgeInsets.all(4),
+        decoration: const BoxDecoration(
+          color: AppColors.primary,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x40000000),
+              blurRadius: 4,
+              offset: Offset(2, 2),
+            ),
+          ],
+        ),
+        child: const AppIcon(
+          SvgIcon.qr,
+          width: 24,
+          height: 24,
+          color: AppColors.white,
+        ),
       ),
-      child: const Icon(Icons.qr_code, color: AppColors.white, size: 24),
     );
   }
 }
@@ -442,27 +371,17 @@ class _FilaDato extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 24),
+    return SizedBox(
+      height: 24,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: AppIcon(
-                icono,
-                width: 16,
-                height: 16,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
+          AppIcon(icono, width: 16, height: 16, color: AppColors.primary),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               texto,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontFamily: Fonts.medium,
                 fontSize: Fonts.text1h,
@@ -498,7 +417,7 @@ class _BotonAccion extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = relleno ? AppColors.white : AppColors.primary;
 
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
       child: Container(
         width: width,
@@ -530,67 +449,99 @@ class _BotonAccion extends StatelessWidget {
   }
 }
 
-// ─── TabBar con flechas prev / next ──────────────────────────────────────────
-class _TabBar extends StatelessWidget {
-  final List<String> tabs;
-  final int tabIndex;
-  final ValueChanged<int> onTab;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
+class BarraPestanas extends StatefulWidget {
+  final List<String> pestanas;
+  final int indice;
+  final ValueChanged<int> onPestana;
 
-  const _TabBar({
+  const BarraPestanas({
     super.key,
-    required this.tabs,
-    required this.tabIndex,
-    required this.onTab,
-    required this.onPrev,
-    required this.onNext,
+    required this.pestanas,
+    required this.indice,
+    required this.onPestana,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final hayPrev = tabIndex > 0;
-    final hayNext = tabIndex < tabs.length - 1;
+  State<BarraPestanas> createState() => _BarraPestanasState();
+}
 
-    final start = math.max(0, math.min(tabIndex - 1, tabs.length - 3));
-    final visibles = tabs.sublist(start, math.min(start + 3, tabs.length));
+class _BarraPestanasState extends State<BarraPestanas> {
+  final ScrollController _scroll = ScrollController();
+  final Map<int, GlobalKey> _claves = {};
+
+  @override
+  void didUpdateWidget(covariant BarraPestanas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.indice != widget.indice) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _mostrarActiva());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _mostrarActiva() {
+    final clave = _claves[widget.indice];
+    final contexto = clave?.currentContext;
+    if (contexto == null) return;
+    Scrollable.ensureVisible(
+      contexto,
+      alignment: 0,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hayPrev = widget.indice > 0;
+    final hayNext = widget.indice < widget.pestanas.length - 1;
 
     return SizedBox(
       width: 360,
-      height: 34,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: AppColors.lightGray, width: 1),
-          ),
-        ),
-        child: Row(
-          children: [
-            if (hayPrev)
-              _FlechaTab(haciaAtras: true, onTap: onPrev)
-            else
-              const SizedBox.shrink(),
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: visibles.map((label) {
-                    final i = tabs.indexOf(label);
-                    return _TabItem(
-                      label: label,
-                      active: i == tabIndex,
-                      onTap: () => onTab(i),
-                    );
-                  }).toList(),
-                ),
+      height: 38,
+      child: Row(
+        children: [
+          if (hayPrev)
+            _FlechaTab(
+              haciaAtras: true,
+              onTap: () => widget.onPestana(widget.indice - 1),
+            ),
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scroll,
+              scrollDirection: Axis.horizontal,
+              physics: const ClampingScrollPhysics(),
+              child: Row(
+                children: [
+                  for (var i = 0; i < widget.pestanas.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 16),
+                    _ItemPestana(
+                      key: _claves.putIfAbsent(i, GlobalKey.new),
+                      label: widget.pestanas[i],
+                      activa: i == widget.indice,
+                      onTap: () => widget.onPestana(i),
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (hayNext)
-              _FlechaTab(haciaAtras: false, onTap: onNext)
-            else
-              const SizedBox.shrink(),
+          ),
+          if (hayNext) ...[
+            Container(
+              width: 1,
+              height: 30,
+              color: AppColors.lightGray,
+            ),
+            _FlechaTab(
+              haciaAtras: false,
+              onTap: () => widget.onPestana(widget.indice + 1),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -606,9 +557,10 @@ class _FlechaTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 40,
-        height: 34,
+        height: 38,
         child: Center(
           child: Transform.rotate(
             angle: haciaAtras ? 0 : math.pi,
@@ -625,14 +577,15 @@ class _FlechaTab extends StatelessWidget {
   }
 }
 
-class _TabItem extends StatelessWidget {
+class _ItemPestana extends StatelessWidget {
   final String label;
-  final bool active;
+  final bool activa;
   final VoidCallback onTap;
 
-  const _TabItem({
+  const _ItemPestana({
+    super.key,
     required this.label,
-    required this.active,
+    required this.activa,
     required this.onTap,
   });
 
@@ -641,12 +594,12 @@ class _TabItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 34,
+        height: 38,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? AppColors.lightGray : Colors.transparent,
-          border: active
+          color: activa ? AppColors.lightGray : Colors.transparent,
+          border: activa
               ? const Border(
                   bottom: BorderSide(color: AppColors.primary, width: 2),
                 )
@@ -656,12 +609,12 @@ class _TabItem extends StatelessWidget {
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: active ? Fonts.medium : Fonts.regular,
+            fontFamily: activa ? Fonts.medium : Fonts.regular,
             fontSize: Fonts.text0h,
-            fontWeight: active ? Fonts.wMedium : Fonts.wRegular,
+            fontWeight: activa ? Fonts.wMedium : Fonts.wRegular,
             height: 20 / 16,
             letterSpacing: 0,
-            color: active ? AppColors.textTitle : AppColors.textMuted,
+            color: activa ? AppColors.textTitle : AppColors.textMuted,
           ),
         ),
       ),
@@ -669,29 +622,37 @@ class _TabItem extends StatelessWidget {
   }
 }
 
-// ─── Card de Sesión (Stands / Laboratorios) ───────────────────────────────────
-class _SesionCard extends StatelessWidget {
-  final _Sesion sesion;
-  const _SesionCard({required this.sesion});
+class SesionCard extends StatelessWidget {
+  final SesionEvento sesion;
+  final VoidCallback? onFavorito;
+  final VoidCallback? onExpandir;
+
+  const SesionCard({
+    super.key,
+    required this.sesion,
+    this.onFavorito,
+    this.onExpandir,
+  });
 
   static const _metaStyle = TextStyle(
     fontFamily: Fonts.regular,
-    fontSize: 13,
+    fontSize: Fonts.textSm,
     fontWeight: Fonts.wRegular,
+    height: 16 / 14,
     letterSpacing: 0,
-    color: AppColors.textMuted,
-    height: 18 / 13,
+    color: AppColors.textSubtle,
   );
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      width: 360,
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border.all(color: AppColors.surface3),
         borderRadius: BorderRadius.circular(4),
       ),
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 13),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -702,57 +663,48 @@ class _SesionCard extends StatelessWidget {
                 child: Text(
                   sesion.titulo,
                   style: const TextStyle(
-                    fontFamily: Fonts.demi,
+                    fontFamily: Fonts.medium,
                     fontSize: Fonts.text0h,
-                    fontWeight: Fonts.wDemi,
+                    fontWeight: Fonts.wMedium,
+                    height: 16 / 16,
                     letterSpacing: 0,
                     color: AppColors.textTitle,
-                    height: 22 / 16,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              const AppIcon(
-                SvgIcon.favoritos,
-                width: 22,
-                height: 22,
-                color: AppColors.textMuted,
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: onFavorito,
+                child: AppIcon(
+                  SvgIcon.favoritos,
+                  width: 24,
+                  height: 24,
+                  color: sesion.favorita
+                      ? AppColors.primary
+                      : AppColors.textSubtle,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const AppIcon(
-                SvgIcon.date,
-                width: 14,
-                height: 14,
-                color: AppColors.textMuted,
-              ),
-              const SizedBox(width: 6),
-              Text(sesion.fecha, style: _metaStyle),
-            ],
-          ),
+          const SizedBox(height: 15),
+          _FilaMeta(icono: SvgIcon.date, texto: sesion.fecha),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              const AppIcon(
-                SvgIcon.lugar,
-                width: 14,
-                height: 14,
-                color: AppColors.textMuted,
-              ),
-              const SizedBox(width: 6),
-              Text(sesion.lugar, style: _metaStyle),
-            ],
-          ),
-          const Align(
+          _FilaMeta(icono: SvgIcon.lugar, texto: sesion.lugar),
+          const SizedBox(height: 8),
+          Align(
             alignment: Alignment.centerRight,
-            child: AppIcon(
-              SvgIcon.arrow,
-              width: 12,
-              height: 8,
-              color: AppColors.textMuted,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 5),
+              child: GestureDetector(
+                onTap: onExpandir,
+                child: const AppIcon(
+                  SvgIcon.arrow,
+                  width: 14,
+                  height: 8.4,
+                  fit: BoxFit.fill,
+                  color: AppColors.textMuted,
+                ),
+              ),
             ),
           ),
         ],
@@ -761,26 +713,30 @@ class _SesionCard extends StatelessWidget {
   }
 }
 
-class _ItemCard {
-  final String imagenAsset;
-  final String titulo;
-  final String subtitulo;
-  final String descripcion;
-  const _ItemCard({
-    required this.imagenAsset,
-    required this.titulo,
-    required this.subtitulo,
-    required this.descripcion,
-  });
-}
+class _FilaMeta extends StatelessWidget {
+  final String icono;
+  final String texto;
 
-class _Sesion {
-  final String titulo;
-  final String fecha;
-  final String lugar;
-  const _Sesion({
-    required this.titulo,
-    required this.fecha,
-    required this.lugar,
-  });
+  const _FilaMeta({required this.icono, required this.texto});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 16,
+      child: Row(
+        children: [
+          AppIcon(icono, width: 16, height: 16, color: AppColors.textSubtle),
+          const SizedBox(width: 2),
+          Expanded(
+            child: Text(
+              texto,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: SesionCard._metaStyle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

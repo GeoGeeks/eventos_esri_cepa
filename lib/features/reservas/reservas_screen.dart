@@ -128,6 +128,7 @@ class _ReservasScreenState extends State<ReservasScreen> {
                                 fontSize: Fonts.text3h,
                                 fontWeight: Fonts.wMedium,
                                 height: 32 / 26,
+                                letterSpacing: 0,
                                 color: AppColors.textTitle,
                               ),
                             ),

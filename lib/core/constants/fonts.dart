@@ -22,6 +22,8 @@ class Fonts {
   static const double text3h = 26;
   static const double text1h = 18;
   static const double text0h = 16;
+  static const double textSm = 14;
+  static const double textXs = 12;
 
 static const double body = 16;
 }

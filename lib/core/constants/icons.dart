@@ -32,6 +32,10 @@ static const String avisoBorde =
 
   static const String x = 'assets/icons/x.svg';
 
+  static const String qr = 'assets/icons/qr.svg';
+  static const String aforo = 'assets/icons/aforo.svg';
+  static const String estrellaLlena = 'assets/icons/star_f.svg';
+
   static const String compartir = 'assets/icons/compartir.svg';
   static const String eliminar = 'assets/icons/eliminar.svg';
   static const String filtro = 'assets/icons/filtro.svg';

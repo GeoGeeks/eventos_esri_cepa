@@ -19,18 +19,14 @@ class FiltroChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 32,
-        margin: const EdgeInsets.only(bottom: 8),
+        width: 78,
+        height: 24,
         alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.chipBg
-              : AppColors.white,
-          border: Border.all(
-            color: AppColors.primary,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(20),
+          color: selected ? AppColors.chipBg : AppColors.white,
+          border: Border.all(color: AppColors.primary, width: 1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           title,
@@ -38,11 +34,12 @@ class FiltroChip extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontFamily: Fonts.regular,
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
+            fontFamily: Fonts.light,
+            fontSize: Fonts.textSm,
+            fontWeight: Fonts.wLight,
+            height: 20 / 14,
+            letterSpacing: 0,
             color: AppColors.filterButtonText,
-            height: 1,
           ),
         ),
       ),
