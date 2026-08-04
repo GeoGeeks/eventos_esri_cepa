@@ -45,12 +45,12 @@ class _FiltroModalState extends State<FiltroModal> {
   }
 
   double _altoGrupo(GrupoFiltro grupo) =>
-      20 + 17 + grupo.opciones.length * 20 + (grupo.opciones.length - 1) * 10;
+      38.5 + grupo.opciones.length * 20 + (grupo.opciones.length - 1) * 10;
 
   double _desplazamiento(int indice) {
     var total = 0.0;
     for (var i = 0; i < indice; i++) {
-      total += _altoGrupo(widget.grupos[i]) + 19;
+      total += _altoGrupo(widget.grupos[i]) + 17.5;
     }
     return total;
   }
@@ -152,7 +152,7 @@ class _FiltroModalState extends State<FiltroModal> {
                         padding: const EdgeInsets.only(left: 12, right: 26),
                         children: [
                           for (var i = 0; i < widget.grupos.length; i++) ...[
-                            if (i > 0) const SizedBox(height: 19),
+                            if (i > 0) const SizedBox(height: 17.5),
                             FiltroPanel(
                               titulo: widget.grupos[i].titulo,
                               opciones: widget.grupos[i].opciones,

@@ -12,7 +12,7 @@ class ActividadCard extends StatelessWidget {
   final Actividad actividad;
   final bool expandida;
   final VoidCallback onExpandir;
-  final VoidCallback onFavorito;
+  final VoidCallback? onFavorito;
   final VoidCallback onValorar;
 
   const ActividadCard({
@@ -20,7 +20,7 @@ class ActividadCard extends StatelessWidget {
     required this.actividad,
     required this.expandida,
     required this.onExpandir,
-    required this.onFavorito,
+    this.onFavorito,
     required this.onValorar,
   });
 

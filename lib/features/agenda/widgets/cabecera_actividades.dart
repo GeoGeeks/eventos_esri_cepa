@@ -60,74 +60,75 @@ class BuscadorActividades extends StatelessWidget {
     return SizedBox(
       height: 32,
       child: Row(
-            children: [
-              SizedBox(
-                width: 316,
-                height: 32,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    border: Border.all(color: AppColors.textSubtle),
-                  ),
-                  padding: const EdgeInsets.only(left: 12, right: 12),
-                  child: Row(
-                    children: [
-                      const AppIcon(
-                        SvgIcon.search,
-                        width: 16,
-                        height: 16,
-                        color: AppColors.textMuted,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          onChanged: onBuscar,
-                          cursorColor: AppColors.primary,
-                          textAlignVertical: TextAlignVertical.center,
-                          style: const TextStyle(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 32,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  border: Border.all(color: AppColors.textSubtle),
+                ),
+                padding: const EdgeInsets.only(left: 12, right: 12),
+                child: Row(
+                  children: [
+                    const AppIcon(
+                      SvgIcon.search,
+                      width: 16,
+                      height: 16,
+                      color: AppColors.textMuted,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        onChanged: onBuscar,
+                        cursorColor: AppColors.primary,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: const TextStyle(
+                          fontFamily: Fonts.regular,
+                          fontSize: Fonts.textSm,
+                          fontWeight: Fonts.wRegular,
+                          height: 20 / 14,
+                          letterSpacing: 0,
+                          color: AppColors.textTitle,
+                        ),
+                        decoration: const InputDecoration(
+                          isCollapsed: true,
+                          border: InputBorder.none,
+                          hintText: 'Buscar',
+                          hintStyle: TextStyle(
                             fontFamily: Fonts.regular,
                             fontSize: Fonts.textSm,
                             fontWeight: Fonts.wRegular,
                             height: 20 / 14,
                             letterSpacing: 0,
-                            color: AppColors.textTitle,
-                          ),
-                          decoration: const InputDecoration(
-                            isCollapsed: true,
-                            border: InputBorder.none,
-                            hintText: 'Buscar',
-                            hintStyle: TextStyle(
-                              fontFamily: Fonts.regular,
-                              fontSize: Fonts.textSm,
-                              fontWeight: Fonts.wRegular,
-                              height: 20 / 14,
-                              letterSpacing: 0,
-                              color: Color(0x80141414),
-                            ),
+                            color: Color(0x80141414),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              GestureDetector(
-                key: const Key('boton-filtro'),
-                onTap: onFiltrar,
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  color: AppColors.primary,
-                  alignment: Alignment.center,
-                  child: const AppIcon(
-                    SvgIcon.filtro,
-                    width: 16,
-                    height: 16,
-                    color: AppColors.white,
-                  ),
-                ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            key: const Key('boton-filtro'),
+            onTap: onFiltrar,
+            child: Container(
+              width: 32,
+              height: 32,
+              color: AppColors.primary,
+              alignment: Alignment.center,
+              child: const AppIcon(
+                SvgIcon.filtro,
+                width: 16,
+                height: 16,
+                color: AppColors.white,
               ),
+            ),
+          ),
         ],
       ),
     );

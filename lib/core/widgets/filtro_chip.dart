@@ -22,9 +22,11 @@ class FiltroChip extends StatelessWidget {
         width: 78,
         height: 24,
         alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           color: selected ? AppColors.chipBg : AppColors.white,
           border: Border.all(color: AppColors.primary, width: 1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           title,

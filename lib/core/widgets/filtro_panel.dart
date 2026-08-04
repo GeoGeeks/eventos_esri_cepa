@@ -36,7 +36,13 @@ class FiltroPanel extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 17),
+        const SizedBox(height: 5),
+        Container(
+          width: double.infinity,
+          height: 1,
+          color: AppColors.lightGray,
+        ),
+        const SizedBox(height: 12.5),
         for (var i = 0; i < opciones.length; i++) ...[
           if (i > 0) const SizedBox(height: 10),
           _Opcion(

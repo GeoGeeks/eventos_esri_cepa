@@ -22,7 +22,10 @@ class FavoritosScreen extends StatefulWidget {
 }
 
 class _FavoritosScreenState extends State<FavoritosScreen> {
-  late final List<Actividad> _actividades = List.of(widget.actividades);
+  late final List<Actividad> _actividades = [
+    for (final actividad in widget.actividades)
+      actividad.favorita ? actividad : actividad.copyWith(favorita: true),
+  ];
   final Set<int> _expandidas = {};
   String _busqueda = '';
   Map<String, Set<String>> _filtros = const {};
@@ -59,13 +62,6 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
   void _alternarExpandida(int indice) {
     setState(() {
       if (!_expandidas.remove(indice)) _expandidas.add(indice);
-    });
-  }
-
-  void _alternarFavorita(int indice) {
-    setState(() {
-      final actividad = _actividades[indice];
-      _actividades[indice] = actividad.copyWith(favorita: !actividad.favorita);
     });
   }
 
@@ -127,7 +123,6 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                     actividad: _actividades[indice],
                     expandida: _expandidas.contains(indice),
                     onExpandir: () => _alternarExpandida(indice),
-                    onFavorito: () => _alternarFavorita(indice),
                     onValorar: () => _abrirValoracion(_actividades[indice]),
                   ),
                   const SizedBox(height: 10),

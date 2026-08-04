@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:esri_eventos/core/constants/app_colors.dart';
 import 'package:esri_eventos/core/widgets/alerta_guardado.dart';
+import 'package:esri_eventos/core/widgets/filtro_chip.dart';
 import 'package:esri_eventos/core/widgets/filtro_modal.dart';
 import 'package:esri_eventos/features/agenda/agenda.dart';
 import 'package:esri_eventos/features/agenda/valoracion_modal.dart';
@@ -10,15 +13,21 @@ import 'package:esri_eventos/features/favoritos/favoritos.dart';
 
 import 'fuentes_de_prueba.dart';
 
-Future<void> _montarAgenda(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(412, 917);
+/// Ancho real del emulador: 1440 px físicos a densidad 3.5.
+const double _anchoEmulador = 1440 / 3.5;
+
+Future<void> _montar(WidgetTester tester, Widget pantalla, Size lienzo) async {
+  tester.view.physicalSize = lienzo;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  await tester.pumpWidget(const MaterialApp(home: AgendaScreen()));
+  await tester.pumpWidget(MaterialApp(home: pantalla));
   await tester.pump();
 }
+
+Future<void> _montarAgenda(WidgetTester tester) =>
+    _montar(tester, const AgendaScreen(), const Size(412, 917));
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -142,5 +151,149 @@ void main() {
   testWidgets('la pantalla no desborda a 412x917', (tester) async {
     await _montarAgenda(tester);
     expect(tester.takeException(), isNull);
+  });
+
+  for (final lienzo in const [
+    Size(412, 917),
+    Size(_anchoEmulador, 869),
+    Size(360, 800),
+  ]) {
+    testWidgets('Agenda y Favoritos no desbordan a $lienzo', (tester) async {
+      await _montar(tester, const AgendaScreen(), lienzo);
+      expect(tester.takeException(), isNull, reason: 'agenda');
+
+      await tester.tap(find.byKey(const Key('boton-filtro')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'filtro abierto');
+
+      await tester.tap(find.byType(FiltroChip).at(2));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'chip seleccionado');
+
+      await tester.tap(find.text('Auditorio 103').last, warnIfMissed: false);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'opción marcada');
+
+      await tester.tap(find.text('Aplicar'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'filtro aplicado');
+
+      await _montar(tester, const FavoritosScreen(), lienzo);
+      expect(tester.takeException(), isNull, reason: 'favoritos');
+    });
+  }
+
+  testWidgets('los chips del filtro son píldoras de 78x24 cada 32', (
+    tester,
+  ) async {
+    await _montarAgenda(tester);
+    await tester.tap(find.byKey(const Key('boton-filtro')));
+    await tester.pumpAndSettle();
+
+    for (var i = 0; i < 5; i++) {
+      final chip = tester.getRect(find.byType(FiltroChip).at(i));
+      expect(chip.left, moreOrLessEquals(27, epsilon: 0.5));
+      expect(chip.width, moreOrLessEquals(78, epsilon: 0.5));
+      expect(chip.height, moreOrLessEquals(24, epsilon: 0.5));
+      expect(chip.top, moreOrLessEquals(323 + i * 32, epsilon: 0.5));
+
+      final caja = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(FiltroChip).at(i),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final decoracion = caja.decoration! as BoxDecoration;
+      expect(decoracion.borderRadius, BorderRadius.circular(12));
+      expect(decoracion.border!.top.color, AppColors.primary);
+      expect(decoracion.border!.top.width, 1);
+      expect(
+        decoracion.color,
+        i == 0 ? AppColors.chipBg : AppColors.white,
+        reason: 'sólo el grupo activo lleva fondo #D6EFFF',
+      );
+    }
+
+    for (final etiqueta in const [
+      'Lugar',
+      'Actividad',
+      'Temática',
+      'Nivel',
+      'Producto',
+    ]) {
+      final texto = find.descendant(
+        of: find.byType(FiltroChip),
+        matching: find.text(etiqueta),
+      );
+      final estilo = tester.widget<Text>(texto).style!;
+      expect(estilo.color, AppColors.filterButtonText);
+      expect(estilo.fontSize, 14);
+      expect(tester.getRect(texto).width, lessThan(70));
+    }
+  });
+
+  testWidgets('cada título de grupo lleva una línea debajo', (tester) async {
+    await _montarAgenda(tester);
+    await tester.tap(find.byKey(const Key('boton-filtro')));
+    await tester.pumpAndSettle();
+
+    final lineas = find.descendant(
+      of: find.byType(ListView),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Container && widget.constraints?.maxHeight == 1,
+      ),
+    );
+
+    for (var i = 0; i < 3; i++) {
+      final linea = tester.getRect(lineas.at(i));
+      expect(linea.top, moreOrLessEquals(353 + i * 166, epsilon: 0.5));
+      expect(linea.height, moreOrLessEquals(1, epsilon: 0.01));
+      expect(linea.left, moreOrLessEquals(129, epsilon: 0.5));
+    }
+
+    final titulo = tester.getRect(find.text('Lugar').last);
+    expect(titulo.top, moreOrLessEquals(328, epsilon: 0.5));
+
+    final opcion = tester.getRect(find.text('Auditorio 103').last);
+    expect(opcion.top, moreOrLessEquals(366.5, epsilon: 0.5));
+  });
+
+  testWidgets('las estrellas de Favoritos siempre son #007AC2 llenas', (
+    tester,
+  ) async {
+    await _montar(tester, const FavoritosScreen(), const Size(412, 917));
+
+    List<SvgPicture> estrellas() => tester
+        .widgetList<SvgPicture>(find.byType(SvgPicture))
+        .where((icono) {
+          final cargador = icono.bytesLoader;
+          return cargador is SvgAssetLoader &&
+              (cargador.assetName.contains('star') ||
+                  cargador.assetName.contains('favoritos'));
+        })
+        .toList();
+
+    void comprobar() {
+      expect(estrellas().length, 3);
+      for (final estrella in estrellas()) {
+        expect(
+          (estrella.bytesLoader as SvgAssetLoader).assetName,
+          'assets/icons/star_f.svg',
+        );
+        expect(
+          estrella.colorFilter,
+          const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+        );
+      }
+    }
+
+    comprobar();
+
+    await tester.tap(find.byKey(const Key('actividad-favorito')).first);
+    await tester.pumpAndSettle();
+
+    comprobar();
   });
 }
