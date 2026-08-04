@@ -105,9 +105,9 @@ class InfoCard extends StatelessWidget {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontFamily: Fonts.light,
+                      fontFamily: Fonts.regular,
                       fontSize: Fonts.textSm,
-                      fontWeight: Fonts.wLight,
+                      fontWeight: Fonts.wRegular,
                       fontStyle: FontStyle.italic,
                       height: 16 / 14,
                       letterSpacing: 0,

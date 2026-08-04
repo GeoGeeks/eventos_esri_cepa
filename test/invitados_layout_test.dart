@@ -235,6 +235,29 @@ void main() {
     expect(estilo.color, AppColors.textTitle);
   });
 
+  testWidgets('la descripción de la tarjeta es Regular Italic 14/16 #141414', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+
+    final descripcion = tester.widget<Text>(
+      find
+          .descendant(
+            of: find.byType(InfoCard).first,
+            matching: find.textContaining('Encuestas avanzadas'),
+          )
+          .first,
+    );
+    final estilo = descripcion.style!;
+    expect(estilo.fontFamily, Fonts.regular);
+    expect(estilo.fontWeight, Fonts.wRegular);
+    expect(estilo.fontStyle, FontStyle.italic);
+    expect(estilo.fontSize, 14);
+    expect(estilo.height, 16 / 14);
+    expect(estilo.letterSpacing, 0);
+    expect(estilo.color, AppColors.textTitle);
+  });
+
   testWidgets('la flecha de un speaker despliega fecha y lugar en 140x36', (
     tester,
   ) async {
