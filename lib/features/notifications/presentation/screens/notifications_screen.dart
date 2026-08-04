@@ -10,14 +10,12 @@ class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() =>
-      _NotificationsScreenState();
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   static const String _eliminarIcon = 'assets/icons/eliminar.svg';
 
-  // rgba(216, 48, 32, 0.05) del CSS
   static final Color _deleteRedLight =
       AppColors.requiredField.withOpacity(0.05);
 
@@ -66,155 +64,163 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Agrupa preservando el orden por 'group' (Hoy / Semana pasada)
     final groups = <String, List<Map<String, dynamic>>>{};
     for (final n in notifications) {
       groups.putIfAbsent(n['group'] as String, () => []).add(n);
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background, // #F7F7F7
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: notifications.isEmpty
-            ? const EmptyNotifications()
-            : SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: SizedBox(
-                    width: 360,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 36, bottom: 80),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Título "Notificaciones" + Chip "Borrar todo"
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Notificaciones',
-                                style: TextStyle(
-                                  fontFamily: Fonts.medium,
-                                  fontWeight: Fonts.wMedium,
-                                  fontSize: Fonts.text3h, // 26px
-                                  height: 32 / 26,
-                                  color: AppColors.textTitle, // #141414
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () =>
-                                    setState(() => notifications.clear()),
-                                child: Container(
-                                  height: 32,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.chipBg, // #D6EFFF
-                                    border: Border.all(
-                                      color: AppColors.chipBg,
-                                      width: 1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(9999),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    'Borrar todo',
-                                    style: TextStyle(
-                                      fontFamily: Fonts.medium,
-                                      fontWeight: Fonts.wMedium,
-                                      fontSize: 14,
-                                      height: 16 / 14,
-                                      color: AppColors.primary, // #007AC2
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // Lista de notificaciones agrupadas
-                          for (final entry in groups.entries) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Text(
-                                entry.key,
-                                style: const TextStyle(
-                                  fontFamily: Fonts.medium,
-                                  fontWeight: Fonts.wMedium,
-                                  fontSize: Fonts.text0h, // 16px
-                                  height: 20 / 16,
-                                  color: AppColors.modalSubtitle, // #4A4A4A
-                                ),
-                              ),
-                            ),
-                            for (final item in entry.value)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Dismissible(
-                                  key: Key(item['id']),
-                                  direction: DismissDirection.endToStart,
-                                  background: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: _deleteRedLight,
-                                            borderRadius:
-                                                const BorderRadius.horizontal(
-                                              left: Radius.circular(8),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 48,
-                                        height: 88,
-                                        alignment: Alignment.center,
-                                        decoration: const BoxDecoration(
-                                          color: AppColors
-                                              .requiredField, // #D83020
-                                          borderRadius:
-                                              BorderRadius.horizontal(
-                                            right: Radius.circular(8),
-                                          ),
-                                        ),
-                                        child: SvgPicture.asset(
-                                          _eliminarIcon,
-                                          width: 24,
-                                          height: 24,
-                                          colorFilter: const ColorFilter.mode(
-                                            AppColors.white,
-                                            BlendMode.srcIn,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  onDismissed: (_) {
-                                    setState(() {
-                                      notifications.removeWhere(
-                                        (n) => n['id'] == item['id'],
-                                      );
-                                    });
-                                  },
-                                  child: NotificationItem(
-                                    title: item['title'],
-                                    description: item['description'],
-                                    date: item['date'],
-                                    isNew: item['isNew'],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ],
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: 360,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 36, bottom: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// HEADER: Siempre visible
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Notificaciones',
+                        style: TextStyle(
+                          fontFamily: Fonts.medium,
+                          fontWeight: Fonts.wMedium,
+                          fontSize: Fonts.text3h, // 26px
+                          height: 32 / 26,
+                          color: AppColors.textTitle,
+                        ),
                       ),
-                    ),
+                      GestureDetector(
+                        onTap: () => setState(() => notifications.clear()),
+                        child: Container(
+                          height: 32,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.chipBg,
+                            border: Border.all(
+                              color: AppColors.chipBg,
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(9999),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'Borrar todo',
+                            style: TextStyle(
+                              fontFamily: Fonts.medium,
+                              fontWeight: Fonts.wMedium,
+                              fontSize: 14,
+                              height: 16 / 14,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+
+                  const SizedBox(height: 12),
+
+                  /// CONTENIDO: Lista o Estado Vacío
+                  Expanded(
+                    child: notifications.isEmpty
+                        ? const Center(
+                            child: EmptyNotifications(),
+                          )
+                        : SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (final entry in groups.entries) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Text(
+                                      entry.key,
+                                      style: const TextStyle(
+                                        fontFamily: Fonts.medium,
+                                        fontWeight: Fonts.wMedium,
+                                        fontSize: Fonts.text0h, // 16px
+                                        height: 20 / 16,
+                                        color: AppColors.modalSubtitle,
+                                      ),
+                                    ),
+                                  ),
+                                  for (final item in entry.value)
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12),
+                                      child: Dismissible(
+                                        key: Key(item['id']),
+                                        direction: DismissDirection.endToStart,
+                                        background: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: _deleteRedLight,
+                                                  borderRadius:
+                                                      const BorderRadius
+                                                          .horizontal(
+                                                    left: Radius.circular(8),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              width: 48,
+                                              height: 88,
+                                              alignment: Alignment.center,
+                                              decoration: const BoxDecoration(
+                                                color: AppColors.requiredField,
+                                                borderRadius:
+                                                    BorderRadius.horizontal(
+                                                  right: Radius.circular(8),
+                                                ),
+                                              ),
+                                              child: SvgPicture.asset(
+                                                _eliminarIcon,
+                                                width: 24,
+                                                height: 24,
+                                                colorFilter:
+                                                    const ColorFilter.mode(
+                                                  AppColors.white,
+                                                  BlendMode.srcIn,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        onDismissed: (_) {
+                                          setState(() {
+                                            notifications.removeWhere(
+                                              (n) => n['id'] == item['id'],
+                                            );
+                                          });
+                                        },
+                                        child: NotificationItem(
+                                          title: item['title'],
+                                          description: item['description'],
+                                          date: item['date'],
+                                          isNew: item['isNew'],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ],
+                            ),
+                          ),
+                  ),
+                ],
               ),
+            ),
+          ),
+        ),
       ),
     );
   }
