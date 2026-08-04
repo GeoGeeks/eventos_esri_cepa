@@ -8,6 +8,9 @@ import '../../core/constants/icons.dart';
 import '../../core/constants/images.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/bottom_nav.dart';
+import '../../core/widgets/detalle_actividad.dart';
+import '../../core/widgets/etiqueta_chip.dart';
+import '../../core/widgets/fila_meta.dart';
 import '../../core/widgets/info_card.dart';
 import '../../navigation/menu.dart';
 import '../agenda/agenda.dart';
@@ -44,10 +47,20 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   ];
 
   int _tabIndex = 0;
+  final Set<int> _expandidas = {};
 
   void _cambiarTab(int i) {
     if (i < 0 || i >= _tabs.length) return;
-    setState(() => _tabIndex = i);
+    setState(() {
+      _tabIndex = i;
+      _expandidas.clear();
+    });
+  }
+
+  void _alternarExpansion(int i) {
+    setState(() {
+      if (!_expandidas.remove(i)) _expandidas.add(i);
+    });
   }
 
   void _irAMenu(int index) {
@@ -84,7 +97,10 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
         titulo: items[i].titulo,
         subtitulo: items[i].subtitulo,
         descripcion: items[i].descripcion,
-        onExpandir: () {},
+        fecha: items[i].fecha,
+        lugar: items[i].lugar,
+        expandida: _expandidas.contains(i),
+        onExpandir: () => _alternarExpansion(i),
       ),
     );
   }
@@ -96,7 +112,11 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       padding: const EdgeInsets.only(top: 14),
       itemCount: items.length,
       separatorBuilder: (_, _) => const SizedBox(height: 16),
-      itemBuilder: (_, i) => SesionCard(sesion: items[i]),
+      itemBuilder: (_, i) => SesionCard(
+        sesion: items[i],
+        expandida: _expandidas.contains(i),
+        onExpandir: () => _alternarExpansion(i),
+      ),
     );
   }
 
@@ -293,9 +313,9 @@ class _InfoEvento extends StatelessWidget {
               ],
             ),
             style: const TextStyle(
-              fontFamily: Fonts.light,
+              fontFamily: Fonts.medium,
               fontSize: Fonts.textSm,
-              fontWeight: Fonts.wLight,
+              fontWeight: Fonts.wMedium,
               fontStyle: FontStyle.italic,
               height: 16 / 14,
               letterSpacing: 0,
@@ -624,24 +644,17 @@ class _ItemPestana extends StatelessWidget {
 
 class SesionCard extends StatelessWidget {
   final SesionEvento sesion;
+  final bool expandida;
   final VoidCallback? onFavorito;
   final VoidCallback? onExpandir;
 
   const SesionCard({
     super.key,
     required this.sesion,
+    this.expandida = false,
     this.onFavorito,
     this.onExpandir,
   });
-
-  static const _metaStyle = TextStyle(
-    fontFamily: Fonts.regular,
-    fontSize: Fonts.textSm,
-    fontWeight: Fonts.wRegular,
-    height: 16 / 14,
-    letterSpacing: 0,
-    color: AppColors.textSubtle,
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -687,54 +700,47 @@ class SesionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
-          _FilaMeta(icono: SvgIcon.date, texto: sesion.fecha),
+          FilaMeta(icono: SvgIcon.date, texto: sesion.fecha),
           const SizedBox(height: 4),
-          _FilaMeta(icono: SvgIcon.lugar, texto: sesion.lugar),
+          FilaMeta(icono: SvgIcon.lugar, texto: sesion.lugar),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
               padding: const EdgeInsets.only(right: 5),
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: onExpandir,
-                child: const AppIcon(
-                  SvgIcon.arrow,
-                  width: 14,
-                  height: 8.4,
-                  fit: BoxFit.fill,
-                  color: AppColors.textMuted,
+                child: Transform.rotate(
+                  angle: expandida ? math.pi : 0,
+                  child: const AppIcon(
+                    SvgIcon.arrow,
+                    width: 14,
+                    height: 8.4,
+                    fit: BoxFit.fill,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FilaMeta extends StatelessWidget {
-  final String icono;
-  final String texto;
-
-  const _FilaMeta({required this.icono, required this.texto});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 16,
-      child: Row(
-        children: [
-          AppIcon(icono, width: 16, height: 16, color: AppColors.textSubtle),
-          const SizedBox(width: 2),
-          Expanded(
-            child: Text(
-              texto,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: SesionCard._metaStyle,
+          if (expandida) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                for (final etiqueta in sesion.etiquetas) ...[
+                  EtiquetaChip(texto: etiqueta),
+                  const SizedBox(width: 8),
+                ],
+              ],
             ),
-          ),
+            const SizedBox(height: 10),
+            DetalleActividad(
+              descripcion: sesion.descripcion,
+              tituloObjetivos: sesion.tituloObjetivos,
+              objetivos: sesion.objetivos,
+            ),
+          ],
         ],
       ),
     );

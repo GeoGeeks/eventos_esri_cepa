@@ -16,6 +16,7 @@ class AppColors {
   static const Color surface3 = Color(0xFFF2F2F2);
 
   static const Color chipBg = Color(0xFFD6EFFF);
+  static const Color chipBorder = Color(0x14000000);
 
   // hover
   static const Color navActiveHighlight = Color(0x4D00619B);
@@ -34,4 +35,7 @@ class AppColors {
 
   //Valoración
   static const Color success = Color(0xFF288835);
+
+  //Credencial
+  static const Color qrCredencial = Color(0xFF803FFD);
 }

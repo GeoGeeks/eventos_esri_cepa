@@ -20,6 +20,8 @@ const _iconos = [
   SvgIcon.perfil,
   SvgIcon.arrow,
   SvgIcon.x,
+  SvgIcon.check,
+  SvgIcon.datetime,
 ];
 
 void main() {

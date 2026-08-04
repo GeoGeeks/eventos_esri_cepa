@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:esri_eventos/core/constants/app_colors.dart';
+import 'package:esri_eventos/core/constants/icons.dart';
+import 'package:esri_eventos/core/widgets/casilla_verificacion.dart';
 import 'package:esri_eventos/core/widgets/upcoming_event_card.dart';
 import 'package:esri_eventos/features/reservas/reservas_screen.dart';
 
@@ -101,6 +105,57 @@ void main() {
     await tester.tap(find.text('Presencial').first);
     await tester.pump();
     expect(find.text('CUE 2026'), findsOneWidget);
+  });
+
+  testWidgets('"Mi credencial" abre el modal de credencial', (tester) async {
+    await _montarReservas(tester);
+
+    expect(find.text('Credencial digital'), findsNothing);
+
+    await tester.tap(find.text('Mi credencial').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Credencial digital'), findsOneWidget);
+    expect(
+      find.text('Utilice este código para acceder al evento'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('las casillas de modalidad se marcan con el check SVG', (
+    tester,
+  ) async {
+    await _montarReservas(tester);
+
+    await tester.tap(find.byType(InkWell).first);
+    await tester.pump();
+
+    final casilla = find.byType(CasillaVerificacion).first;
+    expect(tester.widget<CasillaVerificacion>(casilla).marcada, isFalse);
+    expect(
+      find.descendant(of: casilla, matching: find.byType(SvgPicture)),
+      findsNothing,
+    );
+
+    await tester.tap(find.text('Virtual'));
+    await tester.pump();
+
+    final marcada = tester.widget<CasillaVerificacion>(
+      find.byType(CasillaVerificacion).first,
+    );
+    expect(marcada.marcada, isTrue);
+
+    final icono = tester.widget<SvgPicture>(
+      find.descendant(
+        of: find.byType(CasillaVerificacion).first,
+        matching: find.byType(SvgPicture),
+      ),
+    );
+    expect((icono.bytesLoader as SvgAssetLoader).assetName, SvgIcon.check);
+    expect(
+      icono.colorFilter,
+      const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+    );
   });
 
   testWidgets('la pantalla no desborda a 412x917', (tester) async {

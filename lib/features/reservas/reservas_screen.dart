@@ -7,7 +7,9 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/icons.dart';
 import '../../core/constants/images.dart';
+import '../../core/widgets/casilla_verificacion.dart';
 import '../../core/widgets/upcoming_event_card.dart';
+import '../credencial/presentation/credencial_modal.dart';
 import '../invitados/invitados.dart';
 
 class _ReservedEvent {
@@ -265,7 +267,8 @@ class _ReservasScreenState extends State<ReservasScreen> {
                                     viewMoreWidth: 75,
                                     secondaryWidth: 110,
                                     onViewMore: _abrirInvitados,
-                                    onRegister: () {},
+                                    onRegister: () =>
+                                        CredencialModal.mostrar(context),
                                   ),
                                 ),
                               ),
@@ -423,26 +426,7 @@ class _FilterOptionItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
             children: [
-              Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : AppColors.white,
-                  border: Border.all(
-                    color:
-                        isSelected ? AppColors.primary : AppColors.textSubtle,
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        size: 12,
-                        color: AppColors.white,
-                      )
-                    : null,
-              ),
+              CasillaVerificacion(marcada: isSelected, radio: 2),
               const SizedBox(width: 12),
               Text(
                 label,

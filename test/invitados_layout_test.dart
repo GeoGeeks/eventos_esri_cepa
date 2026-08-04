@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
+import 'package:esri_eventos/core/constants/app_colors.dart';
+import 'package:esri_eventos/core/constants/fonts.dart';
 import 'package:esri_eventos/core/widgets/bottom_nav.dart';
+import 'package:esri_eventos/core/widgets/detalle_actividad.dart';
+import 'package:esri_eventos/core/widgets/etiqueta_chip.dart';
 import 'package:esri_eventos/core/widgets/info_card.dart';
 import 'package:esri_eventos/features/invitados/invitados.dart';
 
 import 'fuentes_de_prueba.dart';
 
-Future<void> _montarInvitados(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(412, 917);
+/// Ancho real del emulador: 1080 px físicos a densidad 2,625.
+const double _anchoEmulador = 1080 / 2.625;
+
+Future<void> _montarEn(WidgetTester tester, Size lienzo) async {
+  tester.view.physicalSize = lienzo;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -16,6 +24,9 @@ Future<void> _montarInvitados(WidgetTester tester) async {
   await tester.pumpWidget(const MaterialApp(home: InvitadosScreen()));
   await tester.pump();
 }
+
+Future<void> _montarInvitados(WidgetTester tester) =>
+    _montarEn(tester, const Size(412, 917));
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -198,5 +209,144 @@ void main() {
   testWidgets('la pantalla no desborda a 412x917', (tester) async {
     await _montarInvitados(tester);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('el aviso es Avenir Medium Italic 14/16 en #141414', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+
+    final aviso = tester.widget<Text>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            (widget.textSpan?.toPlainText() ?? '').startsWith(
+              'Información sujeta a cambios sin aviso.',
+            ),
+      ),
+    );
+    final estilo = aviso.style!;
+    expect(estilo.fontFamily, Fonts.medium);
+    expect(estilo.fontWeight, Fonts.wMedium);
+    expect(estilo.fontStyle, FontStyle.italic);
+    expect(estilo.fontSize, 14);
+    expect(estilo.height, 16 / 14);
+    expect(estilo.letterSpacing, 0);
+    expect(estilo.color, AppColors.textTitle);
+  });
+
+  testWidgets('la flecha de un speaker despliega fecha y lugar en 140x36', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+
+    expect(find.text('Oct 02 - 11:00 a.m.'), findsNothing);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(InfoCard).first,
+        matching: find.byType(GestureDetector),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Oct 02 - 11:00 a.m.'), findsOneWidget);
+    expect(find.text('Calle 32 # 54 -34'), findsOneWidget);
+
+    final detalle = tester.getRect(find.byKey(const Key('info-detalle')));
+    expect(detalle.width, moreOrLessEquals(InfoCard.anchoDetalle, epsilon: 0.5));
+    expect(detalle.height, moreOrLessEquals(InfoCard.altoDetalle, epsilon: 0.5));
+
+    final fecha = tester.getRect(find.text('Oct 02 - 11:00 a.m.'));
+    final lugar = tester.getRect(find.text('Calle 32 # 54 -34'));
+    expect(lugar.top - fecha.bottom, moreOrLessEquals(4, epsilon: 0.5));
+
+    final estilo = tester.widget<Text>(find.text('Oct 02 - 11:00 a.m.')).style!;
+    expect(estilo.fontFamily, Fonts.regular);
+    expect(estilo.fontSize, 14);
+    expect(estilo.height, 16 / 14);
+    expect(estilo.color, AppColors.textSubtle);
+  });
+
+  testWidgets('la flecha de un stand despliega etiquetas y objetivos', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+
+    await tester.tap(find.text('Experiencias'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Stands'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(EtiquetaChip), findsNothing);
+    expect(find.byType(DetalleActividad), findsNothing);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(SesionCard).first,
+        matching: find.byType(GestureDetector),
+      ).last,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(EtiquetaChip), findsNWidgets(3));
+    expect(find.text('Avanzado'), findsOneWidget);
+    expect(find.text('Tecnología'), findsOneWidget);
+    expect(find.text('GeoIA'), findsOneWidget);
+
+    expect(find.byType(DetalleActividad), findsOneWidget);
+    expect(find.text('Objetivos'), findsOneWidget);
+    for (var i = 1; i <= 4; i++) {
+      expect(find.textContaining('$i. Integre modelos'), findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final lienzo in const [
+    Size(412, 917),
+    Size(_anchoEmulador, 869),
+    Size(360, 800),
+  ]) {
+    testWidgets('las tarjetas desplegadas no desbordan a $lienzo', (
+      tester,
+    ) async {
+      await _montarEn(tester, lienzo);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(InfoCard).first,
+          matching: find.byType(GestureDetector),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'speaker desplegado');
+
+      await tester.tap(find.text('Experiencias'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Stands'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(SesionCard).first,
+              matching: find.byType(GestureDetector),
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'stand desplegado');
+    });
+  }
+
+  testWidgets('el QR de la credencial se dibuja en #803FFD', (tester) async {
+    await _montarInvitados(tester);
+
+    await tester.tap(find.byKey(const Key('invitados-qr')));
+    await tester.pumpAndSettle();
+
+    final qr = tester.widget<QrImageView>(find.byType(QrImageView));
+    expect(qr.eyeStyle.color, AppColors.qrCredencial);
+    expect(qr.dataModuleStyle.color, AppColors.qrCredencial);
   });
 }

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../../../core/widgets/casilla_verificacion.dart';
 import '../../../../core/widgets/upcoming_event_card.dart';
 import '../../data/eventos_data.dart';
 
@@ -440,35 +441,15 @@ class _FilterOptionItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
             children: [
-              Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF007AC2) : Colors.white,
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF007AC2)
-                        : const Color(0xFF949494),
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        size: 12,
-                        color: Colors.white,
-                      )
-                    : null,
-              ),
+              CasillaVerificacion(marcada: isSelected, radio: 2),
               const SizedBox(width: 12),
               Text(
                 label,
                 style: const TextStyle(
                   fontFamily: Fonts.regular,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF141414),
+                  fontSize: Fonts.textSm,
+                  fontWeight: Fonts.wRegular,
+                  color: AppColors.textTitle,
                 ),
               ),
             ],
