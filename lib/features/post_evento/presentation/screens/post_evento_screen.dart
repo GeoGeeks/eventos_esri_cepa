@@ -22,6 +22,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   static const _tabs = ['Galería', 'Agendar con expertos'];
   int _tabIndex = 0;
   bool _showVideo = false;
+  bool _showCertificadoToast = false; // ✅ nuevo estado del toast
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -142,7 +143,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
             ),
 
             // 4. Contenido (Texto, botones, pestañas y galería/expertos)
-            Positioned(
+Positioned(
               top: 102,
               left: 0,
               right: 0,
@@ -152,31 +153,59 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                   width: 412,
                   child: SingleChildScrollView(
                     controller: _scrollController,
-                    physics: const BouncingScrollPhysics(), // ✅ agregado
+                    physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.only(top: 20, bottom: 100),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _InfoEvento(),
                         const SizedBox(height: 16),
-                        _BotonesAccion(),
-                        const SizedBox(height: 16),
-                        _TabBar(
-                          tabs: _tabs,
-                          tabIndex: _tabIndex,
-                          onTab: (i) => setState(() {
-                            _tabIndex = i;
-                            _showVideo = false;
-                            // Forzamos el scroll a 0 al cambiar de pestaña
-                            // para que Galería y Agendar con expertos
-                            // siempre arranquen en la misma posición.
-                            if (_scrollController.hasClients) {
-                              _scrollController.jumpTo(0);
-                            }
-                          }),
+                        _BotonesAccion(
+                          onCertificado: () {
+                            setState(() => _showCertificadoToast = true);
+                          },
                         ),
-                        const SizedBox(height: 11),
-                        _buildTabContent(),
+                        const SizedBox(height: 16),
+
+                        // Stack para superponer el Toast sobre el TabBar
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _TabBar(
+                                  tabs: _tabs,
+                                  tabIndex: _tabIndex,
+                                  onTab: (i) => setState(() {
+                                    _tabIndex = i;
+                                    _showVideo = false;
+                                    if (_scrollController.hasClients) {
+                                      _scrollController.jumpTo(0);
+                                    }
+                                  }),
+                                ),
+                                const SizedBox(height: 11),
+                                _buildTabContent(),
+                              ],
+                            ),
+
+                            // Toast flotante cubriendo las pestañas
+                            if (_showCertificadoToast)
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: _CertificadoToast(
+                                    onClose: () {
+                                      setState(() => _showCertificadoToast = false);
+                                    },
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -184,7 +213,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
               ),
             ),
 
-            // 5. Botón de retroceso
+            // Botón de retroceso
             _HeaderBackBtn(onBack: widget.onBack),
           ],
         ),
@@ -193,7 +222,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   }
 }
 
-// ─── Botón de retroceso del Header (igual al de Invitados) ───────────────────
+// ─── Botón de retroceso del Header ───────────────────────────────────────────
 class _HeaderBackBtn extends StatelessWidget {
   final VoidCallback? onBack;
 
@@ -391,6 +420,10 @@ class _InfoEvento extends StatelessWidget {
 
 // ─── Botones Valorar / Certificado ───────────────────────────────────────────
 class _BotonesAccion extends StatelessWidget {
+  final VoidCallback? onCertificado;
+
+  const _BotonesAccion({this.onCertificado});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -456,7 +489,7 @@ class _BotonesAccion extends StatelessWidget {
               child: SizedBox(
                 height: 44,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: onCertificado,
                   style: OutlinedButton.styleFrom(
                     backgroundColor: const Color(0xFFF7F7F7),
                     foregroundColor: const Color(0xFF949494),
@@ -504,6 +537,174 @@ class _BotonesAccion extends StatelessWidget {
   }
 }
 
+// ─── Toast "¡Gracias por tu opinión!" (CSS exacto del Figma actualizad) ──────
+class _CertificadoToast extends StatelessWidget {
+  final VoidCallback onClose;
+
+  const _CertificadoToast({
+  required this.onClose,
+});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: 361,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1A000000),
+              blurRadius: 20,
+              offset: Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Highlight (2 px)
+            Container(
+              height: 2,
+              decoration: const BoxDecoration(
+                color: Color(0xFF288835),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(4),
+                  topRight: Radius.circular(4),
+                ),
+              ),
+            ),
+
+            // Bottom Container
+            Container(
+              height: 61,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  left: BorderSide(color: Color(0xFFEBEBEB)),
+                  right: BorderSide(color: Color(0xFFEBEBEB)),
+                  bottom: BorderSide(color: Color(0xFFEBEBEB)),
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(4),
+                  bottomRight: Radius.circular(4),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 11, 12, 11),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: SvgPicture.asset(
+                              SvgIcon.ecard1,
+                              width: 16,
+                              height: 16,
+                              colorFilter: const ColorFilter.mode(
+                                Color(0xFF288835),
+                                BlendMode.srcIn,
+                              ),
+                              placeholderBuilder: (_) => const Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: Color(0xFF288835),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 16),
+
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  '¡Gracias por tu opinión!',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: Fonts.medium,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                    height: 20 / 16,
+                                    color: Color(0xFF141414),
+                                  ),
+                                ),
+                                Text(
+                                  'Se ha descargado su certificado.',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: Fonts.regular,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                    height: 16 / 14,
+                                    color: Color(0xFF141414),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: SizedBox(
+                      width: 38,
+                      height: 32,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: InkWell(
+                          onTap: onClose,
+                          borderRadius: BorderRadius.circular(2),
+                          child: SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: Center(
+                              child: SvgPicture.asset(
+                                SvgIcon.x,
+                                width: 8.04,
+                                height: 8.02,
+                                colorFilter: const ColorFilter.mode(
+                                  Color(0xFF6B6B6B),
+                                  BlendMode.srcIn,
+                                ),
+                                placeholderBuilder: (_) => const Icon(
+                                  Icons.close,
+                                  size: 16,
+                                  color: Color(0xFF6B6B6B),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 // ─── TabBar ───────────────────────────────────────────────────────────────────
 class _TabBar extends StatelessWidget {
   final List<String> tabs;
@@ -835,7 +1036,6 @@ class _ExpertosTab extends StatelessWidget {
 }
 
 // ─── Experto Card (según Figma CSS) ───────────────────────────────────────────
-// ─── Experto Card (Ajuste final sin desbordamiento) ───────────────────────────
 class _ExpertoCard extends StatelessWidget {
   final String imagenAsset;
   final String nombre;
@@ -866,7 +1066,6 @@ class _ExpertoCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // comunidad-pe-2 2 (Avatar 92x92)
           ClipOval(
             child: Image.asset(
               imagenAsset,
@@ -876,14 +1075,12 @@ class _ExpertoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          // content-container ajustado con Expanded para evitar overflow
           Expanded(
             child: SizedBox(
               height: 90,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // header (50px altura)
                   Container(
                     height: 50,
                     alignment: Alignment.topLeft,
@@ -892,7 +1089,6 @@ class _ExpertoCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Card title (18px, Medium, Color: #141414)
                         SizedBox(
                           height: 24,
                           child: Text(
@@ -909,7 +1105,6 @@ class _ExpertoCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        // Subtitle (14px, Regular, Color: #6B6B6B)
                         SizedBox(
                           height: 16,
                           child: Text(
@@ -928,7 +1123,6 @@ class _ExpertoCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // footer (40px altura, alineado a la derecha)
                   Container(
                     height: 40,
                     padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -956,7 +1150,6 @@ class _ExpertoCard extends StatelessWidget {
                               color: Color(0xFFFFFFFF),
                             ),
                             SizedBox(width: 12),
-                            // Button text (14px, Regular, Color: #FFFFFF)
                             Text(
                               'Agendar',
                               style: TextStyle(
@@ -996,4 +1189,5 @@ class _Experto {
     required this.descripcion,
   });
 }
+
 
