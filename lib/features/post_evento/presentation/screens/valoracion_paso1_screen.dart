@@ -1,12 +1,11 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 // Constantes globales de tu arquitectura
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/widgets/app_icons.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
+import '../../../../core/widgets/desplegable_si_no.dart';
+import '../../../../core/widgets/mensaje_error_campo.dart';
 
 import 'valoracion_paso2_screen.dart';
 
@@ -25,12 +24,39 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
   bool dia3 = false;
 
   String? laboratorio;
-  bool isMenuOpen = false; // ✅ Controla el estado del menú desplegable
+
+  /// Los errores no salen hasta que se intenta continuar: así el formulario no
+  /// aparece en rojo antes de que la persona haya escrito nada.
+  bool _mostrarErrores = false;
 
   final TextEditingController _comentarioGeneralController =
       TextEditingController();
   final TextEditingController _comentarioLabController =
       TextEditingController();
+
+  // ── Campos obligatorios (los marcados con * en el diseño) ──
+  bool get _faltaCalificacion => rating == 0;
+  bool get _faltaLaboratorio => laboratorio == null;
+  bool get _faltaDias => !dia1 && !dia2 && !dia3;
+
+  bool get _formularioCompleto =>
+      !_faltaCalificacion && !_faltaLaboratorio && !_faltaDias;
+
+  /// Texto del error de un campo, o nulo si no hay que mostrarlo todavía.
+  String? _error(bool falta) =>
+      _mostrarErrores && falta ? MensajeErrorCampo.obligatorio : null;
+
+  void _continuar() {
+    setState(() => _mostrarErrores = true);
+
+    // Sin los obligatorios no se avanza: la encuesta se queda en este paso.
+    if (!_formularioCompleto) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ValoracionPaso2Screen()),
+    );
+  }
 
   @override
   void dispose() {
@@ -167,6 +193,9 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
                 ),
               ),
 
+              if (_error(_faltaCalificacion) != null)
+                MensajeErrorCampo(texto: _error(_faltaCalificacion)!),
+
               const SizedBox(height: 12),
 
               /// CUÉNTANOS MÁS (1)
@@ -188,114 +217,11 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
               const SizedBox(height: 12),
 
               /// COMBOBOX: Participó en los Laboratorios de entrenamiento
-              RichText(
-                text: const TextSpan(
-                  style: TextStyle(
-                    fontFamily: Fonts.regular,
-                    fontWeight: Fonts.wRegular,
-                    fontSize: Fonts.text0h,
-                    height: 20 / 16,
-                    color: Color(0xFF141414),
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Participó en los Laboratorios de entrenamiento',
-                    ),
-                    TextSpan(
-                      text: ' *',
-                      style: TextStyle(color: Color(0xFFD83020)),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              /// content-container: padding 0px 10px 0px 16px (Figma spec)
-              Container(
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF),
-                  border: Border.all(color: const Color(0xFF949494), width: 1),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton2<String>(
-                    value: laboratorio,
-                    isExpanded: true,
-                    onMenuStateChange: (isOpen) {
-                      setState(() {
-                        isMenuOpen = isOpen; // ✅ Detecta si abre o cierra
-                      });
-                    },
-                    buttonStyleData: const ButtonStyleData(
-                      padding: EdgeInsets.only(left: 16, right: 10),
-                    ),
-                    iconStyleData: IconStyleData(
-                      icon: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: Center(
-                          child: Transform.rotate(
-                            // ✅ Si el menú está abierto rota a 90° (arriba), si está cerrado a -90° (abajo)
-                            angle: isMenuOpen ? math.pi / 2 : -math.pi / 2,
-                            child: const AppIcon(
-                              SvgIcon.back,
-                              width: 8.414,
-                              height: 14,
-                              color: Color(0xFF6B6B6B),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    dropdownStyleData: DropdownStyleData(
-                      offset: const Offset(0, -2),
-                      width: MediaQuery.of(context).size.width - 52,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFFFFFF),
-                      ),
-                    ),
-                    hint: const Text(
-                      'Seleccione',
-                      style: TextStyle(
-                        fontFamily: Fonts.light,
-                        fontWeight: Fonts.wLight,
-                        fontSize: Fonts.text0h,
-                        height: 20 / 16,
-                        color: Color(0xFF6B6B6B),
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'si',
-                        child: Text(
-                          'Sí',
-                          style: TextStyle(
-                            fontFamily: Fonts.regular,
-                            fontSize: Fonts.text0h,
-                            color: Color(0xFF141414),
-                          ),
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'no',
-                        child: Text(
-                          'No',
-                          style: TextStyle(
-                            fontFamily: Fonts.regular,
-                            fontSize: Fonts.text0h,
-                            color: Color(0xFF141414),
-                          ),
-                        ),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      setState(() {
-                        laboratorio = v;
-                      });
-                    },
-                  ),
-                ),
+              DesplegableSiNo(
+                etiqueta: 'Participó en los Laboratorios de entrenamiento',
+                valor: laboratorio,
+                error: _error(_faltaLaboratorio),
+                onChanged: (v) => setState(() => laboratorio = v),
               ),
 
               const SizedBox(height: 12),
@@ -359,6 +285,9 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
                 ],
               ),
 
+              if (_error(_faltaDias) != null)
+                MensajeErrorCampo(texto: _error(_faltaDias)!),
+
               const SizedBox(height: 28),
 
               /// BOTÓN CONTINUAR (360x44, azul #007AC2, texto #F7F7F7)
@@ -373,14 +302,7 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
                     ),
                     elevation: 0,
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ValoracionPaso2Screen(),
-                      ),
-                    );
-                  },
+                  onPressed: _continuar,
                   child: const Text(
                     'Continuar',
                     style: TextStyle(

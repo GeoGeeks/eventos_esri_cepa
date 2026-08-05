@@ -21,13 +21,9 @@ class _ReservedEvent {
   });
 }
 
+/// Una sola tarjeta. El carrusel no cambia: si mañana entran más eventos
+/// reservados, se añaden a esta lista y vuelve a deslizarse solo.
 const _reservedEvents = [
-  _ReservedEvent(
-    title: 'CUE 2026',
-    date: 'Oct 02 - 11:00 a.m.',
-    location: 'Ágora Bogotá',
-    image: Images.esriEventos,
-  ),
   _ReservedEvent(
     title: 'CUE 2026',
     date: 'Oct 02 - 11:00 a.m.',

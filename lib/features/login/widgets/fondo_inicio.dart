@@ -43,11 +43,17 @@ class FondoInicio extends StatelessWidget {
     // en 0 —lo absorbe viewInsets— y el pie se iría 24 px hacia abajo.
     final barraNavegacion = media.viewPadding.bottom;
 
-    // El teclado ya cubre la barra de navegación, así que se reserva el mayor
-    // de los dos, no la suma.
-    final reservaInferior = teclado > barraNavegacion
+    // Sitio que ocupa el logo del pie más su margen.
+    const reservaPie = _margenPie + _altoPie;
+
+    // Con el teclado fuera, la zona desplazable llega **justo hasta su borde**.
+    // Antes se le restaba además el pie, y quedaba una franja muerta de 50 px
+    // sobre el teclado: la pantalla se veía cortada, como con un margen encima
+    // del teclado. El logo del pie queda tapado por el teclado, así que no hay
+    // que reservarle sitio mientras está abierto.
+    final reservaInferior = teclado > 0
         ? teclado
-        : barraNavegacion;
+        : barraNavegacion + reservaPie;
 
     return Stack(
       children: [
@@ -61,7 +67,7 @@ class FondoInicio extends StatelessWidget {
           top: barraEstado,
           left: 0,
           right: 0,
-          bottom: reservaInferior + _margenPie + _altoPie,
+          bottom: reservaInferior,
           child: SingleChildScrollView(
             child: SizedBox(
               width: double.infinity,

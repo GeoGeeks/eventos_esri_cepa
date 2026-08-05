@@ -48,20 +48,6 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
       cargo: 'Directora de Analítica ArcGIS',
       descripcion: 'Analítica geoespacial aplicada a proyectos urbanos.',
     ),
-    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
-    _Experto(
-      imagenAsset: Images.fotoInvitado,
-      nombre: 'Carlos Andrés Gómez',
-      cargo: 'Consultor SIG',
-      descripcion: 'Implementación de sistemas de información geográfica.',
-    ),
-    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
-    _Experto(
-      imagenAsset: Images.fotoInvitado,
-      nombre: 'Laura Patricia Méndez',
-      cargo: 'Especialista en Geointeligencia',
-      descripcion: 'Modelos predictivos con datos geoespaciales.',
-    ),
   ];
 
   static const _galeria = [
