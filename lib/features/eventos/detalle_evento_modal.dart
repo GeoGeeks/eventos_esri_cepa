@@ -33,7 +33,9 @@ class DetalleEventoModal extends StatelessWidget {
             // --- HEADER (height: 69px) ---
             Container(
               width: 358,
-              height: 69,
+              // 69 del diseño como mínimo: si el título del evento necesita
+              // más de un renglón, la cabecera crece en vez de recortarlo.
+              constraints: const BoxConstraints(minHeight: 69),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -47,8 +49,6 @@ class DetalleEventoModal extends StatelessWidget {
                   Expanded(
                     child: Text(
                       evento.titulo,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontFamily: Fonts.medium,
                         fontSize: 26,

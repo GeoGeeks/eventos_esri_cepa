@@ -26,6 +26,11 @@ class AgendaScreen extends StatefulWidget {
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
+  /// Hueco entre la cabecera —que arranca en 36 y mide 36— y la alerta. Deja
+  /// el borde superior de la alerta en `y = 96`, la misma altura a la que sale
+  /// en Laboratorios.
+  static const double _topAlerta = 60;
+
   late final List<Actividad> _actividades = List.of(widget.actividades);
   final Set<int> _expandidas = {};
   String _busqueda = '';
@@ -140,7 +145,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
+      body: Stack(
+        children: [
+          Column(
               children: [
                 Padding(
                   // La cabecera va a 36 de Figma; solo baja si la barra de
@@ -165,22 +172,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                         onBuscar: (texto) => setState(() => _busqueda = texto),
                         onFiltrar: _abrirFiltro,
                       ),
-
-                      // La alerta ya no flota sobre el pie: va aquí arriba,
-                      // junto al buscador, y deja 16 hasta la primera tarjeta.
-                      if (_alertaVisible) ...[
-                        const SizedBox(height: 16),
-                        AlertaGuardado(
-                          key: const Key('alerta-guardado'),
-                          mensaje: '¡Ha guardado una actividad!',
-                          enlace: 'Ir a guardados',
-                          onEnlace: _irAGuardados,
-                          onCerrar: () =>
-                              setState(() => _alertaVisible = false),
-                        ),
-                        const SizedBox(height: 16),
-                      ] else
-                        const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
                       for (final indice in visibles) ...[
                         ActividadCard(
@@ -197,6 +189,25 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 ),
               ],
         ),
+
+          // La alerta **no ocupa sitio en la columna**: se superpone sobre el
+          // contenido justo debajo del botón de volver y del título, así que
+          // ninguna tarjeta se mueve al aparecer ni al desaparecer.
+          if (_alertaVisible)
+            Positioned(
+              top: AreaSegura.top(context, 36) + _topAlerta,
+              left: 26,
+              right: 26,
+              child: AlertaGuardado(
+                key: const Key('alerta-guardado'),
+                mensaje: '¡Ha guardado una actividad!',
+                enlace: 'Ir a guardados',
+                onEnlace: _irAGuardados,
+                onCerrar: () => setState(() => _alertaVisible = false),
+              ),
+            ),
+        ],
+      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: CustomBottomNav(currentIndex: -1, onTap: _irAMenu),

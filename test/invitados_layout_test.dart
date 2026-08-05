@@ -4,7 +4,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import 'package:esri_eventos/core/constants/app_colors.dart';
 import 'package:esri_eventos/core/constants/fonts.dart';
+import 'package:esri_eventos/core/constants/icons.dart';
 import 'package:esri_eventos/core/constants/images.dart';
+import 'package:esri_eventos/core/widgets/alerta_guardado.dart';
 import 'package:esri_eventos/core/widgets/app_icons.dart';
 import 'package:esri_eventos/core/widgets/bottom_nav.dart';
 import 'package:esri_eventos/core/widgets/detalle_actividad.dart';
@@ -12,6 +14,7 @@ import 'package:esri_eventos/core/widgets/etiqueta_chip.dart';
 import 'package:esri_eventos/core/widgets/info_card.dart';
 import 'package:esri_eventos/core/widgets/tarjeta_experiencia.dart';
 import 'package:esri_eventos/features/credencial/presentation/credencial_modal.dart';
+import 'package:esri_eventos/features/favoritos/favoritos_store.dart';
 import 'package:esri_eventos/features/invitados/data/invitados_mock_data.dart';
 import 'package:esri_eventos/features/invitados/invitados.dart';
 import 'package:esri_eventos/features/profile/data/ecard_mock_data.dart';
@@ -330,6 +333,125 @@ void main() {
     expect(find.text('Partner Member'), findsOneWidget);
   });
 
+  testWidgets('en Stands solo el correo va subrayado', (tester) async {
+    await _montarInvitados(tester);
+
+    // Pestaña a pestaña: la tira se desplaza y «Stands» solo queda a tiro
+    // cuando ya se está en «Experiencias».
+    for (final pestana in ['Experiencias', 'Stands']) {
+      await tester.tap(find.text(pestana));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(
+      find
+          .descendant(
+            of: find.byType(TarjetaExperiencia),
+            matching: find.byType(GestureDetector),
+          )
+          .last,
+    );
+    await tester.pumpAndSettle();
+
+    final descripcion = tester.widget<Text>(
+      find.byKey(const Key('experiencia-descripcion')),
+    );
+    expect(descripcion.style!.decoration, TextDecoration.none);
+
+    final correo = tester.widget<Text>(
+      find.byKey(const Key('experiencia-enlace')),
+    );
+    expect(correo.style!.decoration, TextDecoration.underline);
+    expect(find.text('jangel@gentemovil.co'), findsOneWidget);
+  });
+
+  testWidgets('Experiencias y Stands muestran la hora junto a la fecha', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+
+    await tester.tap(find.text('Experiencias'));
+    await tester.pumpAndSettle();
+    expect(find.text('Oct 01 y 02 – 11:00 a.m.'), findsOneWidget);
+
+    await tester.tap(find.text('Stands'));
+    await tester.pumpAndSettle();
+    expect(find.text('Oct 01 y 02 – 11:00 a.m.'), findsOneWidget);
+  });
+
+  testWidgets('al desplegar un speaker la flecha queda debajo del detalle', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(InfoCard).first,
+        matching: find.byType(GestureDetector),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final detalle = tester.getRect(find.byKey(const Key('info-detalle')));
+    final flecha = tester.getRect(
+      find.descendant(
+        of: find.byType(InfoCard).first,
+        matching: find.byType(Transform),
+      ),
+    );
+    expect(
+      flecha.top,
+      greaterThanOrEqualTo(detalle.bottom),
+      reason: 'la información se inserta encima de la flecha',
+    );
+
+    // Y sigue quedando el espacio de la fila de la flecha hasta el borde.
+    final tarjeta = tester.getRect(find.byType(InfoCard).first);
+    expect(tarjeta.bottom - flecha.bottom, greaterThan(0));
+  });
+
+  testWidgets('la estrella de un laboratorio lo lleva a Favoritos', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+    await _irALaboratorios(tester);
+
+    expect(FavoritosStore.contiene(InvitadosMockData.laboratorios.first.titulo),
+        isFalse);
+
+    final estrella = find.byKey(const Key('sesion-favorito'));
+    var icono = tester.widget<AppIcon>(
+      find.descendant(of: estrella, matching: find.byType(AppIcon)),
+    );
+    expect(icono.icon, SvgIcon.favoritos);
+    expect(icono.color, AppColors.textSubtle);
+
+    await tester.tap(estrella);
+    await tester.pumpAndSettle();
+
+    icono = tester.widget<AppIcon>(
+      find.descendant(of: estrella, matching: find.byType(AppIcon)),
+    );
+    expect(icono.icon, SvgIcon.estrellaLlena, reason: 'estrella rellena');
+    expect(icono.color, AppColors.primary);
+    expect(
+      FavoritosStore.contiene(InvitadosMockData.laboratorios.first.titulo),
+      isTrue,
+    );
+
+    // Al volver a pulsarla se apaga y sale de Favoritos.
+    await tester.tap(estrella);
+    await tester.pumpAndSettle();
+
+    icono = tester.widget<AppIcon>(
+      find.descendant(of: estrella, matching: find.byType(AppIcon)),
+    );
+    expect(icono.icon, SvgIcon.favoritos);
+    expect(
+      FavoritosStore.contiene(InvitadosMockData.laboratorios.first.titulo),
+      isFalse,
+    );
+  });
+
   testWidgets('el botón de cupo recorre reservar, gracias y cancelar', (
     tester,
   ) async {
@@ -556,5 +678,36 @@ void main() {
       CredencialModal.datosPorDefecto.codigo,
       'CUE-2026-${EcardMockData.documento}',
     );
+  });
+
+  testWidgets('la estrella de Laboratorios saca la alerta a 96 sin mover nada', (
+    tester,
+  ) async {
+    await _montarInvitados(tester);
+    await _irALaboratorios(tester);
+
+    expect(find.byType(AlertaGuardado), findsNothing);
+    final tarjetaAntes = tester.getRect(find.byType(SesionCard).first);
+
+    await tester.tap(find.byKey(const Key('sesion-favorito')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('¡Ha guardado una actividad!'), findsOneWidget);
+
+    final alerta = tester.getRect(find.byKey(const Key('alerta-guardado')));
+    expect(alerta.top, moreOrLessEquals(96, epsilon: 0.5));
+    expect(alerta.left, moreOrLessEquals(26, epsilon: 0.5));
+    expect(alerta.width, moreOrLessEquals(360, epsilon: 0.5));
+
+    // Se superpone: la tarjeta no se mueve ni un píxel.
+    final tarjetaDespues = tester.getRect(find.byType(SesionCard).first);
+    expect(tarjetaDespues.top, moreOrLessEquals(tarjetaAntes.top, epsilon: 0.5));
+
+    // Al desmarcar no vuelve a salir.
+    await tester.tap(find.byKey(const Key('sesion-favorito')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(AlertaGuardado), findsNothing);
   });
 }

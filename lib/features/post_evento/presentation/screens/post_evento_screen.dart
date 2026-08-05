@@ -7,6 +7,7 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/widgets/app_icons.dart';
+import '../../data/valoracion_store.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
 import '../widgets/agendar_modal.dart';
 
@@ -161,20 +162,34 @@ Positioned(
                       children: [
                         _InfoEvento(),
                         const SizedBox(height: 16),
-                        _BotonesAccion(
-                          onCertificado: () {
-                            setState(() => _showCertificadoToast = true);
-                          },
-                        ),
-                        const SizedBox(height: 16),
 
-                        // Stack para superponer el Toast sobre el TabBar
+                        // Los botones y el toast van en el mismo Stack: así el
+                        // toast se ancla a **15 debajo de la fila de botones**
+                        // y se superpone a las pestañas sin moverlas.
                         Stack(
                           clipBehavior: Clip.none,
                           children: [
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                ValueListenableBuilder<bool>(
+                                  valueListenable:
+                                      ValoracionStore.eventoValorado,
+                                  builder: (_, valorado, _) => _BotonesAccion(
+                                    valorado: valorado,
+                                    onValorar: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const ValoracionPaso1Screen(),
+                                      ),
+                                    ),
+                                    onCertificado: () => setState(
+                                      () => _showCertificadoToast = true,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
                                 _TabBar(
                                   tabs: _tabs,
                                   tabIndex: _tabIndex,
@@ -191,14 +206,15 @@ Positioned(
                               ],
                             ),
 
-                            // Toast flotante cubriendo las pestañas
+                            // 44 de la fila de botones + los 15 del diseño.
                             if (_showCertificadoToast)
                               Positioned(
-                                top: 0,
+                                top: 44 + 15,
                                 left: 0,
                                 right: 0,
                                 child: Center(
                                   child: _CertificadoToast(
+                                    key: const Key('certificado-toast'),
                                     onClose: () {
                                       setState(() => _showCertificadoToast = false);
                                     },
@@ -420,10 +436,25 @@ class _InfoEvento extends StatelessWidget {
 }
 
 // ─── Botones Valorar / Certificado ───────────────────────────────────────────
+/// Los dos botones se **intercambian** al valorar: mientras no se haya valorado
+/// manda «Valorar evento» y el certificado está apagado; una vez valorado,
+/// «Valorar evento» queda en gris y «Certificado» pasa a ser el botón activo.
+/// Sin valoración no se puede descargar el certificado.
 class _BotonesAccion extends StatelessWidget {
+  final bool valorado;
+  final VoidCallback? onValorar;
   final VoidCallback? onCertificado;
 
-  const _BotonesAccion({this.onCertificado});
+  const _BotonesAccion({
+    required this.valorado,
+    this.onValorar,
+    this.onCertificado,
+  });
+
+  static const Color _azul = Color(0xFF007AC2);
+  static const Color _gris = Color(0xFF949494);
+  static const Color _blanco = Color(0xFFFFFFFF);
+  static const Color _apagado = Color(0xFFF7F7F7);
 
   @override
   Widget build(BuildContext context) {
@@ -434,100 +465,90 @@ class _BotonesAccion extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: SizedBox(
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ValoracionPaso1Screen(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF007AC2),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: SvgPicture.asset(
-                          'assets/icons/valorar_evento.svg',
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Flexible(
-                        child: Text(
-                          'Valorar evento',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: Fonts.regular,
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              child: _Boton(
+                key: const Key('post-evento-valorar'),
+                etiqueta: 'Valorar evento',
+                icono: 'assets/icons/valorar_evento.svg',
+                // Sin valorar: relleno azul con letra blanca. Ya valorado:
+                // fondo blanco, borde y letra en #949494.
+                fondo: valorado ? _blanco : _azul,
+                contenido: valorado ? _gris : _blanco,
+                borde: valorado ? _gris : null,
+                onTap: valorado ? null : onValorar,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: SizedBox(
-                height: 44,
-                child: OutlinedButton(
-                  onPressed: onCertificado,
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF7F7F7),
-                    foregroundColor: const Color(0xFF949494),
-                    elevation: 0,
-                    side: const BorderSide(color: Color(0xFF949494), width: 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: SvgPicture.asset(
-                          'assets/icons/certificado.svg',
-                          colorFilter: const ColorFilter.mode(
-                            Color(0xFF949494),
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Flexible(
-                        child: Text(
-                          'Certificado',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: Fonts.regular,
-                            fontSize: 16,
-                            color: Color(0xFF949494),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              child: _Boton(
+                key: const Key('post-evento-certificado'),
+                etiqueta: 'Certificado',
+                icono: 'assets/icons/certificado.svg',
+                // Apagado hasta que se valore; después, azul con letra blanca.
+                fondo: valorado ? _azul : _apagado,
+                contenido: valorado ? _blanco : _gris,
+                borde: valorado ? null : _gris,
+                onTap: valorado ? onCertificado : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Boton extends StatelessWidget {
+  final String etiqueta;
+  final String icono;
+  final Color fondo;
+
+  /// Color del ícono y de la letra.
+  final Color contenido;
+  final Color? borde;
+  final VoidCallback? onTap;
+
+  const _Boton({
+    super.key,
+    required this.etiqueta,
+    required this.icono,
+    required this.fondo,
+    required this.contenido,
+    this.borde,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: fondo,
+          border: borde == null ? null : Border.all(color: borde!, width: 1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: SvgPicture.asset(
+                icono,
+                colorFilter: ColorFilter.mode(contenido, BlendMode.srcIn),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                etiqueta,
+                style: TextStyle(
+                  fontFamily: Fonts.regular,
+                  fontSize: 16,
+                  color: contenido,
                 ),
               ),
             ),
@@ -538,13 +559,85 @@ class _BotonesAccion extends StatelessWidget {
   }
 }
 
-// ─── Toast "¡Gracias por tu opinión!" (CSS exacto del Figma actualizad) ──────
-class _CertificadoToast extends StatelessWidget {
+// ─── Toast "¡Gracias por tu opinión!" — `assets/views/Alert_certificado.svg` ──
+//
+// Panel de 361 con barra verde de 2 partida en tres tramos, que se van
+// apagando mientras corre el tiempo. **Entra deslizándose de derecha a
+// izquierda** y se va sola a los 5 segundos si no se cierra antes.
+class _CertificadoToast extends StatefulWidget {
   final VoidCallback onClose;
 
-  const _CertificadoToast({
-  required this.onClose,
-});
+  /// Lo que tarda en irse solo.
+  static const Duration duracion = Duration(seconds: 5);
+
+  const _CertificadoToast({super.key, required this.onClose});
+
+  @override
+  State<_CertificadoToast> createState() => _CertificadoToastState();
+}
+
+class _CertificadoToastState extends State<_CertificadoToast>
+    with TickerProviderStateMixin {
+  late final AnimationController _entrada = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 320),
+  );
+
+  late final AnimationController _tiempo = AnimationController(
+    vsync: this,
+    duration: _CertificadoToast.duracion,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _entrada.forward();
+    _tiempo.forward().whenCompleteOrCancel(() {
+      if (mounted && _tiempo.isCompleted) _salir();
+    });
+  }
+
+  @override
+  void dispose() {
+    _entrada.dispose();
+    _tiempo.dispose();
+    super.dispose();
+  }
+
+  Future<void> _salir() async {
+    if (!mounted) return;
+    _tiempo.stop();
+    await _entrada.reverse();
+    if (mounted) widget.onClose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final curva = CurvedAnimation(
+      parent: _entrada,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+
+    return SlideTransition(
+      // De fuera del borde derecho hasta su sitio.
+      position: Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(curva),
+      child: FadeTransition(
+        opacity: curva,
+        child: _Panel(restante: _tiempo, onClose: _salir),
+      ),
+    );
+  }
+}
+
+class _Panel extends StatelessWidget {
+  final Animation<double> restante;
+  final VoidCallback onClose;
+
+  const _Panel({required this.restante, required this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -570,15 +663,15 @@ class _CertificadoToast extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Highlight (2 px)
-            Container(
-              height: 2,
-              decoration: const BoxDecoration(
-                color: Color(0xFF288835),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
-                ),
+            // Barra de tiempo de 2, en tres tramos verdes como el SVG.
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(4),
+                topRight: Radius.circular(4),
+              ),
+              child: AnimatedBuilder(
+                animation: restante,
+                builder: (_, _) => _BarraTiempo(restante: 1 - restante.value),
               ),
             ),
 
@@ -706,6 +799,41 @@ class _CertificadoToast extends StatelessWidget {
     );
   }
 }
+/// Los tres tramos de 120,333 × 2 que dibuja `Alert_certificado.svg`: se van
+/// apagando de derecha a izquierda mientras corre el tiempo del toast.
+class _BarraTiempo extends StatelessWidget {
+  final double restante;
+
+  const _BarraTiempo({required this.restante});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 2,
+      color: Colors.white,
+      child: Row(
+        children: List.generate(3, (i) {
+          final limite = (i + 1) / 3;
+          final double opacidad;
+          if (restante >= limite) {
+            opacidad = 1;
+          } else if (restante > i / 3) {
+            opacidad = 0.3;
+          } else {
+            opacidad = 0;
+          }
+          return Expanded(
+            child: Opacity(
+              opacity: opacidad,
+              child: Container(color: const Color(0xFF288835)),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
 // ─── TabBar ───────────────────────────────────────────────────────────────────
 class _TabBar extends StatelessWidget {
   final List<String> tabs;
@@ -981,13 +1109,12 @@ class _EventVideoPlayerState extends State<_EventVideoPlayer> {
           const SizedBox(height: 16),
           SizedBox(
             width: 360,
-            height: 48,
             child: Align(
               alignment: Alignment.centerLeft,
+              // Sin alto fijo ni recorte: el texto ocupa los renglones que
+              // necesite y el bloque crece con él.
               child: Text(
                 widget.description,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontFamily: Fonts.light,
                   fontSize: 14,

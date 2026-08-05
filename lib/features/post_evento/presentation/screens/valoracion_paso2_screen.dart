@@ -8,6 +8,7 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/widgets/app_icons.dart';
 
+import '../../data/valoracion_store.dart';
 import '../widgets/valoracion_success_dialog.dart';
 
 class ValoracionPaso2Screen extends StatefulWidget {
@@ -237,6 +238,9 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                     elevation: 0,
                   ),
                   onPressed: () {
+                    // A partir de aquí el evento queda valorado: en Post-evento
+                    // se apaga «Valorar evento» y se enciende «Certificado».
+                    ValoracionStore.marcarValorado();
                     showDialog(
                       context: context,
                       barrierDismissible: false,

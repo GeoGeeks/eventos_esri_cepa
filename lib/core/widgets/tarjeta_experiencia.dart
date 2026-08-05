@@ -30,10 +30,11 @@ class TarjetaExperiencia extends StatelessWidget {
   final String fecha;
   final String lugar;
 
-  /// Solo al expandir. Avenir Regular **Italic subrayada** 12/16 `#141414`.
+  /// Solo al expandir. Avenir Regular **Italic** 12/16 `#141414`, sin subrayar:
+  /// la línea inferior es exclusiva del correo.
   final String? descripcion;
 
-  /// Solo al expandir. Igual que [descripcion] pero en `#004874`.
+  /// Solo al expandir. Igual que [descripcion] pero en `#004874` y **subrayado**.
   final String? enlace;
 
   final bool expandida;
@@ -94,9 +95,10 @@ class TarjetaExperiencia extends StatelessWidget {
     color: AppColors.textMuted,
   );
 
-  /// Itálica subrayada de 12/16. El diseño la usa tanto para la descripción
-  /// como para el correo; solo cambia el color.
-  static TextStyle estiloDesplegado(Color color) => TextStyle(
+  /// Itálica de 12/16. El diseño la usa tanto para la descripción como para el
+  /// correo; cambian el color y el subrayado, que **solo lleva el correo**.
+  static TextStyle estiloDesplegado(Color color, {bool subrayado = false}) =>
+      TextStyle(
         fontFamily: Fonts.regular,
         fontSize: Fonts.textXs,
         fontWeight: Fonts.wRegular,
@@ -104,8 +106,9 @@ class TarjetaExperiencia extends StatelessWidget {
         height: 16 / 12,
         letterSpacing: 0,
         color: color,
-        decoration: TextDecoration.underline,
-        decorationColor: color,
+        decoration:
+            subrayado ? TextDecoration.underline : TextDecoration.none,
+        decorationColor: subrayado ? color : null,
       );
 
   @override
@@ -161,7 +164,10 @@ class TarjetaExperiencia extends StatelessWidget {
                     Text(
                       enlace!,
                       key: const Key('experiencia-enlace'),
-                      style: estiloDesplegado(AppColors.enlace),
+                      style: estiloDesplegado(
+                        AppColors.enlace,
+                        subrayado: true,
+                      ),
                     ),
                 ],
 

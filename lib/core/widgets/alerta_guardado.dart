@@ -109,8 +109,11 @@ class _BarraTiempo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    // Fondo blanco: la alerta va superpuesta al contenido, así que los tramos
+    // apagados de la barra no pueden dejar ver lo que hay detrás.
+    return Container(
       height: 2,
+      color: AppColors.white,
       child: Row(
         children: List.generate(4, (i) {
           final limite = (i + 1) / 4;
@@ -152,7 +155,9 @@ class _Tarjeta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 65,
+      // 65 del diseño, pero como mínimo: un mensaje largo baja de renglón y la
+      // alerta crece con él en vez de recortarlo.
+      constraints: const BoxConstraints(minHeight: 65),
       decoration: const BoxDecoration(
         color: AppColors.white,
         border: Border(
@@ -176,7 +181,9 @@ class _Tarjeta extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.only(left: 17, right: 10),
+      // Los 12 de arriba y abajo son los que dejaba el alto fijo de 65 con las
+      // dos líneas de 20; ahora los pone el padding y el alto sale del texto.
+      padding: const EdgeInsets.fromLTRB(17, 12, 10, 12),
       child: Row(
         children: [
           AppIcon(icono, width: 16, height: 16, color: AppColors.primary),
@@ -186,20 +193,15 @@ class _Tarjeta extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 20,
-                  child: Text(
-                    mensaje,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: Fonts.medium,
-                      fontSize: Fonts.text0h,
-                      fontWeight: Fonts.wMedium,
-                      height: 20 / 16,
-                      letterSpacing: 0,
-                      color: AppColors.textTitle,
-                    ),
+                Text(
+                  mensaje,
+                  style: const TextStyle(
+                    fontFamily: Fonts.medium,
+                    fontSize: Fonts.text0h,
+                    fontWeight: Fonts.wMedium,
+                    height: 20 / 16,
+                    letterSpacing: 0,
+                    color: AppColors.textTitle,
                   ),
                 ),
                 GestureDetector(

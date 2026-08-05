@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:esri_eventos/core/widgets/alerta_modal.dart';
 import 'package:esri_eventos/core/widgets/formulario_web_modal.dart';
 import 'package:esri_eventos/features/agenda/agenda.dart';
-import 'package:esri_eventos/features/agenda/widgets/actividad_card.dart';
 import 'package:esri_eventos/features/favoritos/favoritos.dart';
 import 'package:esri_eventos/features/post_evento/presentation/screens/post_evento_screen.dart';
 
@@ -61,7 +60,9 @@ void main() {
       expect(find.byType(AlertaModal), findsNothing);
     });
 
-    testWidgets('en Favoritos «Valorar» se apaga tras valorar', (tester) async {
+    testWidgets('en Favoritos «Valorar» pasa a gris tras valorar', (
+      tester,
+    ) async {
       await _montar(tester, const FavoritosScreen());
 
       final antes = tester.widget<Text>(
@@ -70,20 +71,20 @@ void main() {
           matching: find.text('Valorar'),
         ),
       );
-      expect(antes.style!.color, isNot(Colors.transparent));
+      expect(antes.style!.color, const Color(0xFF007AC2));
 
       await _valorarPrimera(tester);
       await tester.tap(find.byKey(const Key('alerta-cerrar')));
       await tester.pumpAndSettle();
 
-      // La palabra deja de verse y la línea pasa de azul a #949494.
+      // La palabra sigue viéndose: ella y la línea pasan de azul a #949494.
       final despues = tester.widget<Text>(
         find.descendant(
           of: find.byKey(const Key('actividad-valorar')).first,
           matching: find.text('Valorar'),
         ),
       );
-      expect(despues.style!.color, Colors.transparent);
+      expect(despues.style!.color, const Color(0xFF949494));
 
       final caja = tester.widget<Container>(
         find

@@ -43,10 +43,10 @@ class ActividadCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
+                // Sin `maxLines`: un título largo baja de renglón y la tarjeta
+                // crece con él. Nunca se recorta ni se encoge la fuente.
                 child: Text(
                   actividad.titulo,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: Fonts.medium,
                     fontSize: Fonts.text0h,
@@ -123,8 +123,8 @@ class ActividadCard extends StatelessWidget {
                     style: FilaMeta.estiloTexto,
                   ),
                 ),
-                // Una vez valorada, la palabra deja de verse y la línea que
-                // había debajo pasa de azul a #949494.
+                // Una vez valorada, la palabra **sigue viéndose** y tanto ella
+                // como la línea de debajo pasan de azul a #949494.
                 GestureDetector(
                   key: const Key('actividad-valorar'),
                   onTap: actividad.valorada ? null : onValorar,
@@ -147,10 +147,8 @@ class ActividadCard extends StatelessWidget {
                         fontWeight: Fonts.wRegular,
                         height: 16 / 14,
                         letterSpacing: 0,
-                        // Transparente en vez de quitar el texto: así la línea
-                        // conserva el ancho que tenía la palabra.
                         color: actividad.valorada
-                            ? Colors.transparent
+                            ? AppColors.textSubtle
                             : AppColors.primary,
                       ),
                     ),

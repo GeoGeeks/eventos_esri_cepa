@@ -10,6 +10,7 @@ import '../agenda/presentation/alerta_valoracion.dart';
 import '../agenda/valoracion_modal.dart';
 import '../agenda/widgets/actividad_card.dart';
 import '../agenda/widgets/cabecera_actividades.dart';
+import 'favoritos_store.dart';
 
 class FavoritosScreen extends StatefulWidget {
   final List<Actividad> actividades;
@@ -24,9 +25,12 @@ class FavoritosScreen extends StatefulWidget {
 }
 
 class _FavoritosScreenState extends State<FavoritosScreen> {
+  /// Las de la agenda más las que se hayan marcado con la estrella en
+  /// Laboratorios, que llegan por [FavoritosStore].
   late final List<Actividad> _actividades = [
     for (final actividad in widget.actividades)
       actividad.favorita ? actividad : actividad.copyWith(favorita: true),
+    ...FavoritosStore.actividades.value,
   ];
   final Set<int> _expandidas = {};
   String _busqueda = '';

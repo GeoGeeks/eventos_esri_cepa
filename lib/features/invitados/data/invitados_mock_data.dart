@@ -65,6 +65,12 @@ class SesionEvento {
   final String titulo;
   final String fecha;
   final String lugar;
+
+  /// Datos que la tarjeta de Laboratorios no pinta pero sí necesita la de
+  /// Favoritos cuando la sesión se marca con la estrella.
+  final String ponente;
+  final String aforo;
+
   final List<String> etiquetas;
   final String descripcion;
   final String tituloObjetivos;
@@ -79,6 +85,8 @@ class SesionEvento {
     required this.titulo,
     required this.fecha,
     required this.lugar,
+    this.ponente = '',
+    this.aforo = '',
     this.etiquetas = const [],
     this.descripcion = '',
     this.tituloObjetivos = 'Objetivos',
@@ -140,7 +148,7 @@ class InvitadosMockData {
     ExperienciaEvento(
       imagenAsset: Images.experienciaComunidad,
       titulo: 'Comunidad Esri',
-      fecha: 'Oct 01 y 02 – 11:00 am',
+      fecha: 'Oct 01 y 02 – 11:00 a.m.',
       lugar: 'Piso 2',
       descripcion: 'La Comunidad Esri te espera en nuestro stand\n\n'
           'Descubre tu ruta en SIG, inspírate con proyectos reales, vive '
@@ -154,7 +162,7 @@ class InvitadosMockData {
       imagenAsset: Images.fotoInvitado2,
       titulo: 'Gentemovil',
       subtitulo: 'Partner Member',
-      fecha: 'Oct 01 y 02',
+      fecha: 'Oct 01 y 02 – 11:00 a.m.',
       lugar: 'Piso 2',
       descripcion:
           'Expertos en soluciones GIS. CatasIA es su plataforma para Catastro '
@@ -169,6 +177,8 @@ class InvitadosMockData {
       titulo: _descripcionSesion,
       fecha: _fechaSesion,
       lugar: 'Auditorio 103',
+      ponente: 'Julian Gutiérrez',
+      aforo: 'Aforo 30 personas',
       etiquetas: _etiquetas,
       descripcion: _detalleSesion,
       objetivos: _objetivos,

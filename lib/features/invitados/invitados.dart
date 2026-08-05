@@ -7,6 +7,7 @@ import '../../core/constants/fonts.dart';
 import '../../core/constants/icons.dart';
 import '../../core/constants/images.dart';
 import '../../core/utils/area_segura.dart';
+import '../../core/widgets/alerta_guardado.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/boton_cupo.dart';
 import '../../core/widgets/tarjeta_experiencia.dart';
@@ -22,6 +23,7 @@ import '../../navigation/menu.dart';
 import '../agenda/agenda.dart';
 import '../credencial/presentation/credencial_modal.dart';
 import '../favoritos/favoritos.dart';
+import '../favoritos/favoritos_store.dart';
 import 'data/invitados_mock_data.dart';
 
 class InvitadosScreen extends StatefulWidget {
@@ -58,8 +60,12 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     'Laboratorios',
   ];
 
+  /// `y` de la alerta de guardado: el borde superior del panel blanco.
+  static const double _topAlerta = 96;
+
   int _tabIndex = 0;
   final Set<int> _expandidas = {};
+  bool _alertaVisible = false;
 
   /// Estado del cupo de cada laboratorio, por índice. Vive aquí porque la
   /// reserva sobrevive a que la tarjeta se pliegue y se despliegue.
@@ -103,6 +109,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     setState(() {
       _tabIndex = i;
       _expandidas.clear();
+      _alertaVisible = false;
     });
   }
 
@@ -110,6 +117,23 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     setState(() {
       if (!_expandidas.remove(i)) _expandidas.add(i);
     });
+  }
+
+  /// La estrella de un laboratorio se pinta de azul y la sesión pasa a
+  /// Favoritos; al volver a pulsarla se apaga y sale de la lista.
+  ///
+  /// Al marcarla sale la misma alerta que en Agenda, superpuesta a 96 —el
+  /// borde superior del panel blanco—, sin mover nada de la lista.
+  void _alternarFavorito(SesionEvento sesion) {
+    final marcada = FavoritosStore.alternar(sesion);
+    setState(() => _alertaVisible = marcada);
+  }
+
+  void _irAFavoritos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FavoritosScreen()),
+    );
   }
 
   void _irAMenu(int index) {
@@ -185,6 +209,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       itemBuilder: (_, i) => SesionCard(
         sesion: items[i],
         expandida: _expandidas.contains(i),
+        esFavorita: FavoritosStore.contiene(items[i].titulo),
+        onFavorito: () => _alternarFavorito(items[i]),
         onExpandir: () => _alternarExpansion(i),
         estadoCupo: _cupo(i),
         onReservar: () => _reservarCupo(i),
@@ -284,6 +310,21 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
               onTap: () => Navigator.pop(context),
             ),
           ),
+
+          // La alerta se superpone al panel: no empuja ninguna tarjeta.
+          if (_alertaVisible)
+            Positioned(
+              top: _topAlerta,
+              left: 26,
+              right: 26,
+              child: AlertaGuardado(
+                key: const Key('alerta-guardado'),
+                mensaje: '¡Ha guardado una actividad!',
+                enlace: 'Ir a guardados',
+                onEnlace: _irAFavoritos,
+                onCerrar: () => setState(() => _alertaVisible = false),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -728,8 +769,14 @@ class _ItemPestana extends StatelessWidget {
 class SesionCard extends StatelessWidget {
   final SesionEvento sesion;
   final bool expandida;
+
+  /// Estado de la estrella. Por defecto, el que traiga la sesión; la pantalla
+  /// lo sobrescribe con lo que el usuario haya marcado.
+  final bool? esFavorita;
   final VoidCallback? onFavorito;
   final VoidCallback? onExpandir;
+
+  bool get favorita => esFavorita ?? sesion.favorita;
 
   /// Solo en Laboratorios: estado del cupo. Sin él la tarjeta no muestra
   /// ningún botón de reserva, que es como se ve en Stands.
@@ -741,6 +788,7 @@ class SesionCard extends StatelessWidget {
     super.key,
     required this.sesion,
     this.expandida = false,
+    this.esFavorita,
     this.onFavorito,
     this.onExpandir,
     this.estadoCupo,
@@ -779,14 +827,16 @@ class SesionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               GestureDetector(
+                key: const Key('sesion-favorito'),
+                behavior: HitTestBehavior.opaque,
                 onTap: onFavorito,
+                // Marcada: la estrella va **rellena** de #007AC2. Sin marcar,
+                // solo el contorno en #949494.
                 child: AppIcon(
-                  SvgIcon.favoritos,
+                  favorita ? SvgIcon.estrellaLlena : SvgIcon.favoritos,
                   width: 24,
                   height: 24,
-                  color: sesion.favorita
-                      ? AppColors.primary
-                      : AppColors.textSubtle,
+                  color: favorita ? AppColors.primary : AppColors.textSubtle,
                 ),
               ),
             ],

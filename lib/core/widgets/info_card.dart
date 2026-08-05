@@ -156,9 +156,29 @@ class InfoCard extends StatelessWidget {
                   Text(descripcion!, style: estiloCharla),
                 ],
 
-                // Contenedor de 26 con la flecha pegada a la derecha. En el
-                // estado plegado es la última fila de la tarjeta; al expandirse
-                // queda entre el encabezado y la información nueva.
+                // La fecha y el lugar se **insertan encima** de la flecha, igual
+                // que en `TarjetaExperiencia`: al desplegar, la flecha baja y
+                // sigue siendo la última fila de la tarjeta.
+                if (expandida && hayDetalle) ...[
+                  const SizedBox(height: separacionDetalle),
+                  Column(
+                    key: const Key('info-detalle'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (fecha != null)
+                        FilaMeta(icono: SvgIcon.datetime, texto: fecha!),
+                      if (fecha != null && lugar != null)
+                        const SizedBox(height: separacionDetalle),
+                      if (lugar != null)
+                        FilaMeta(icono: SvgIcon.lugar, texto: lugar!),
+                    ],
+                  ),
+                ],
+
+                // Contenedor de 26 con la flecha pegada a la derecha. Es
+                // siempre la última fila, plegada o desplegada, y deja el
+                // espacio de abajo de la tarjeta.
                 SizedBox(
                   // El botón «Agendar» mide 32, así que la fila se adapta a él
                   // cuando se usa esa variante en vez de la flecha.
@@ -188,21 +208,6 @@ class InfoCard extends StatelessWidget {
                           ),
                   ),
                 ),
-
-                if (expandida && hayDetalle)
-                  Column(
-                    key: const Key('info-detalle'),
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (fecha != null)
-                        FilaMeta(icono: SvgIcon.datetime, texto: fecha!),
-                      if (fecha != null && lugar != null)
-                        const SizedBox(height: separacionDetalle),
-                      if (lugar != null)
-                        FilaMeta(icono: SvgIcon.lugar, texto: lugar!),
-                    ],
-                  ),
               ],
             ),
           ),

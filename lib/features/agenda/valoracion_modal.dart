@@ -48,10 +48,14 @@ class _ValoracionModalState extends State<ValoracionModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 521,
-      width: double.infinity,
-      decoration: const BoxDecoration(
+    // 521 es el alto del diseño, pero es un **mínimo**: si el nombre de la
+    // actividad ocupa más renglones el panel crece, y si aun así no cabe en
+    // pantalla se puede desplazar en vez de recortar el texto.
+    return SingleChildScrollView(
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 521),
+        width: double.infinity,
+        decoration: const BoxDecoration(
         color: AppColors.white,
         border: Border(
           top: BorderSide(color: AppColors.lightGray),
@@ -89,13 +93,13 @@ class _ValoracionModalState extends State<ValoracionModal> {
               ),
             ),
           ),
-          Positioned(
-            top: 60,
-            left: 24,
-            right: 24,
-            bottom: 0,
+          // Sin `Positioned`: es el contenido el que da el alto al panel, así
+          // que un título de dos o cinco renglones lo empuja hacia arriba.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 60, 24, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(
                   height: 20,
@@ -116,8 +120,6 @@ class _ValoracionModalState extends State<ValoracionModal> {
                 Text(
                   widget.actividad,
                   textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: Fonts.medium,
                     fontSize: Fonts.text3h,
@@ -265,6 +267,7 @@ class _ValoracionModalState extends State<ValoracionModal> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
