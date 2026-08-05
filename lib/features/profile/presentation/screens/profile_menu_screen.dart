@@ -135,6 +135,18 @@ class ProfileMenuScreen extends StatelessWidget {
                       children: [
                         // ── Perfil ──
                         const ProfileSectionTitle(title: 'Perfil'),
+
+                        Visibility(
+                          visible: false,
+                          maintainState: true,
+                          maintainAnimation: true,
+                          child: ProfileMenuItem(
+                            icon: 'assets/icons/configuracion.svg',
+                            title: 'Configuración',
+                            onTap: () {},
+                          ),
+                        ),
+
                         ProfileMenuItem(
                           icon: 'assets/icons/e-card.svg',
                           title: 'E-card',

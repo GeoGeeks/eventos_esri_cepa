@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +25,13 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
   String? laboratorio1;
   String? laboratorio2;
   String? volveria2;
+
+  // Estados de apertura individual para cada dropdown
+  bool openDeseaContacto = false;
+  bool openVolveria1 = false;
+  bool openLaboratorio1 = false;
+  bool openLaboratorio2 = false;
+  bool openVolveria2 = false;
 
   bool dia1 = false;
   bool dia2 = false;
@@ -123,6 +131,9 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
               _buildDropdown(
                 label: 'Desea ser contactado',
                 value: deseaContacto,
+                isOpen: openDeseaContacto,
+                onMenuStateChange: (isOpen) =>
+                    setState(() => openDeseaContacto = isOpen),
                 onChanged: (v) => setState(() => deseaContacto = v),
               ),
 
@@ -132,6 +143,9 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
               _buildDropdown(
                 label: 'Volvería a participar',
                 value: volveria1,
+                isOpen: openVolveria1,
+                onMenuStateChange: (isOpen) =>
+                    setState(() => openVolveria1 = isOpen),
                 onChanged: (v) => setState(() => volveria1 = v),
               ),
 
@@ -141,6 +155,9 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
               _buildDropdown(
                 label: 'Participó en los Laboratorios de entrenamiento',
                 value: laboratorio1,
+                isOpen: openLaboratorio1,
+                onMenuStateChange: (isOpen) =>
+                    setState(() => openLaboratorio1 = isOpen),
                 onChanged: (v) => setState(() => laboratorio1 = v),
               ),
 
@@ -150,6 +167,9 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
               _buildDropdown(
                 label: 'Participó en los Laboratorios de entrenamiento',
                 value: laboratorio2,
+                isOpen: openLaboratorio2,
+                onMenuStateChange: (isOpen) =>
+                    setState(() => openLaboratorio2 = isOpen),
                 onChanged: (v) => setState(() => laboratorio2 = v),
               ),
 
@@ -204,6 +224,9 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
               _buildDropdown(
                 label: 'Volvería a participar',
                 value: volveria2,
+                isOpen: openVolveria2,
+                onMenuStateChange: (isOpen) =>
+                    setState(() => openVolveria2 = isOpen),
                 onChanged: (v) => setState(() => volveria2 = v),
               ),
 
@@ -249,7 +272,7 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                     );
                   },
                   child: const Text(
-                    'Continuar',
+                    'Enviar',
                     style: TextStyle(
                       fontFamily: Fonts.regular,
                       fontWeight: Fonts.wRegular,
@@ -269,11 +292,12 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
     );
   }
 
-  /// Dropdown "Input Time Zone": label + combobox 360x44.
-  /// chevron-down: mismo asset del botón "atrás" (back.svg), rotado -90°.
+  /// Dropdown adaptado con DropdownButton2
   Widget _buildDropdown({
     required String label,
     required String? value,
+    required bool isOpen,
+    required ValueChanged<bool> onMenuStateChange,
     required ValueChanged<String?> onChanged,
   }) {
     return Column(
@@ -304,24 +328,36 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
             color: const Color(0xFFFFFFFF),
             border: Border.all(color: const Color(0xFF949494), width: 1),
           ),
-          padding: const EdgeInsets.only(left: 16, right: 10),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
+            child: DropdownButton2<String>(
               value: value,
               isExpanded: true,
-              icon: SizedBox(
-                width: 24,
-                height: 24,
-                child: Center(
-                  child: Transform.rotate(
-                    angle: -math.pi / 2,
-                    child: const AppIcon(
-                      SvgIcon.back,
-                      width: 8.414,
-                      height: 14,
-                      color: Color(0xFF6B6B6B),
+              onMenuStateChange: onMenuStateChange,
+              buttonStyleData: const ButtonStyleData(
+                padding: EdgeInsets.only(left: 16, right: 10),
+              ),
+              iconStyleData: IconStyleData(
+                icon: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Center(
+                    child: Transform.rotate(
+                      angle: isOpen ? math.pi / 2 : -math.pi / 2,
+                      child: const AppIcon(
+                        SvgIcon.back,
+                        width: 8.414,
+                        height: 14,
+                        color: Color(0xFF6B6B6B),
+                      ),
                     ),
                   ),
+                ),
+              ),
+              dropdownStyleData: DropdownStyleData(
+                offset: const Offset(0, -2),
+                width: MediaQuery.of(context).size.width - 52,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFFFFF),
                 ),
               ),
               hint: const Text(
