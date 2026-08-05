@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/fonts.dart';
+import '../../core/constants/icons.dart';
+import '../registro/presentation/registro_modal.dart';
 import 'data/proximos_eventos_data.dart';
 
 class DetalleEventoModal extends StatelessWidget {
@@ -63,19 +65,16 @@ class DetalleEventoModal extends StatelessWidget {
                     child: SizedBox(
                       width: 32,
                       height: 32,
+                      // `close.svg` no existe en el proyecto; el ícono de cerrar
+                      // es `x.svg` (8,041 × 8,020 dentro de una caja de 16).
                       child: Center(
                         child: SvgPicture.asset(
-                          'assets/icons/close.svg',
-                          width: 16,
-                          height: 16,
+                          SvgIcon.x,
+                          width: 8.041,
+                          height: 8.020,
                           colorFilter: const ColorFilter.mode(
                             Color(0xFF6B6B6B),
                             BlendMode.srcIn,
-                          ),
-                          placeholderBuilder: (context) => const Icon(
-                            Icons.close,
-                            size: 16,
-                            color: Color(0xFF6B6B6B),
                           ),
                         ),
                       ),
@@ -139,15 +138,10 @@ class DetalleEventoModal extends StatelessWidget {
                 width: double.infinity,
                 height: 44,
                 child: ElevatedButton(
+                  // Cierra el detalle y abre el formulario de registro.
                   onPressed: () {
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Registro exitoso en ${evento.titulo}',
-                        ),
-                      ),
-                    );
+                    RegistroModal.mostrar(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF007AC2),

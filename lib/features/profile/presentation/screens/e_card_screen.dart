@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
+import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../data/ecard_visibility_config.dart';
 import '../widgets/e_card_action_button.dart';
@@ -22,6 +23,10 @@ class ECardScreen extends StatefulWidget {
 }
 
 class _ECardScreenState extends State<ECardScreen> {
+  /// `y` de la fila de botones en Figma. El título va 24 px más abajo del
+  /// borde inferior de los botones, o sea en 96.
+  static const double _topBotones = 36;
+
   bool _showNotification = false;
 
   ECardVisibilityConfig _visibilityConfig = const ECardVisibilityConfig();
@@ -45,16 +50,22 @@ class _ECardScreenState extends State<ECardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Figma: los dos botones arrancan en y=36 y el título «E-card» en y=96.
+    // Solo bajan si la barra de estado llegara a taparlos.
+    final double topBotones = AreaSegura.top(context, _topBotones);
+
     return Container(
       color: AppColors.lightGray,
+      // top:false — la posición la fija AreaSegura, no el SafeArea.
       child: SafeArea(
+        top: false,
         child: Stack(
           children: [
             Column(
               children: [
                 /// Appbar superior con botones (36x36, círculo azul)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(26, 16, 26, 0),
+                  padding: EdgeInsets.fromLTRB(26, topBotones, 26, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -107,7 +118,8 @@ class _ECardScreenState extends State<ECardScreen> {
                     physics: const BouncingScrollPhysics(),
                     child: Column(
                       children: [
-                        const SizedBox(height: 16),
+                        // 36 + 36 de los botones + 24 = 96, la y del título.
+                        const SizedBox(height: 24),
 
                         /// Sección Título
                         SizedBox(

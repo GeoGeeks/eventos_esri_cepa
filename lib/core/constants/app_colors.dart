@@ -41,4 +41,10 @@ class AppColors {
 
   // Sombras — rgba(0, 0, 0, 0.25)
   static const Color buttonShadow = Color(0x40000000);
+
+  /// Enlaces dentro de las tarjetas (correo de Experiencias y Stands).
+  static const Color enlace = Color(0xFF004874);
+
+  /// Botón de reserva cuando ya no quedan cupos.
+  static const Color deshabilitado = Color(0xFFD4D4D4);
 }

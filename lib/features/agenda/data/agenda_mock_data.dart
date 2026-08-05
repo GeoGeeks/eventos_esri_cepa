@@ -10,6 +10,9 @@ class Actividad {
   final List<String> objetivos;
   final bool favorita;
 
+  /// Si ya se envió la valoración. Deja de ofrecerse «Valorar».
+  final bool valorada;
+
   const Actividad({
     required this.titulo,
     required this.horario,
@@ -21,9 +24,10 @@ class Actividad {
     this.tituloObjetivos = 'Objetivos',
     this.objetivos = const [],
     this.favorita = false,
+    this.valorada = false,
   });
 
-  Actividad copyWith({bool? favorita}) => Actividad(
+  Actividad copyWith({bool? favorita, bool? valorada}) => Actividad(
     titulo: titulo,
     horario: horario,
     ponente: ponente,
@@ -34,6 +38,7 @@ class Actividad {
     tituloObjetivos: tituloObjetivos,
     objetivos: objetivos,
     favorita: favorita ?? this.favorita,
+    valorada: valorada ?? this.valorada,
   );
 }
 

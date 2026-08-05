@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/area_segura.dart';
 import '../../core/widgets/alerta_guardado.dart';
 import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/filtro_modal.dart';
 import '../../navigation/menu.dart';
 import '../favoritos/favoritos.dart';
 import 'data/agenda_mock_data.dart';
+import 'presentation/alerta_valoracion.dart';
 import 'valoracion_modal.dart';
 import 'widgets/actividad_card.dart';
 import 'widgets/cabecera_actividades.dart';
@@ -96,14 +98,26 @@ class _AgendaScreenState extends State<AgendaScreen> {
     if (seleccion != null) setState(() => _filtros = seleccion);
   }
 
-  void _abrirValoracion(Actividad actividad) {
-    showModalBottomSheet<void>(
+  /// Abre la encuesta y, si se envía, marca la actividad como valorada y
+  /// muestra la alerta de agradecimiento del diseño.
+  Future<void> _abrirValoracion(int indice) async {
+    final actividad = _actividades[indice];
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: AppColors.modalOverlay,
-      builder: (_) => ValoracionModal(actividad: actividad.titulo),
+      builder: (_) => ValoracionModal(
+        actividad: actividad.titulo,
+        onEnviar: (_) {
+          setState(() {
+            _actividades[indice] = actividad.copyWith(valorada: true);
+          });
+        },
+      ),
     );
+    if (!mounted || !_actividades[indice].valorada) return;
+    await AlertaValoracion.mostrar(context, actividad.titulo);
   }
 
   void _irAMenu(int index) {
@@ -126,15 +140,17 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      // bottom:false — del borde inferior ya se ocupa el bottomNavigationBar.
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-          children: [
-            Column(
+      body: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
+                  // La cabecera va a 36 de Figma; solo baja si la barra de
+                  // estado llegara a taparla.
+                  padding: EdgeInsets.fromLTRB(
+                    26,
+                    AreaSegura.top(context, 36),
+                    26,
+                    0,
+                  ),
                   child: CabeceraActividades(
                     titulo: 'Agenda',
                     onVolver: () => Navigator.pop(context),
@@ -149,15 +165,30 @@ class _AgendaScreenState extends State<AgendaScreen> {
                         onBuscar: (texto) => setState(() => _busqueda = texto),
                         onFiltrar: _abrirFiltro,
                       ),
-                      const SizedBox(height: 24),
+
+                      // La alerta ya no flota sobre el pie: va aquí arriba,
+                      // junto al buscador, y deja 16 hasta la primera tarjeta.
+                      if (_alertaVisible) ...[
+                        const SizedBox(height: 16),
+                        AlertaGuardado(
+                          key: const Key('alerta-guardado'),
+                          mensaje: '¡Ha guardado una actividad!',
+                          enlace: 'Ir a guardados',
+                          onEnlace: _irAGuardados,
+                          onCerrar: () =>
+                              setState(() => _alertaVisible = false),
+                        ),
+                        const SizedBox(height: 16),
+                      ] else
+                        const SizedBox(height: 24),
+
                       for (final indice in visibles) ...[
                         ActividadCard(
                           actividad: _actividades[indice],
                           expandida: _expandidas.contains(indice),
                           onExpandir: () => _alternarExpandida(indice),
                           onFavorito: () => _alternarFavorita(indice),
-                          onValorar: () =>
-                              _abrirValoracion(_actividades[indice]),
+                          onValorar: () => _abrirValoracion(indice),
                         ),
                         const SizedBox(height: 10),
                       ],
@@ -165,23 +196,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                   ),
                 ),
               ],
-            ),
-            if (_alertaVisible)
-              Positioned(
-                left: 26,
-                right: 26,
-                bottom: 26,
-                child: AlertaGuardado(
-                  key: const Key('alerta-guardado'),
-                  mensaje: '¡Ha guardado una actividad!',
-                  enlace: 'Ir a guardados',
-                  onEnlace: _irAGuardados,
-                  onCerrar: () => setState(() => _alertaVisible = false),
-                ),
-              ),
-          ],
         ),
-      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: CustomBottomNav(currentIndex: -1, onTap: _irAMenu),

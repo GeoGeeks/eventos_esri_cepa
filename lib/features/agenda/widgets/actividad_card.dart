@@ -123,16 +123,23 @@ class ActividadCard extends StatelessWidget {
                     style: FilaMeta.estiloTexto,
                   ),
                 ),
+                // Una vez valorada, la palabra deja de verse y la línea que
+                // había debajo pasa de azul a #949494.
                 GestureDetector(
-                  onTap: onValorar,
+                  key: const Key('actividad-valorar'),
+                  onTap: actividad.valorada ? null : onValorar,
                   child: Container(
                     height: 16,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Color(0x66007AC2)),
+                        bottom: BorderSide(
+                          color: actividad.valorada
+                              ? AppColors.textSubtle
+                              : const Color(0x66007AC2),
+                        ),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Valorar',
                       style: TextStyle(
                         fontFamily: Fonts.regular,
@@ -140,7 +147,11 @@ class ActividadCard extends StatelessWidget {
                         fontWeight: Fonts.wRegular,
                         height: 16 / 14,
                         letterSpacing: 0,
-                        color: AppColors.primary,
+                        // Transparente en vez de quitar el texto: así la línea
+                        // conserva el ancho que tenía la palabra.
+                        color: actividad.valorada
+                            ? Colors.transparent
+                            : AppColors.primary,
                       ),
                     ),
                   ),

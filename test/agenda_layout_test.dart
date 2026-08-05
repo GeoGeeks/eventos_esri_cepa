@@ -9,6 +9,7 @@ import 'package:esri_eventos/core/widgets/filtro_modal.dart';
 import 'package:esri_eventos/features/agenda/agenda.dart';
 import 'package:esri_eventos/features/agenda/valoracion_modal.dart';
 import 'package:esri_eventos/features/agenda/widgets/actividad_card.dart';
+import 'package:esri_eventos/features/agenda/widgets/cabecera_actividades.dart';
 import 'package:esri_eventos/features/favoritos/favoritos.dart';
 
 import 'fuentes_de_prueba.dart';
@@ -103,7 +104,14 @@ void main() {
     expect(alerta.left, moreOrLessEquals(26, epsilon: 0.5));
     expect(alerta.width, moreOrLessEquals(360, epsilon: 0.5));
     expect(alerta.height, moreOrLessEquals(67, epsilon: 0.5));
-    expect(917 - 70 - alerta.bottom, moreOrLessEquals(26, epsilon: 1));
+
+    // Ya no flota sobre el pie: va arriba, pegada al buscador, y deja 16
+    // hasta la primera tarjeta.
+    final buscador = tester.getRect(find.byType(BuscadorActividades));
+    expect(alerta.top - buscador.bottom, moreOrLessEquals(16, epsilon: 1));
+
+    final primeraTarjeta = tester.getRect(find.byType(ActividadCard).first);
+    expect(primeraTarjeta.top - alerta.bottom, moreOrLessEquals(16, epsilon: 1));
 
     await tester.tap(find.text('Ir a guardados'));
     await tester.pump();

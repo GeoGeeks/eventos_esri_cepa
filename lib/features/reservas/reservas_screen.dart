@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/icons.dart';
 import '../../core/constants/images.dart';
+import '../../core/utils/area_segura.dart';
 import '../../core/widgets/casilla_verificacion.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../credencial/presentation/credencial_modal.dart';
@@ -107,7 +108,10 @@ class _ReservasScreenState extends State<ReservasScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
+        // top:false — el título se coloca con AreaSegura para respetar los 36
+        // de Figma cuando la barra de estado no llega a taparlos.
         body: SafeArea(
+          top: false,
           child: Stack(
             children: [
               SingleChildScrollView(
@@ -117,7 +121,10 @@ class _ReservasScreenState extends State<ReservasScreen> {
                   child: SizedBox(
                     width: 360,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 36, bottom: 80),
+                      padding: EdgeInsets.only(
+                        top: AreaSegura.top(context, 36),
+                        bottom: 80,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -281,7 +288,9 @@ class _ReservasScreenState extends State<ReservasScreen> {
 
               if (_showFilter)
                 Positioned(
-                  top: 184,
+                  // El desplegable cuelga del buscador, así que baja lo mismo
+                  // que el título.
+                  top: 184 + AreaSegura.desplazamiento(context, 36),
                   right: rightPadding,
                   child: Material(
                     color: Colors.transparent,

@@ -78,12 +78,9 @@ class _AlertaGuardadoState extends State<AlertaGuardado>
       reverseCurve: Curves.easeInCubic,
     );
 
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(0, 1.4),
-        end: Offset.zero,
-      ).animate(curva),
-      child: FadeTransition(
+    // Sin `SlideTransition`: la alerta ya no sube flotando desde abajo, va
+    // fija en su sitio y solo aparece y desaparece.
+    return FadeTransition(
         opacity: curva,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -101,7 +98,6 @@ class _AlertaGuardadoState extends State<AlertaGuardado>
             ),
           ],
         ),
-      ),
     );
   }
 }

@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/images.dart';
+import '../../core/utils/area_segura.dart';
 import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
+import '../credencial/presentation/credencial_modal.dart';
+import '../eventos/data/proximos_eventos_data.dart';
 import '../invitados/invitados.dart';
+import '../registro/presentation/registro_modal.dart';
 
 class _ReservedEvent {
   final String title, date, location, image;
@@ -14,18 +18,6 @@ class _ReservedEvent {
     required this.date,
     required this.location,
     required this.image,
-  });
-}
-
-class _UpcomingEvent {
-  final String title, date, location, image, mode;
-
-  const _UpcomingEvent({
-    required this.title,
-    required this.date,
-    required this.location,
-    required this.image,
-    required this.mode,
   });
 }
 
@@ -44,33 +36,16 @@ const _reservedEvents = [
   ),
 ];
 
-const _upcomingEvents = [
-  _UpcomingEvent(
-    title: 'Planeta Esri Villavicencio',
-    date: 'Ago 20 - 08:00 a.m.',
-    location: 'Universidad de los Llanos',
-    image: Images.planetaEsri,
-    mode: 'Presencial',
-  ),
-  _UpcomingEvent(
-    title: 'Planeta Esri Bogotá',
-    date: 'Oct 02 - 11:00 a.m.',
-    location: 'Calle 32 # 54-34',
-    image: Images.planetaEsri,
-    mode: 'Virtual',
-  ),
-  _UpcomingEvent(
-    title: 'Planeta Esri',
-    date: 'Oct 02 - 11:00 a.m.',
-    location: 'Calle 32 # 54-34',
-    image: Images.planetaEsri,
-    mode: 'Presencial',
-  ),
-];
+/// Los «Próximos eventos» son los mismos de la pantalla Eventos: así el "Ver
+/// más" de una tarjeta puede abrir el modal de detalle de ese mismo evento.
+const _upcomingEvents = proximosEventosMock;
 
 class InicioApp extends StatelessWidget {
   final VoidCallback? onGoToNotifications;
-  final VoidCallback? onGoToEventos;
+
+  /// Abre la pantalla Eventos. Con [ProximoEvento] no nulo, además superpone
+  /// el modal de detalle de ese evento (la «ventana evento» del diseño).
+  final void Function(ProximoEvento? evento)? onGoToEventos;
 
   const InicioApp({
     super.key,
@@ -107,6 +82,7 @@ class InicioApp extends StatelessWidget {
                             date: e.date,
                             location: e.location,
                             image: e.image,
+                            // "Ver más" de un evento reservado → Invitados.
                             onViewMore: () {
                               Navigator.push(
                                 context,
@@ -115,7 +91,9 @@ class InicioApp extends StatelessWidget {
                                 ),
                               );
                             },
-                            onCredential: () {},
+                            // "Mi credencial" → el modal de la credencial.
+                            onCredential: () =>
+                                CredencialModal.mostrar(context),
                           );
                         },
                       ),
@@ -123,11 +101,7 @@ class InicioApp extends StatelessWidget {
                       _SectionTitle(
                         title: 'Próximos eventos',
                         action: _SeeAllChip(
-                          onTap: () {
-                            if (onGoToEventos != null) {
-                              onGoToEventos!();
-                            }
-                          },
+                          onTap: () => onGoToEventos?.call(null),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -135,20 +109,16 @@ class InicioApp extends StatelessWidget {
                         (e) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: UpcomingEventCard(
-                            title: e.title,
-                            date: e.date,
-                            location: e.location,
+                            title: e.titulo,
+                            date: '${e.fecha} - ${e.hora}',
+                            location: e.direccion,
                             image: e.image,
-                            mode: e.mode,
-                            onViewMore: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const InvitadosScreen(),
-                                ),
-                              );
-                            },
-                            onRegister: () {},
+                            mode: e.presencial ? 'Presencial' : 'Virtual',
+                            // "Ver más" → pantalla Eventos con el modal de
+                            // detalle de este evento superpuesto.
+                            onViewMore: () => onGoToEventos?.call(e),
+                            // "Registrarse" → el formulario de registro.
+                            onRegister: () => RegistroModal.mostrar(context),
                           ),
                         ),
                       ),
@@ -172,35 +142,44 @@ class _Header extends StatelessWidget {
 
   const _Header({this.onGoToNotifications});
 
+  /// Alto de la cabecera en Figma. No cambia con la barra de estado: el fondo
+  /// va a sangre por detrás de ella y solo se desplaza el contenido.
+  static const double alto = 136;
+
+  /// `y` del bloque de texto y de la campana en el diseño.
+  static const double _topTexto = 26;
+  static const double _topCampana = 30;
+
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    // Los dos bloques bajan lo mismo, así que conservan entre sí los 4 px de
+    // diferencia que tienen en Figma.
+    final double d = AreaSegura.desplazamiento(context, _topTexto);
 
     return Container(
+      key: const Key('inicio-header'),
       width: double.infinity,
-      height: 120 + statusBarHeight,
+      height: alto,
       clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          bottomLeft: Radius.circular(22),
+          bottomRight: Radius.circular(22),
         ),
         image: DecorationImage(
           image: AssetImage(Images.headerInicio),
           fit: BoxFit.cover,
         ),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: SizedBox(
-          width: double.infinity,
-          height: 120,
-          child: Stack(
-            children: [
-              Positioned(
-                left: 26,
-                top: 26,
-                child: Column(
+      child: SizedBox(
+        width: double.infinity,
+        height: alto,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 26,
+              top: _topTexto + d,
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
@@ -236,15 +215,14 @@ class _Header extends StatelessWidget {
                   ],
                 ),
               ),
-              Positioned(
-                right: 26,
-                top: 30,
-                child: _NotificationBell(
-                  onTap: onGoToNotifications,
-                ),
+            Positioned(
+              right: 26,
+              top: _topCampana + d,
+              child: _NotificationBell(
+                onTap: onGoToNotifications,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -370,16 +348,24 @@ class _HorizontalCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Sin alto fijo: `IntrinsicHeight` mide la tarjeta más alta —la que tenga
+    // el título más largo— y estira las demás para igualarlas.
     return SizedBox(
       width: 360,
-      height: 262,
-      child: ListView.separated(
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: itemCount,
-        separatorBuilder: (_, __) => const SizedBox(width: 24),
-        itemBuilder: (context, index) =>
-            SizedBox(width: itemWidth, child: itemBuilder(context, index)),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < itemCount; i++) ...[
+                if (i > 0) const SizedBox(width: 24),
+                SizedBox(width: itemWidth, child: itemBuilder(context, i)),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

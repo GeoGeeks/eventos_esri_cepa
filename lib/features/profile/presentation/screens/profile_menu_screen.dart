@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
+import '../../../../core/utils/area_segura.dart';
 import '../../../login/login_screen.dart';
 import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
@@ -13,17 +14,31 @@ class ProfileMenuScreen extends StatelessWidget {
 
   const ProfileMenuScreen({super.key, required this.onOpenEcard});
 
+  /// Alto de la cabecera en Figma. Fijo: el fondo va a sangre por detrás de la
+  /// barra de estado y solo se desplaza el contenido de dentro.
+  static const double altoHeader = 110;
+
+  /// `y` a la que arranca el avatar (padding 30 + los 12 del Fotograma 4).
+  static const double _topAvatar = 42;
+
   @override
   Widget build(BuildContext context) {
+    // Con una barra de 48,76 dp el avatar baja 6,76 y termina en 92,76:
+    // sigue cabiendo de sobra en los 110 de la cabecera.
+    final double d = AreaSegura.desplazamiento(context, _topAvatar);
+
     return Scaffold(
       backgroundColor: AppColors.white,
+      // top:false — la cabecera pasa por detrás de la barra de estado.
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             // ── HEADER (Rectángulo 12) ──
             Container(
+              key: const Key('perfil-header'),
               width: double.infinity,
-              height: 110,
+              height: altoHeader,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(Images.headerInicio),
@@ -34,7 +49,7 @@ class ProfileMenuScreen extends StatelessWidget {
                   bottomRight: Radius.circular(22),
                 ),
               ),
-              padding: const EdgeInsets.only(left: 26, top: 30, right: 26),
+              padding: EdgeInsets.only(left: 26, top: 30 + d, right: 26),
               alignment: Alignment.topLeft,
 
               // ── Fotograma 4 ──

@@ -91,10 +91,10 @@ class UpcomingEventCard extends StatelessWidget {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
+                                      // Sin maxLines ni ellipsis: el título
+                                      // crece en líneas antes que recortarse.
                                       child: Text(
                                         title,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontFamily: Fonts.medium,
                                           fontSize: 18,
@@ -305,6 +305,9 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      // La fecha y el lugar pueden ocupar varias líneas; el ícono se queda
+      // alineado con la primera.
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: 16,
@@ -321,8 +324,6 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontFamily: Fonts.regular,
               fontSize: 14,

@@ -1,4 +1,5 @@
 import '../../../core/constants/images.dart';
+import '../../laboratorios/data/laboratorio_data.dart';
 
 class EventoDetalle {
   final String fecha;
@@ -16,6 +17,7 @@ class EventoDetalle {
   });
 }
 
+/// Persona de la pestaña **Speakers e Invitados**.
 class PersonaEvento {
   final String imagenAsset;
   final String titulo;
@@ -34,6 +36,31 @@ class PersonaEvento {
   });
 }
 
+/// Tarjeta de **Experiencias** y **Stands**. La diferencia entre las dos es
+/// que Stands lleva subtítulo («Partner Member»); el resto es idéntico.
+class ExperienciaEvento {
+  final String imagenAsset;
+  final String titulo;
+  final String? subtitulo;
+  final String fecha;
+  final String lugar;
+
+  /// Solo visibles al desplegar la tarjeta.
+  final String descripcion;
+  final String enlace;
+
+  const ExperienciaEvento({
+    required this.imagenAsset,
+    required this.titulo,
+    required this.fecha,
+    required this.lugar,
+    required this.descripcion,
+    required this.enlace,
+    this.subtitulo,
+  });
+}
+
+/// Sesión de **Laboratorios**.
 class SesionEvento {
   final String titulo;
   final String fecha;
@@ -44,6 +71,10 @@ class SesionEvento {
   final List<String> objetivos;
   final bool favorita;
 
+  /// Estado inicial del cupo. La pantalla lo va cambiando según reserve o
+  /// cancele el usuario; cuando entre el backend será el valor que él mande.
+  final EstadoCupo estadoCupo;
+
   const SesionEvento({
     required this.titulo,
     required this.fecha,
@@ -53,6 +84,7 @@ class SesionEvento {
     this.tituloObjetivos = 'Objetivos',
     this.objetivos = const [],
     this.favorita = false,
+    this.estadoCupo = EstadoCupo.disponible,
   });
 }
 
@@ -90,80 +122,49 @@ class InvitadosMockData {
     _detalleSesion,
   ];
 
+  /// Una sola tarjeta, como el diseño. Cuando los datos lleguen del backend
+  /// esta lista se sustituye sin tocar la pantalla ni `InfoCard`.
   static const List<PersonaEvento> speakers = [
     PersonaEvento(
       imagenAsset: Images.fotoInvitado,
-      titulo: 'Edwin Chirivi',
-      subtitulo: 'Gerente de Camacol',
-      descripcion: _descripcionSesion,
-      fecha: _fechaSesion,
-      lugar: _lugarSesion,
-    ),
-    PersonaEvento(
-      imagenAsset: Images.fotoInvitado,
-      titulo: 'Edwin Chirivi',
-      subtitulo: 'Gerente de Camacol',
-      descripcion: _descripcionSesion,
-      fecha: _fechaSesion,
-      lugar: _lugarSesion,
-    ),
-    PersonaEvento(
-      imagenAsset: Images.fotoInvitado,
-      titulo: 'Edwin Chirivi',
-      subtitulo: 'Gerente de Camacol',
-      descripcion: _descripcionSesion,
+      titulo: 'Ismael Chivite',
+      subtitulo: 'Product manager',
+      descripcion: 'Con más de 20 años dedicados al mundo de los Sistemas de '
+          'Información Geográfica.',
       fecha: _fechaSesion,
       lugar: _lugarSesion,
     ),
   ];
 
-  static const List<PersonaEvento> experiencias = [
-    PersonaEvento(
+  static const List<ExperienciaEvento> experiencias = [
+    ExperienciaEvento(
       imagenAsset: Images.experienciaComunidad,
-      titulo: 'Comunidad',
-      subtitulo: 'comunidad@esri.co',
-      descripcion: _descripcionSesion,
-      fecha: _fechaSesion,
-      lugar: _lugarSesion,
-    ),
-    PersonaEvento(
-      imagenAsset: Images.experienciaGeoIA,
-      titulo: 'GeoIA',
-      subtitulo: 'geoia@esri.co',
-      descripcion: _descripcionSesion,
-      fecha: _fechaSesion,
-      lugar: _lugarSesion,
+      titulo: 'Comunidad Esri',
+      fecha: 'Oct 01 y 02 – 11:00 am',
+      lugar: 'Piso 2',
+      descripcion: 'La Comunidad Esri te espera en nuestro stand\n\n'
+          'Descubre tu ruta en SIG, inspírate con proyectos reales, vive '
+          'conversaciones únicas y llévate recuerdos memorables.',
+      enlace: 'cgarnica@esri.co',
     ),
   ];
 
-  static const List<SesionEvento> stands = [
-    SesionEvento(
-      titulo: _descripcionSesion,
-      fecha: _fechaSesion,
-      lugar: 'Auditorio 103',
-      etiquetas: _etiquetas,
-      descripcion: _detalleSesion,
-      objetivos: _objetivos,
-    ),
-    SesionEvento(
-      titulo: _descripcionSesion,
-      fecha: _fechaSesion,
-      lugar: 'Auditorio 103',
-      etiquetas: _etiquetas,
-      descripcion: _detalleSesion,
-      objetivos: _objetivos,
+  static const List<ExperienciaEvento> stands = [
+    ExperienciaEvento(
+      imagenAsset: Images.fotoInvitado2,
+      titulo: 'Gentemovil',
+      subtitulo: 'Partner Member',
+      fecha: 'Oct 01 y 02',
+      lugar: 'Piso 2',
+      descripcion:
+          'Expertos en soluciones GIS. CatasIA es su plataforma para Catastro '
+          'Multipropósito, basada en LADM-COL y ArcGIS, que mejora la gestión '
+          'catastral con tecnología confiable y escalable.',
+      enlace: 'jangel@gentemovil.co',
     ),
   ];
 
   static const List<SesionEvento> laboratorios = [
-    SesionEvento(
-      titulo: _descripcionSesion,
-      fecha: _fechaSesion,
-      lugar: 'Auditorio 103',
-      etiquetas: _etiquetas,
-      descripcion: _detalleSesion,
-      objetivos: _objetivos,
-    ),
     SesionEvento(
       titulo: _descripcionSesion,
       fecha: _fechaSesion,

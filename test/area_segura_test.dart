@@ -3,11 +3,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:esri_eventos/features/agenda/agenda.dart';
+import 'package:esri_eventos/features/eventos/eventos_screen.dart';
 import 'package:esri_eventos/features/favoritos/favoritos.dart';
+import 'package:esri_eventos/features/historial/presentation/screens/historial_screen.dart';
+import 'package:esri_eventos/features/inicio/inicio.dart';
 import 'package:esri_eventos/features/invitados/invitados.dart';
 import 'package:esri_eventos/features/login/login_screen.dart';
 import 'package:esri_eventos/features/login/soporte_screen.dart';
 import 'package:esri_eventos/features/login/verificacion_screen.dart';
+import 'package:esri_eventos/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:esri_eventos/features/profile/presentation/screens/e_card_screen.dart';
+import 'package:esri_eventos/features/profile/presentation/screens/profile_menu_screen.dart';
+import 'package:esri_eventos/features/reservas/reservas_screen.dart';
 
 import 'fuentes_de_prueba.dart';
 
@@ -22,6 +29,9 @@ const double kBarraNavegacion = 63 / 2.625;
 /// Alto típico del teclado de Android en vertical.
 const double kTeclado = 300;
 
+/// Barra de estado «normal», la que el diseño de Figma da por hecha.
+const double kBarraCorta = 24;
+
 /// Monta [pantalla] a 411,43 x 914,3 dp —las medidas reales del emulador, no
 /// los 412x917 del lienzo de Figma (ver D26)— con las barras del sistema
 /// declaradas y, opcionalmente, el teclado desplegado.
@@ -29,6 +39,7 @@ Future<void> _montar(
   WidgetTester tester,
   Widget pantalla, {
   double teclado = 0,
+  double barra = kBarraEstado,
 }) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.625;
@@ -41,11 +52,11 @@ Future<void> _montar(
         builder: (context) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
             padding: EdgeInsets.only(
-              top: kBarraEstado,
+              top: barra,
               bottom: teclado > 0 ? 0 : kBarraNavegacion,
             ),
-            viewPadding: const EdgeInsets.only(
-              top: kBarraEstado,
+            viewPadding: EdgeInsets.only(
+              top: barra,
               bottom: kBarraNavegacion,
             ),
             viewInsets: EdgeInsets.only(bottom: teclado),
@@ -57,6 +68,11 @@ Future<void> _montar(
   );
   await tester.pump();
 }
+
+/// El círculo de 44 del avatar, no el texto «ML» que va centrado dentro.
+final Finder _avatar = find
+    .ancestor(of: find.text('ML'), matching: find.byType(Container))
+    .first;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -113,22 +129,121 @@ void main() {
       );
     });
 
-    testWidgets('Invitados baja el botón de volver y crece la cabecera', (
+    testWidgets('Invitados baja el botón de volver SIN crecer la cabecera', (
       tester,
     ) async {
       await _montar(tester, const InvitadosScreen());
 
+      // El botón va a 36 en Figma; con una barra de 48,76 baja hasta rozarla.
       final volver = tester.getRect(find.byKey(const Key('invitados-volver')));
-      expect(volver.top, moreOrLessEquals(kBarraEstado + 36, epsilon: 0.5));
-      expect(volver.top, greaterThan(kBarraEstado));
+      expect(volver.top, moreOrLessEquals(kBarraEstado, epsilon: 0.5));
 
-      // La imagen de cabecera sigue arrancando en 0 —va a sangre por detrás de
-      // la barra— pero crece lo que mide la barra.
+      // La cabecera va a sangre por detrás de la barra y conserva sus 122.
       final cabecera = tester.getRect(find.byType(Image).first);
       expect(cabecera.top, moreOrLessEquals(0, epsilon: 0.5));
+      expect(cabecera.height, moreOrLessEquals(122, epsilon: 0.5));
+    });
+
+    testWidgets('Inicio deja el saludo libre sin crecer los 136 de cabecera', (
+      tester,
+    ) async {
+      await _montar(tester, const InicioApp());
+
+      final cabecera = tester.getRect(find.byKey(const Key('inicio-header')));
+      expect(cabecera.top, moreOrLessEquals(0, epsilon: 0.5));
+      expect(cabecera.height, moreOrLessEquals(136, epsilon: 0.5));
+
+      // El bloque de texto va a 26 en Figma: baja a 48,76 y sigue cabiendo.
+      final saludo = tester.getRect(find.text('Bienvenida'));
+      expect(saludo.top, moreOrLessEquals(kBarraEstado, epsilon: 0.5));
+
+      final cargo = tester.getRect(find.text('Ingeniera Civil · Procalculo'));
+      expect(cargo.bottom, lessThan(cabecera.bottom));
+    });
+
+    testWidgets('el menú de perfil no crece sus 110 de cabecera', (
+      tester,
+    ) async {
+      await _montar(tester, ProfileMenuScreen(onOpenEcard: () {}));
+
+      final cabecera = tester.getRect(find.byKey(const Key('perfil-header')));
+      expect(cabecera.top, moreOrLessEquals(0, epsilon: 0.5));
+      expect(cabecera.height, moreOrLessEquals(110, epsilon: 0.5));
+
+      // El avatar va a 42 en Figma; baja a 48,76 y sigue dentro de la cabecera.
+      final avatar = tester.getRect(_avatar);
+      expect(avatar.top, moreOrLessEquals(kBarraEstado, epsilon: 0.5));
+      expect(avatar.bottom, lessThan(cabecera.bottom));
+    });
+
+    testWidgets('los títulos a 36 bajan justo por debajo de la barra', (
+      tester,
+    ) async {
+      final pantallas = <String, Widget>{
+        'Eventos': const EventosScreen(),
+        'Eventos Reservados': const ReservasScreen(),
+        'Historial de Eventos': const HistorialScreen(),
+        'Notificaciones': const NotificationsScreen(),
+      };
+
+      for (final entrada in pantallas.entries) {
+        await _montar(tester, entrada.value);
+        final titulo = tester.getRect(find.text(entrada.key).first);
+        expect(
+          titulo.top,
+          moreOrLessEquals(kBarraEstado, epsilon: 1),
+          reason: '${entrada.key}: el título no está a ras de la barra',
+        );
+      }
+    });
+
+    testWidgets('la E-card pone los botones a ras y el título 60 más abajo', (
+      tester,
+    ) async {
+      await _montar(tester, ECardScreen(onBack: () {}));
+
+      final volver = tester.getRect(find.byType(GestureDetector).first);
+      expect(volver.top, moreOrLessEquals(kBarraEstado, epsilon: 0.5));
+
+      // Figma: botones en 36 y título en 96, o sea 60 de diferencia.
+      final titulo = tester.getRect(find.text('E-card'));
+      expect(titulo.top - volver.top, moreOrLessEquals(60, epsilon: 1));
+    });
+  });
+
+  group('con una barra de 24 dp todo queda en la medida de Figma', () {
+    testWidgets('Inicio, Invitados y los títulos no se mueven', (tester) async {
+      await _montar(tester, const InicioApp(), barra: kBarraCorta);
       expect(
-        cabecera.height,
-        moreOrLessEquals(122 + kBarraEstado, epsilon: 0.5),
+        tester.getRect(find.byKey(const Key('inicio-header'))).height,
+        moreOrLessEquals(136, epsilon: 0.5),
+      );
+      expect(
+        tester.getRect(find.text('Bienvenida')).top,
+        moreOrLessEquals(26, epsilon: 0.5),
+        reason: 'el saludo debería quedarse en los 26 de Figma',
+      );
+
+      await _montar(tester, const InvitadosScreen(), barra: kBarraCorta);
+      expect(
+        tester.getRect(find.byKey(const Key('invitados-volver'))).top,
+        moreOrLessEquals(36, epsilon: 0.5),
+      );
+
+      await _montar(tester, const EventosScreen(), barra: kBarraCorta);
+      expect(
+        tester.getRect(find.text('Eventos').first).top,
+        moreOrLessEquals(36, epsilon: 1),
+      );
+
+      await _montar(
+        tester,
+        ProfileMenuScreen(onOpenEcard: () {}),
+        barra: kBarraCorta,
+      );
+      expect(
+        tester.getRect(_avatar).top,
+        moreOrLessEquals(42, epsilon: 0.5),
       );
     });
   });

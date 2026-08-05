@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/casilla_verificacion.dart';
 import '../../../../core/widgets/upcoming_event_card.dart';
 import '../../data/eventos_data.dart';
@@ -53,7 +54,10 @@ class _HistorialScreenState extends State<HistorialScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
+        // top:false — el título se coloca con AreaSegura para respetar los 36
+        // de Figma cuando la barra de estado no llega a taparlos.
         body: SafeArea(
+          top: false,
           child: Stack(
             children: [
               SingleChildScrollView(
@@ -63,7 +67,10 @@ class _HistorialScreenState extends State<HistorialScreen> {
                   child: SizedBox(
                     width: 360,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 36, bottom: 80),
+                      padding: EdgeInsets.only(
+                        top: AreaSegura.top(context, 36),
+                        bottom: 80,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -230,7 +237,9 @@ class _HistorialScreenState extends State<HistorialScreen> {
               // --- MENU DROPDOWN DE FILTRO ---
               if (showFilter)
                 Positioned(
-                  top: 184,
+                  // El desplegable cuelga del buscador, así que baja lo mismo
+                  // que el título.
+                  top: 184 + AreaSegura.desplazamiento(context, 36),
                   right: rightPadding,
                   child: _FilterDropdownContainer(
                     virtualSelected: virtualSelected,

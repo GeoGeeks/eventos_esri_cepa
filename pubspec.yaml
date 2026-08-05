@@ -21,6 +21,10 @@ dependencies:
   screenshot: ^3.0.0
   path_provider: ^2.1.5
   share_plus: ^11.0.0
+
+  # Formulario de registro: registroeventos.esri.co es una SPA que se pinta con
+  # JavaScript, así que se muestra dentro de la app en un WebView.
+  webview_flutter: ^4.13.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

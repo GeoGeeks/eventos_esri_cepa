@@ -8,6 +8,7 @@ import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
+import '../widgets/agendar_modal.dart';
 
 class PostEventoScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -1025,7 +1026,8 @@ class _ExpertosTab extends StatelessWidget {
                 imagenAsset: experto.imagenAsset,
                 nombre: experto.nombre,
                 cargo: experto.cargo,
-                onAgendar: () {},
+                // Abre el formulario de reservas de Microsoft Bookings.
+                onAgendar: () => AgendarModal.mostrar(context),
               ),
             );
           }),

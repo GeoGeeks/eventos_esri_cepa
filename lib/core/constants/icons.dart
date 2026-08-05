@@ -33,6 +33,13 @@ static const String avisoBorde =
   static const String x = 'assets/icons/x.svg';
   static const String check = 'assets/icons/check.svg';
 
+  /// Signo «+» del botón «Reservar cupo» de Laboratorios.
+  static const String mas = 'assets/icons/mas.svg';
+
+  /// Círculo con chulo de 14,6 usado por las alertas de confirmación. Se tiñe
+  /// verde o rojo según el caso; extraído de los SVG de las vistas.
+  static const String checkCirculo = 'assets/icons/check_circulo.svg';
+
   static const String qr = 'assets/icons/qr.svg';
   static const String aforo = 'assets/icons/aforo.svg';
   static const String estrellaLlena = 'assets/icons/star_f.svg';
