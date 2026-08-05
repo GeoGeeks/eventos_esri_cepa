@@ -57,6 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // El teclado no encoge la pantalla: FondoInicio recorta sólo su propia
+      // zona desplazable, para que ni el fondo ni el logo del pie se muevan.
+      resizeToAvoidBottomInset: false,
       body: FondoInicio(
         child: Container(
           width: 360,

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
+import '../../../../core/utils/area_segura.dart';
 import '../widgets/empty_notifications.dart';
 import '../widgets/notification_item.dart';
 
@@ -71,13 +72,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      // top:false — el título se coloca con AreaSegura para respetar los 36
+      // de Figma cuando la barra de estado no llega a taparlos.
       body: SafeArea(
+        top: false,
         child: Align(
           alignment: Alignment.topCenter,
           child: SizedBox(
             width: 360,
             child: Padding(
-              padding: const EdgeInsets.only(top: 36, bottom: 24),
+              padding: EdgeInsets.only(
+                top: AreaSegura.top(context, 36),
+                bottom: 24,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

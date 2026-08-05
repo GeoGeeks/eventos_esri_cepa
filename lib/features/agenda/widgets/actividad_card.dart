@@ -43,10 +43,10 @@ class ActividadCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
+                // Sin `maxLines`: un título largo baja de renglón y la tarjeta
+                // crece con él. Nunca se recorta ni se encoge la fuente.
                 child: Text(
                   actividad.titulo,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: Fonts.medium,
                     fontSize: Fonts.text0h,
@@ -123,16 +123,23 @@ class ActividadCard extends StatelessWidget {
                     style: FilaMeta.estiloTexto,
                   ),
                 ),
+                // Una vez valorada, la palabra **sigue viéndose** y tanto ella
+                // como la línea de debajo pasan de azul a #949494.
                 GestureDetector(
-                  onTap: onValorar,
+                  key: const Key('actividad-valorar'),
+                  onTap: actividad.valorada ? null : onValorar,
                   child: Container(
                     height: 16,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: Color(0x66007AC2)),
+                        bottom: BorderSide(
+                          color: actividad.valorada
+                              ? AppColors.textSubtle
+                              : const Color(0x66007AC2),
+                        ),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Valorar',
                       style: TextStyle(
                         fontFamily: Fonts.regular,
@@ -140,7 +147,9 @@ class ActividadCard extends StatelessWidget {
                         fontWeight: Fonts.wRegular,
                         height: 16 / 14,
                         letterSpacing: 0,
-                        color: AppColors.primary,
+                        color: actividad.valorada
+                            ? AppColors.textSubtle
+                            : AppColors.primary,
                       ),
                     ),
                   ),

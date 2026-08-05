@@ -196,7 +196,7 @@ class _ReservasButton extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: active
-                    ? AppColors.navActiveReservas
+                    ? AppColors.navActiveHighlight
                     : AppColors.white,
                 border: Border.all(
                   color: AppColors.lightGray,

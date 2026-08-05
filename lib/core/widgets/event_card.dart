@@ -26,10 +26,10 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // .card (Contenedor principal con tamaño fijo y posición relativa para los overlays)
+    // .card — el alto lo marca el contenido: si el título ocupa 2 o 3 líneas
+    // la tarjeta crece en vez de recortarlo. El carrusel iguala las alturas.
     return SizedBox(
       width: 237,
-      height: 257,
       child: Stack(
         children: [
           // .card-container
@@ -37,8 +37,9 @@ class EventCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: Container(
               width: 237,
-              height: 257,
               color: const Color(0xFFFFFFFF), // background: #FFFFFF
+              // Sin mainAxisSize.min: así el blanco llega hasta abajo cuando
+              // el carrusel estira esta tarjeta para igualarla con la más alta.
               child: Column(
                 children: [
                   // IMAGE (.card-image)
@@ -52,13 +53,12 @@ class EventCard extends StatelessWidget {
                   // CONTENT (.card-content)
                   SizedBox(
                     width: 237,
-                    height: 126,
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // HEADER (.card-header / .card-header-content)
                         SizedBox(
                           width: 237,
-                          height: 74,
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(12, 8, 12, 4), // padding: 8px 12px 4px
                             child: Column(
@@ -67,8 +67,6 @@ class EventCard extends StatelessWidget {
                                 // Title (.card-title)
                                 Text(
                                   title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontFamily: Fonts.medium,
                                     fontSize: 20,
@@ -181,10 +179,10 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 16,
-      child: Row(
-        children: [
+    return Row(
+      // El texto puede ocupar varias líneas; el ícono se alinea con la primera.
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
           // SVG Icon (16x16)
           SizedBox(
             width: 16,
@@ -198,11 +196,9 @@ class _InfoRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 2), // gap: 2px
-          Flexible(
+          Expanded(
             child: Text(
               text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontFamily: Fonts.regular,
                 fontSize: 14,
@@ -212,8 +208,7 @@ class _InfoRow extends StatelessWidget {
               ),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }

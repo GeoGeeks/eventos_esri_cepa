@@ -18,17 +18,18 @@ class CabeceraActividades extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 36,
+    // Mínimo de 36 —el alto del botón de volver—, pero la cabecera crece si el
+    // título necesita más de un renglón.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 36),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           BotonVolver(onTap: onVolver),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               titulo,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontFamily: Fonts.medium,
                 fontSize: Fonts.text3h,

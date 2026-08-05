@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/area_segura.dart';
 import '../../core/widgets/alerta_guardado.dart';
 import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/filtro_modal.dart';
 import '../../navigation/menu.dart';
 import '../favoritos/favoritos.dart';
 import 'data/agenda_mock_data.dart';
+import 'presentation/alerta_valoracion.dart';
 import 'valoracion_modal.dart';
 import 'widgets/actividad_card.dart';
 import 'widgets/cabecera_actividades.dart';
@@ -14,13 +16,21 @@ import 'widgets/cabecera_actividades.dart';
 class AgendaScreen extends StatefulWidget {
   final List<Actividad> actividades;
 
-  const AgendaScreen({super.key, this.actividades = AgendaMockData.actividades});
+  const AgendaScreen({
+    super.key,
+    this.actividades = AgendaMockData.actividades,
+  });
 
   @override
   State<AgendaScreen> createState() => _AgendaScreenState();
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
+  /// Hueco entre la cabecera —que arranca en 36 y mide 36— y la alerta. Deja
+  /// el borde superior de la alerta en `y = 96`, la misma altura a la que sale
+  /// en Laboratorios.
+  static const double _topAlerta = 60;
+
   late final List<Actividad> _actividades = List.of(widget.actividades);
   final Set<int> _expandidas = {};
   String _busqueda = '';
@@ -48,7 +58,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
     for (final valores in _filtros.values) {
       if (valores.isEmpty) continue;
       final coincide = valores.any(
-        (valor) => valor == actividad.lugar || actividad.etiquetas.contains(valor),
+        (valor) =>
+            valor == actividad.lugar || actividad.etiquetas.contains(valor),
       );
       if (!coincide) return false;
     }
@@ -92,14 +103,26 @@ class _AgendaScreenState extends State<AgendaScreen> {
     if (seleccion != null) setState(() => _filtros = seleccion);
   }
 
-  void _abrirValoracion(Actividad actividad) {
-    showModalBottomSheet<void>(
+  /// Abre la encuesta y, si se envía, marca la actividad como valorada y
+  /// muestra la alerta de agradecimiento del diseño.
+  Future<void> _abrirValoracion(int indice) async {
+    final actividad = _actividades[indice];
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: AppColors.modalOverlay,
-      builder: (_) => ValoracionModal(actividad: actividad.titulo),
+      builder: (_) => ValoracionModal(
+        actividad: actividad.titulo,
+        onEnviar: (_) {
+          setState(() {
+            _actividades[indice] = actividad.copyWith(valorada: true);
+          });
+        },
+      ),
     );
+    if (!mounted || !_actividades[indice].valorada) return;
+    await AlertaValoracion.mostrar(context, actividad.titulo);
   }
 
   void _irAMenu(int index) {
@@ -125,45 +148,56 @@ class _AgendaScreenState extends State<AgendaScreen> {
       body: Stack(
         children: [
           Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(26, 36, 26, 0),
-                child: CabeceraActividades(
-                  titulo: 'Agenda',
-                  onVolver: () => Navigator.pop(context),
+              children: [
+                Padding(
+                  // La cabecera va a 36 de Figma; solo baja si la barra de
+                  // estado llegara a taparla.
+                  padding: EdgeInsets.fromLTRB(
+                    26,
+                    AreaSegura.top(context, 36),
+                    26,
+                    0,
+                  ),
+                  child: CabeceraActividades(
+                    titulo: 'Agenda',
+                    onVolver: () => Navigator.pop(context),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
-                  children: [
-                    BuscadorActividades(
-                      onBuscar: (texto) => setState(() => _busqueda = texto),
-                      onFiltrar: _abrirFiltro,
-                    ),
-                    const SizedBox(height: 24),
-                    for (final indice in visibles) ...[
-                      ActividadCard(
-                        actividad: _actividades[indice],
-                        expandida: _expandidas.contains(indice),
-                        onExpandir: () => _alternarExpandida(indice),
-                        onFavorito: () => _alternarFavorita(indice),
-                        onValorar: () =>
-                            _abrirValoracion(_actividades[indice]),
+                const SizedBox(height: 30),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                    children: [
+                      BuscadorActividades(
+                        onBuscar: (texto) => setState(() => _busqueda = texto),
+                        onFiltrar: _abrirFiltro,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 24),
+
+                      for (final indice in visibles) ...[
+                        ActividadCard(
+                          actividad: _actividades[indice],
+                          expandida: _expandidas.contains(indice),
+                          onExpandir: () => _alternarExpandida(indice),
+                          onFavorito: () => _alternarFavorita(indice),
+                          onValorar: () => _abrirValoracion(indice),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+        ),
+
+          // La alerta **no ocupa sitio en la columna**: se superpone sobre el
+          // contenido justo debajo del botón de volver y del título, así que
+          // ninguna tarjeta se mueve al aparecer ni al desaparecer.
           if (_alertaVisible)
             Positioned(
+              top: AreaSegura.top(context, 36) + _topAlerta,
               left: 26,
               right: 26,
-              bottom: 26,
               child: AlertaGuardado(
                 key: const Key('alerta-guardado'),
                 mensaje: '¡Ha guardado una actividad!',

@@ -38,7 +38,8 @@ class _SoporteScreenState extends State<SoporteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      // Ver login_screen.dart: el desplazamiento lo administra FondoInicio.
+      resizeToAvoidBottomInset: false,
       body: FondoInicio(
         espacioSuperior: 62,
         child: Container(

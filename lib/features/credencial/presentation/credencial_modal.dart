@@ -55,8 +55,11 @@ class CredencialModal extends StatelessWidget {
       type: MaterialType.transparency,
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: Container(
-          height: 581,
+        child: SingleChildScrollView(
+          child: Container(
+          // 581 del diseño como mínimo: el nombre y el evento crecen en
+          // renglones y el panel con ellos.
+          constraints: const BoxConstraints(minHeight: 581),
           width: double.infinity,
           decoration: const BoxDecoration(
             color: AppColors.white,
@@ -96,15 +99,15 @@ class CredencialModal extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                top: 48,
-                left: 24,
-                right: 24,
-                height: 452,
+              // Sin `Positioned`: es el contenido el que da el alto al panel.
+              // 48 arriba y los 81 que sobraban abajo en el diseño.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 48, 24, 81),
                 child: _Contenido(datos: datos),
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -120,6 +123,7 @@ class _Contenido extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(
           height: 32,
@@ -153,13 +157,9 @@ class _Contenido extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 61.5),
-        SizedBox(
-          height: 32,
-          child: Text(
+        Text(
             datos.nombre,
             textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontFamily: Fonts.demi,
               fontSize: Fonts.text3h,
@@ -169,23 +169,17 @@ class _Contenido extends StatelessWidget {
               color: AppColors.primary,
             ),
           ),
-        ),
         const SizedBox(height: 2.5),
-        SizedBox(
-          height: 20,
-          child: Text(
-            datos.subtitulo,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: Fonts.regular,
-              fontSize: Fonts.text0h,
-              fontWeight: Fonts.wRegular,
-              height: 20 / 16,
-              letterSpacing: 0,
-              color: AppColors.modalSubtitle,
-            ),
+        Text(
+          datos.subtitulo,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: Fonts.regular,
+            fontSize: Fonts.text0h,
+            fontWeight: Fonts.wRegular,
+            height: 20 / 16,
+            letterSpacing: 0,
+            color: AppColors.modalSubtitle,
           ),
         ),
         const SizedBox(height: 20),
@@ -199,11 +193,11 @@ class _Contenido extends StatelessWidget {
             errorCorrectionLevel: QrErrorCorrectLevel.H,
             eyeStyle: const QrEyeStyle(
               eyeShape: QrEyeShape.square,
-              color: AppColors.qrCredencial,
+              color: AppColors.primary,
             ),
             dataModuleStyle: const QrDataModuleStyle(
               dataModuleShape: QrDataModuleShape.square,
-              color: AppColors.qrCredencial,
+              color: AppColors.primary,
             ),
             embeddedImage: const AssetImage(Images.logoqr),
             embeddedImageStyle: const QrEmbeddedImageStyle(
@@ -212,21 +206,16 @@ class _Contenido extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 20,
-          child: Text(
-            datos.evento,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: Fonts.medium,
-              fontSize: Fonts.text0h,
-              fontWeight: Fonts.wMedium,
-              height: 20 / 16,
-              letterSpacing: 0,
-              color: AppColors.textMuted,
-            ),
+        Text(
+          datos.evento,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: Fonts.medium,
+            fontSize: Fonts.text0h,
+            fontWeight: Fonts.wMedium,
+            height: 20 / 16,
+            letterSpacing: 0,
+            color: AppColors.textMuted,
           ),
         ),
       ],

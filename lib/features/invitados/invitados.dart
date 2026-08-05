@@ -6,7 +6,14 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/icons.dart';
 import '../../core/constants/images.dart';
+import '../../core/utils/area_segura.dart';
+import '../../core/widgets/alerta_guardado.dart';
 import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/boton_cupo.dart';
+import '../../core/widgets/tarjeta_experiencia.dart';
+import '../laboratorios/data/laboratorio_data.dart';
+import '../laboratorios/presentation/alertas_laboratorio.dart';
+import '../laboratorios/presentation/reserva_cupo_modal.dart';
 import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/detalle_actividad.dart';
 import '../../core/widgets/etiqueta_chip.dart';
@@ -16,13 +23,14 @@ import '../../navigation/menu.dart';
 import '../agenda/agenda.dart';
 import '../credencial/presentation/credencial_modal.dart';
 import '../favoritos/favoritos.dart';
+import '../favoritos/favoritos_store.dart';
 import 'data/invitados_mock_data.dart';
 
 class InvitadosScreen extends StatefulWidget {
   final EventoDetalle evento;
   final List<PersonaEvento> speakers;
-  final List<PersonaEvento> experiencias;
-  final List<SesionEvento> stands;
+  final List<ExperienciaEvento> experiencias;
+  final List<ExperienciaEvento> stands;
   final List<SesionEvento> laboratorios;
 
   const InvitadosScreen({
@@ -39,6 +47,12 @@ class InvitadosScreen extends StatefulWidget {
 }
 
 class _InvitadosScreenState extends State<InvitadosScreen> {
+  /// Medidas de `assets/views/Invitados.svg`, fijas: la imagen de cabecera va a
+  /// sangre y el panel blanco arranca en 96, ya por debajo de cualquier barra.
+  static const double altoHeader = 122;
+  static const double topPanel = 96;
+  static const double _topVolver = 36;
+
   static const _tabs = [
     'Speakers e Invitados',
     'Experiencias',
@@ -46,14 +60,56 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     'Laboratorios',
   ];
 
+  /// `y` de la alerta de guardado: el borde superior del panel blanco.
+  static const double _topAlerta = 96;
+
   int _tabIndex = 0;
   final Set<int> _expandidas = {};
+  bool _alertaVisible = false;
+
+  /// Estado del cupo de cada laboratorio, por índice. Vive aquí porque la
+  /// reserva sobrevive a que la tarjeta se pliegue y se despliegue.
+  final Map<int, EstadoCupo> _cupos = {};
+
+  EstadoCupo _cupo(int i) =>
+      _cupos[i] ?? widget.laboratorios[i].estadoCupo;
+
+  /// Recorrido de la reserva, tal como lo encadenan los SVG:
+  /// reserva → gracias → (cancelar → cancelada) y de vuelta a la tarjeta.
+  Future<void> _reservarCupo(int indice) async {
+    final reservado = await ReservaCupoModal.mostrar(context);
+    if (!mounted) return;
+
+    // Cerrar con el aspa deja la tarjeta como estaba, desplegada.
+    if (reservado != true) return;
+
+    setState(() => _cupos[indice] = EstadoCupo.reservado);
+
+    final resultado = await AlertasLaboratorio.gracias(context);
+    if (!mounted) return;
+    if (resultado == ResultadoGracias.cancelar) {
+      await _cancelarCupo(indice);
+    }
+  }
+
+  Future<void> _cancelarCupo(int indice) async {
+    final resultado = await AlertasLaboratorio.cancelada(context);
+    if (!mounted) return;
+
+    setState(() {
+      _cupos[indice] = EstadoCupo.disponible;
+      // «Reservar otro horario» devuelve la pantalla sin nada desplegado; el
+      // aspa la deja como estaba.
+      if (resultado == ResultadoCancelada.otroHorario) _expandidas.clear();
+    });
+  }
 
   void _cambiarTab(int i) {
     if (i < 0 || i >= _tabs.length) return;
     setState(() {
       _tabIndex = i;
       _expandidas.clear();
+      _alertaVisible = false;
     });
   }
 
@@ -61,6 +117,23 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     setState(() {
       if (!_expandidas.remove(i)) _expandidas.add(i);
     });
+  }
+
+  /// La estrella de un laboratorio se pinta de azul y la sesión pasa a
+  /// Favoritos; al volver a pulsarla se apaga y sale de la lista.
+  ///
+  /// Al marcarla sale la misma alerta que en Agenda, superpuesta a 96 —el
+  /// borde superior del panel blanco—, sin mover nada de la lista.
+  void _alternarFavorito(SesionEvento sesion) {
+    final marcada = FavoritosStore.alternar(sesion);
+    setState(() => _alertaVisible = marcada);
+  }
+
+  void _irAFavoritos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FavoritosScreen()),
+    );
   }
 
   void _irAMenu(int index) {
@@ -75,11 +148,11 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       case 0:
         return _listaPersonas(widget.speakers);
       case 1:
-        return _listaPersonas(widget.experiencias);
+        return _listaExperiencias(widget.experiencias);
       case 2:
-        return _listaSesiones(widget.stands);
+        return _listaExperiencias(widget.stands);
       case 3:
-        return _listaSesiones(widget.laboratorios);
+        return _listaLaboratorios(widget.laboratorios);
       default:
         return const SizedBox.shrink();
     }
@@ -105,7 +178,28 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     );
   }
 
-  Widget _listaSesiones(List<SesionEvento> items) {
+  Widget _listaExperiencias(List<ExperienciaEvento> items) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(top: 12),
+      itemCount: items.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
+      itemBuilder: (_, i) => TarjetaExperiencia(
+        imagenAsset: items[i].imagenAsset,
+        titulo: items[i].titulo,
+        subtitulo: items[i].subtitulo,
+        fecha: items[i].fecha,
+        lugar: items[i].lugar,
+        descripcion: items[i].descripcion,
+        enlace: items[i].enlace,
+        expandida: _expandidas.contains(i),
+        onExpandir: () => _alternarExpansion(i),
+      ),
+    );
+  }
+
+  Widget _listaLaboratorios(List<SesionEvento> items) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -115,13 +209,24 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       itemBuilder: (_, i) => SesionCard(
         sesion: items[i],
         expandida: _expandidas.contains(i),
+        esFavorita: FavoritosStore.contiene(items[i].titulo),
+        onFavorito: () => _alternarFavorito(items[i]),
         onExpandir: () => _alternarExpansion(i),
+        estadoCupo: _cupo(i),
+        onReservar: () => _reservarCupo(i),
+        onCancelar: () => _cancelarCupo(i),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // La cabecera va a sangre por detrás de la barra de estado y **conserva sus
+    // 122 px de Figma**: lo único que se mueve es el botón de volver, que a 36
+    // quedaría tapado. El panel blanco arranca en 96, ya por debajo de la barra,
+    // así que no se toca.
+    final double topVolver = AreaSegura.top(context, _topVolver);
+
     return Scaffold(
       backgroundColor: AppColors.surface3,
       body: Stack(
@@ -131,7 +236,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
             left: 0,
             right: 0,
             child: SizedBox(
-              height: 122,
+              height: altoHeader,
               width: double.infinity,
               child: Image.asset(
                 Images.headerInvitados,
@@ -142,7 +247,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
           ),
 
           Positioned(
-            top: 96,
+            top: topPanel,
             left: 0,
             right: 0,
             bottom: 0,
@@ -165,7 +270,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                         children: [
                           _InfoEvento(
                             evento: widget.evento,
-                            onCredencial: () => CredencialModal.mostrar(context),
+                            onCredencial: () =>
+                                CredencialModal.mostrar(context),
                             onAgenda: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -197,13 +303,28 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
           ),
 
           Positioned(
-            top: 36,
+            top: topVolver,
             left: 26,
             child: BotonVolver(
               key: const Key('invitados-volver'),
               onTap: () => Navigator.pop(context),
             ),
           ),
+
+          // La alerta se superpone al panel: no empuja ninguna tarjeta.
+          if (_alertaVisible)
+            Positioned(
+              top: _topAlerta,
+              left: 26,
+              right: 26,
+              child: AlertaGuardado(
+                key: const Key('alerta-guardado'),
+                mensaje: '¡Ha guardado una actividad!',
+                enlace: 'Ir a guardados',
+                onEnlace: _irAFavoritos,
+                onCerrar: () => setState(() => _alertaVisible = false),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -366,17 +487,22 @@ class BotonQr extends StatelessWidget {
           color: AppColors.primary,
           boxShadow: [
             BoxShadow(
-              color: Color(0x40000000),
+              color: AppColors.buttonShadow,
               blurRadius: 4,
               offset: Offset(2, 2),
             ),
           ],
         ),
-        child: const AppIcon(
-          SvgIcon.qr,
-          width: 24,
-          height: 24,
-          color: AppColors.white,
+        // El ícono mide 24x24 y va centrado en la caja de 40: en
+        // `Invitados.svg` el trazo del QR ocupa (354,130)-(378,154), o sea 8
+        // de margen a cada lado de la caja que arranca en (346,122).
+        child: const Center(
+          child: AppIcon(
+            SvgIcon.qr,
+            width: 24,
+            height: 24,
+            color: AppColors.white,
+          ),
         ),
       ),
     );
@@ -550,17 +676,15 @@ class _BarraPestanasState extends State<BarraPestanas> {
               ),
             ),
           ),
-          if (hayNext) ...[
-            Container(
-              width: 1,
-              height: 30,
-              color: AppColors.lightGray,
-            ),
+          // La línea marca dónde se cortan las etiquetas, así que va siempre,
+          // haya o no flecha de avanzar: en `tab-nav.svg` los tres estados la
+          // dibujan al final de la tira (1x30, #EBEBEB).
+          Container(width: 1, height: 30, color: AppColors.lightGray),
+          if (hayNext)
             _FlechaTab(
               haciaAtras: false,
               onTap: () => widget.onPestana(widget.indice + 1),
             ),
-          ],
         ],
       ),
     );
@@ -645,15 +769,31 @@ class _ItemPestana extends StatelessWidget {
 class SesionCard extends StatelessWidget {
   final SesionEvento sesion;
   final bool expandida;
+
+  /// Estado de la estrella. Por defecto, el que traiga la sesión; la pantalla
+  /// lo sobrescribe con lo que el usuario haya marcado.
+  final bool? esFavorita;
   final VoidCallback? onFavorito;
   final VoidCallback? onExpandir;
+
+  bool get favorita => esFavorita ?? sesion.favorita;
+
+  /// Solo en Laboratorios: estado del cupo. Sin él la tarjeta no muestra
+  /// ningún botón de reserva, que es como se ve en Stands.
+  final EstadoCupo? estadoCupo;
+  final VoidCallback? onReservar;
+  final VoidCallback? onCancelar;
 
   const SesionCard({
     super.key,
     required this.sesion,
     this.expandida = false,
+    this.esFavorita,
     this.onFavorito,
     this.onExpandir,
+    this.estadoCupo,
+    this.onReservar,
+    this.onCancelar,
   });
 
   @override
@@ -687,14 +827,16 @@ class SesionCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               GestureDetector(
+                key: const Key('sesion-favorito'),
+                behavior: HitTestBehavior.opaque,
                 onTap: onFavorito,
+                // Marcada: la estrella va **rellena** de #007AC2. Sin marcar,
+                // solo el contorno en #949494.
                 child: AppIcon(
-                  SvgIcon.favoritos,
+                  favorita ? SvgIcon.estrellaLlena : SvgIcon.favoritos,
                   width: 24,
                   height: 24,
-                  color: sesion.favorita
-                      ? AppColors.primary
-                      : AppColors.textSubtle,
+                  color: favorita ? AppColors.primary : AppColors.textSubtle,
                 ),
               ),
             ],
@@ -740,6 +882,33 @@ class SesionCard extends StatelessWidget {
               tituloObjetivos: sesion.tituloObjetivos,
               objetivos: sesion.objetivos,
             ),
+            if (estadoCupo != null) ...[
+              // Sin cupos el diseño antepone el aviso en gris.
+              if (estadoCupo == EstadoCupo.agotado) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  LaboratorioData.avisoAgotado,
+                  style: TextStyle(
+                    fontFamily: Fonts.regular,
+                    fontSize: Fonts.textSm,
+                    fontWeight: Fonts.wRegular,
+                    fontStyle: FontStyle.italic,
+                    height: 16 / 14,
+                    letterSpacing: 0,
+                    color: AppColors.textSubtle,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: BotonCupo(
+                  estado: estadoCupo!,
+                  onReservar: onReservar,
+                  onCancelar: onCancelar,
+                ),
+              ),
+            ],
           ],
         ],
       ),

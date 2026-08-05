@@ -7,8 +7,10 @@ import 'package:esri_eventos/core/widgets/alerta_guardado.dart';
 import 'package:esri_eventos/core/widgets/filtro_chip.dart';
 import 'package:esri_eventos/core/widgets/filtro_modal.dart';
 import 'package:esri_eventos/features/agenda/agenda.dart';
+import 'package:esri_eventos/features/agenda/data/agenda_mock_data.dart';
 import 'package:esri_eventos/features/agenda/valoracion_modal.dart';
 import 'package:esri_eventos/features/agenda/widgets/actividad_card.dart';
+import 'package:esri_eventos/features/agenda/widgets/cabecera_actividades.dart';
 import 'package:esri_eventos/features/favoritos/favoritos.dart';
 
 import 'fuentes_de_prueba.dart';
@@ -92,6 +94,9 @@ void main() {
 
     expect(find.byType(AlertaGuardado), findsNothing);
 
+    final cabecera = tester.getRect(find.byType(CabeceraActividades));
+    final tarjetaAntes = tester.getRect(find.byType(ActividadCard).first);
+
     await tester.tap(find.byKey(const Key('actividad-favorito')).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -103,7 +108,15 @@ void main() {
     expect(alerta.left, moreOrLessEquals(26, epsilon: 0.5));
     expect(alerta.width, moreOrLessEquals(360, epsilon: 0.5));
     expect(alerta.height, moreOrLessEquals(67, epsilon: 0.5));
-    expect(917 - 70 - alerta.bottom, moreOrLessEquals(26, epsilon: 1));
+
+    // Va superpuesta, justo debajo del botón de volver y del título, a la
+    // misma `y = 96` que en Laboratorios.
+    expect(alerta.top, moreOrLessEquals(96, epsilon: 0.5));
+    expect(alerta.top, greaterThanOrEqualTo(cabecera.bottom));
+
+    // Y no mueve nada: las tarjetas siguen exactamente donde estaban.
+    final tarjetaDespues = tester.getRect(find.byType(ActividadCard).first);
+    expect(tarjetaDespues.top, moreOrLessEquals(tarjetaAntes.top, epsilon: 0.5));
 
     await tester.tap(find.text('Ir a guardados'));
     await tester.pump();
@@ -113,7 +126,7 @@ void main() {
     expect(find.byType(FavoritosScreen), findsOneWidget);
   });
 
-  testWidgets('el modal de valoración mide 412x521 y arranca en 396', (
+  testWidgets('el modal de valoración mide 412 de ancho y al menos 521', (
     tester,
   ) async {
     await _montarAgenda(tester);
@@ -123,10 +136,18 @@ void main() {
 
     expect(find.text('Queremos saber su opinión'), findsOneWidget);
 
+    // 521 es el alto del diseño, pero es un mínimo: el nombre de la actividad
+    // no se recorta, así que con un título largo el panel crece hacia arriba.
     final panel = tester.getRect(find.byType(ValoracionModal));
     expect(panel.width, moreOrLessEquals(412, epsilon: 0.5));
-    expect(panel.height, moreOrLessEquals(521, epsilon: 0.5));
-    expect(panel.top, moreOrLessEquals(396, epsilon: 0.5));
+    expect(panel.height, greaterThanOrEqualTo(521));
+    expect(panel.bottom, moreOrLessEquals(917, epsilon: 0.5));
+
+    final titulo = tester.widget<Text>(
+      find.text(AgendaMockData.actividades.first.titulo).first,
+    );
+    expect(titulo.maxLines, isNull, reason: 'el título no debe limitarse');
+    expect(titulo.overflow, isNot(TextOverflow.ellipsis));
   });
 
   testWidgets('el filtro mide 412x618, arranca en 299 y tiene 5 grupos', (

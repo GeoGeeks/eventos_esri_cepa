@@ -4,13 +4,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
+import '../../core/utils/area_segura.dart';
 import '../../core/widgets/casilla_verificacion.dart';
 import '../../core/widgets/upcoming_event_card.dart';
+import '../registro/presentation/registro_modal.dart';
 import 'data/proximos_eventos_data.dart';
 import 'detalle_evento_modal.dart';
 
 class EventosScreen extends StatefulWidget {
-  const EventosScreen({super.key});
+  /// Si viene un evento, la pantalla abre su modal de detalle en cuanto se
+  /// dibuja: es la «ventana evento» a la que lleva el "Ver más" de Inicio.
+  final ProximoEvento? eventoInicial;
+
+  const EventosScreen({super.key, this.eventoInicial});
 
   @override
   State<EventosScreen> createState() => _EventosScreenState();
@@ -21,6 +27,17 @@ class _EventosScreenState extends State<EventosScreen> {
   bool _showFilter = false;
   bool _virtualSelected = false;
   bool _presencialSelected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final evento = widget.eventoInicial;
+    if (evento != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _abrirModalDetalle(evento);
+      });
+    }
+  }
 
   /// Helper para remover acentos y caracteres especiales durante la búsqueda
   String _normalizeText(String text) {
@@ -66,6 +83,8 @@ class _EventosScreenState extends State<EventosScreen> {
   void _abrirModalDetalle(ProximoEvento evento) {
     showDialog(
       context: context,
+      // El scrim del diseño es #000000 al 50 % — modalOverlay es 0x80.
+      barrierColor: AppColors.modalOverlay,
       builder: (_) => DetalleEventoModal(evento: evento),
     );
   }
@@ -85,7 +104,10 @@ class _EventosScreenState extends State<EventosScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
+        // top:false — el título se coloca con AreaSegura para respetar los 36
+        // de Figma cuando la barra de estado no llega a taparlos.
         body: SafeArea(
+          top: false,
           child: Stack(
             children: [
               SingleChildScrollView(
@@ -95,8 +117,8 @@ class _EventosScreenState extends State<EventosScreen> {
                   child: SizedBox(
                     width: 360,
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 36,
+                      padding: EdgeInsets.only(
+                        top: AreaSegura.top(context, 36),
                         bottom: 80,
                       ),
                       child: Column(
@@ -266,9 +288,10 @@ class _EventosScreenState extends State<EventosScreen> {
                                                 bottom: i == eventos.length - 1
                                                     ? 0
                                                     : 8),
+                                            // Sin alto fijo: la tarjeta crece
+                                            // si el título ocupa más líneas.
                                             child: SizedBox(
                                               width: 360,
-                                              height: 146,
                                               child: UpcomingEventCard(
                                                 title: eventos[i].titulo,
                                                 date:
@@ -282,8 +305,8 @@ class _EventosScreenState extends State<EventosScreen> {
                                                     _abrirModalDetalle(
                                                         eventos[i]),
                                                 onRegister: () =>
-                                                    _abrirModalDetalle(
-                                                        eventos[i]),
+                                                    RegistroModal.mostrar(
+                                                        context),
                                               ),
                                             ),
                                           ),
@@ -304,7 +327,9 @@ class _EventosScreenState extends State<EventosScreen> {
               // --- DROPDOWN DE FILTRO ---
               if (_showFilter)
                 Positioned(
-                  top: 184,
+                  // El desplegable cuelga del buscador, así que baja lo mismo
+                  // que el título.
+                  top: 184 + AreaSegura.desplazamiento(context, 36),
                   right: rightPadding,
                   child: Material(
                     color: Colors.transparent,

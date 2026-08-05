@@ -19,7 +19,7 @@ class AppColors {
   static const Color chipBorder = Color(0x14000000);
 
   // hover
-  static const Color navActiveHighlight = Color(0x4D00619B);
+  static const Color navActiveHighlight = Color(0xFF00619B);
   // hover reservas
   static const Color navActiveReservas = Color(0xFF053D72);
 
@@ -38,4 +38,13 @@ class AppColors {
 
   //Credencial
   static const Color qrCredencial = Color(0xFF803FFD);
+
+  // Sombras — rgba(0, 0, 0, 0.25)
+  static const Color buttonShadow = Color(0x40000000);
+
+  /// Enlaces dentro de las tarjetas (correo de Experiencias y Stands).
+  static const Color enlace = Color(0xFF004874);
+
+  /// Botón de reserva cuando ya no quedan cupos.
+  static const Color deshabilitado = Color(0xFFD4D4D4);
 }

@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- El formulario de registro se carga en un WebView. Sin este permiso
+         funciona en debug (lo declara debug/AndroidManifest.xml) pero no en
+         release. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="esri_eventos"
         android:name="${applicationName}"

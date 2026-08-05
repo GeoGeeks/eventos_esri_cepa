@@ -32,6 +32,9 @@ static const String esriBlanco =
   
   static const String fotoInvitado = 'assets/images/invitados/foto_invitados.png';
 
+  /// Foto de la tarjeta de Stands.
+  static const String fotoInvitado2 = 'assets/images/invitados/invitado-2.png';
+
   static const String experienciaComunidad = 'assets/images/experiencias/comunidad.png';
   
   static const String experienciaGeoIA     = 'assets/images/experiencias/geo.png';
