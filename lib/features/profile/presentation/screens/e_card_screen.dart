@@ -189,7 +189,7 @@ class _ECardScreenState extends State<ECardScreen> {
             /// Notification Toast Flotante (Calcite Notice Component Spec Exacto)
             if (_showNotification)
               Positioned(
-                top: 15,
+                top: 48,
                 left: 0,
                 right: 0,
                 child: Center(

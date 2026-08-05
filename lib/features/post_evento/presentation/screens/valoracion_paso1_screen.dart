@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/widgets/app_icons.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 import 'valoracion_paso2_screen.dart';
 
@@ -13,8 +14,7 @@ class ValoracionPaso1Screen extends StatefulWidget {
   const ValoracionPaso1Screen({super.key});
 
   @override
-  State<ValoracionPaso1Screen> createState() =>
-      _ValoracionPaso1ScreenState();
+  State<ValoracionPaso1Screen> createState() => _ValoracionPaso1ScreenState();
 }
 
 class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
@@ -25,6 +25,7 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
   bool dia3 = false;
 
   String? laboratorio;
+  bool isMenuOpen = false; // ✅ Controla el estado del menú desplegable
 
   final TextEditingController _comentarioGeneralController =
       TextEditingController();
@@ -44,7 +45,7 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
       backgroundColor: const Color(0xFFF7F7F7),
       body: SafeArea(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(), // ✅ agregado
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,17 +109,11 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      height: 2,
-                      color: const Color(0xFF007AC2),
-                    ),
+                    child: Container(height: 2, color: const Color(0xFF007AC2)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Container(
-                      height: 2,
-                      color: const Color(0xFFD4D4D4),
-                    ),
+                    child: Container(height: 2, color: const Color(0xFFD4D4D4)),
                   ),
                 ],
               ),
@@ -160,7 +155,7 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
                     child: Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: AppIcon(
-                        SvgIcon.favoritos,
+                        rating > i ? SvgIcon.estrellaLlena : SvgIcon.favoritos,
                         width: 32,
                         height: 32,
                         color: rating > i
@@ -223,26 +218,41 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
                   color: const Color(0xFFFFFFFF),
                   border: Border.all(color: const Color(0xFF949494), width: 1),
                 ),
-                padding: const EdgeInsets.only(left: 16, right: 10),
                 child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
+                  child: DropdownButton2<String>(
                     value: laboratorio,
                     isExpanded: true,
-                    /// chevron-down: mismo asset del botón "atrás" (back.svg),
-                    /// rotado -90° para que apunte hacia abajo.
-                    icon: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Center(
-                        child: Transform.rotate(
-                          angle: -math.pi / 2,
-                          child: const AppIcon(
-                            SvgIcon.back,
-                            width: 8.414,
-                            height: 14,
-                            color: Color(0xFF6B6B6B),
+                    onMenuStateChange: (isOpen) {
+                      setState(() {
+                        isMenuOpen = isOpen; // ✅ Detecta si abre o cierra
+                      });
+                    },
+                    buttonStyleData: const ButtonStyleData(
+                      padding: EdgeInsets.only(left: 16, right: 10),
+                    ),
+                    iconStyleData: IconStyleData(
+                      icon: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Center(
+                          child: Transform.rotate(
+                            // ✅ Si el menú está abierto rota a 90° (arriba), si está cerrado a -90° (abajo)
+                            angle: isMenuOpen ? math.pi / 2 : -math.pi / 2,
+                            child: const AppIcon(
+                              SvgIcon.back,
+                              width: 8.414,
+                              height: 14,
+                              color: Color(0xFF6B6B6B),
+                            ),
                           ),
                         ),
+                      ),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      offset: const Offset(0, -2),
+                      width: MediaQuery.of(context).size.width - 52,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFFFFF),
                       ),
                     ),
                     hint: const Text(
@@ -319,9 +329,7 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
                     color: Color(0xFF141414),
                   ),
                   children: [
-                    TextSpan(
-                      text: 'Seleccione los días en los que participó',
-                    ),
+                    TextSpan(text: 'Seleccione los días en los que participó'),
                     TextSpan(
                       text: ' *',
                       style: TextStyle(color: Color(0xFFD83020)),
@@ -406,10 +414,7 @@ class _ValoracionPaso1ScreenState extends State<ValoracionPaso1Screen> {
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: TextField(
               controller: controller,
               maxLines: null,

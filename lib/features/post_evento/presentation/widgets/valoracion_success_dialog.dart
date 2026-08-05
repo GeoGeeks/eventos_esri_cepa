@@ -5,6 +5,7 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../../../navigation/menu.dart';
+import '../screens/post_evento_screen.dart'; // ✅ Import de PostEventoScreen
 
 class ValoracionSuccessDialog extends StatelessWidget {
   const ValoracionSuccessDialog({super.key});
@@ -158,37 +159,39 @@ class ValoracionSuccessDialog extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: Align(
                 alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: 127,
-                  height: 32,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF007AC2),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) => const Menu(initialIndex: 2),
+                child: IntrinsicWidth( // ✅ Ajusta el ancho al contenido interno del botón
+                  child: SizedBox(
+                    height: 32,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF007AC2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                        (route) => false,
-                      );
-                    },
-                    child: const Text(
-                      'Ir a mis eventos',
-                      style: TextStyle(
-                        fontFamily: Fonts.regular,
-                        fontWeight: Fonts.wRegular,
-                        fontSize: 14,
-                        height: 16 / 14,
-                        color: Color(0xFFFFFFFF),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        // ✅ Navega directamente a PostEventoScreen
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) => const PostEventoScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      child: const Text(
+                        'Descargar mi certificado',
+                        style: TextStyle(
+                          fontFamily: Fonts.regular,
+                          fontWeight: Fonts.wRegular,
+                          fontSize: 14,
+                          height: 16 / 14,
+                          color: Color(0xFFFFFFFF),
+                        ),
                       ),
                     ),
                   ),
