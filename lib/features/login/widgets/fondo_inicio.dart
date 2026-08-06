@@ -68,34 +68,37 @@ class FondoInicio extends StatelessWidget {
           left: 0,
           right: 0,
           bottom: reservaInferior,
-          child: SingleChildScrollView(
-            child: SizedBox(
-              width: double.infinity,
-              child: Column(
-                children: [
-                  SizedBox(height: espacioSuperior),
+          child: ScrollConfiguration(
+            behavior: const _DesplazamientoSinEstirar(),
+            child: SingleChildScrollView(
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    SizedBox(height: espacioSuperior),
 
-                  SvgPicture.asset(Images.logoApp, width: 65, height: 74),
+                    SvgPicture.asset(Images.logoApp, width: 65, height: 74),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  Text(
-                    'Eventos Esri',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: Fonts.bold,
-                      fontSize: 40,
-                      height: 48 / 40,
-                      color: AppColors.white,
+                    Text(
+                      'Eventos Esri',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: Fonts.bold,
+                        fontSize: 40,
+                        height: 48 / 40,
+                        color: AppColors.white,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 32),
 
-                  child,
+                    child,
 
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),
@@ -127,4 +130,30 @@ class FondoInicio extends StatelessWidget {
       ],
     );
   }
+}
+
+/// El desplazamiento de las tres pantallas de acceso, sin efecto de rebote.
+///
+/// En Android, `MaterialScrollBehavior` envuelve todo scroll en un
+/// `StretchingOverscrollIndicator`: al llegar al tope y seguir arrastrando, el
+/// indicador **deforma el contenido entero** —tarjeta blanca, logo y título se
+/// estiran o se aplastan— hasta que se suelta el dedo. En estas pantallas la
+/// columna apenas sobra del alto útil, así que se topa enseguida y el efecto
+/// salta con cualquier gesto. Se desplaza igual que antes; lo que se quita es
+/// sólo la deformación del sobre-arrastre, aquí y no en el resto de la app.
+class _DesplazamientoSinEstirar extends ScrollBehavior {
+  const _DesplazamientoSinEstirar();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) => child;
+
+  /// Clamping en las dos plataformas: sin estiramiento en Android y sin el
+  /// rebote de iOS, que movería el mismo contenido de sitio.
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) =>
+      const ClampingScrollPhysics();
 }
