@@ -7,6 +7,7 @@ import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../credencial/presentation/credencial_modal.dart';
 import '../eventos/data/proximos_eventos_data.dart';
+import '../eventos/detalle_evento_modal.dart';
 import '../invitados/invitados.dart';
 import '../registro/presentation/registro_modal.dart';
 
@@ -32,22 +33,38 @@ const _reservedEvents = [
   ),
 ];
 
-/// Los «Próximos eventos» son los mismos de la pantalla Eventos: así el "Ver
-/// más" de una tarjeta puede abrir el modal de detalle de ese mismo evento.
-const _upcomingEvents = proximosEventosMock;
+/// Ids de los «Próximos eventos» que Inicio destaca. Salen de la misma lista
+/// que la pantalla Eventos —así el "Ver más" abre el modal de detalle de ese
+/// mismo evento—, pero aquí solo se muestran los destacados; el listado
+/// completo sigue en Eventos («Ver todos»).
+const _idsProximosDestacados = {'2'};
+
+final _upcomingEvents = proximosEventosMock
+    .where((e) => _idsProximosDestacados.contains(e.id))
+    .toList();
 
 class InicioApp extends StatelessWidget {
   final VoidCallback? onGoToNotifications;
 
-  /// Abre la pantalla Eventos. Con [ProximoEvento] no nulo, además superpone
-  /// el modal de detalle de ese evento (la «ventana evento» del diseño).
-  final void Function(ProximoEvento? evento)? onGoToEventos;
+  /// Abre la pantalla Eventos: es el chip "Ver todos". Las tarjetas ya no
+  /// navegan, abren sus modales sobre Inicio.
+  final VoidCallback? onGoToEventos;
 
   const InicioApp({
     super.key,
     this.onGoToNotifications,
     this.onGoToEventos,
   });
+
+  /// Misma «ventana evento» que la pantalla Eventos, superpuesta sobre Inicio.
+  /// El scrim del diseño es #000000 al 50 % — modalOverlay es 0x80.
+  void _abrirModalDetalle(BuildContext context, ProximoEvento evento) {
+    showDialog(
+      context: context,
+      barrierColor: AppColors.modalOverlay,
+      builder: (_) => DetalleEventoModal(evento: evento),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +114,7 @@ class InicioApp extends StatelessWidget {
                       _SectionTitle(
                         title: 'Próximos eventos',
                         action: _SeeAllChip(
-                          onTap: () => onGoToEventos?.call(null),
+                          onTap: () => onGoToEventos?.call(),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -110,9 +127,9 @@ class InicioApp extends StatelessWidget {
                             location: e.direccion,
                             image: e.image,
                             mode: e.presencial ? 'Presencial' : 'Virtual',
-                            // "Ver más" → pantalla Eventos con el modal de
-                            // detalle de este evento superpuesto.
-                            onViewMore: () => onGoToEventos?.call(e),
+                            // "Ver más" → el modal de detalle del evento,
+                            // sin salir de Inicio.
+                            onViewMore: () => _abrirModalDetalle(context, e),
                             // "Registrarse" → el formulario de registro.
                             onRegister: () => RegistroModal.mostrar(context),
                           ),
