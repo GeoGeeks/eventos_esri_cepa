@@ -45,8 +45,8 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
     _Experto(
       imagenAsset: Images.fotoInvitado,
-      nombre: 'María Fernanda Ruiz',
-      cargo: 'Directora de Analítica ArcGIS',
+      nombre: 'Geraldine Lopez',
+      cargo: 'Asesor comercial',
       descripcion: 'Analítica geoespacial aplicada a proyectos urbanos.',
     ),
   ];
