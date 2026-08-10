@@ -1,13 +1,11 @@
 import 'package:flutter/widgets.dart';
-
-import '../../../../core/widgets/formulario_web_modal.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Ventana **Política de privacidad** — la abre el enlace «Términos y
 /// Condiciones» de la encuesta (Calificación evento, paso 2).
 ///
-/// Usa el mismo mecanismo que Registro y Agendar con expertos: el contenido es
-/// una página externa, así que se muestra dentro de la app en el WebView de
-/// [FormularioWebModal] en vez de salir a un navegador.
+/// El contenido es una página externa, así que se abre en el navegador
+/// del dispositivo (no embebido dentro de la app).
 class PoliticaPrivacidadModal {
   PoliticaPrivacidadModal._();
 
@@ -16,7 +14,8 @@ class PoliticaPrivacidadModal {
   /// «Política de privacidad | Esri Colombia».
   static const String url = 'https://www.esri.co/es-co/privacidad';
 
-  static Future<void> mostrar(BuildContext context) {
-    return FormularioWebModal.mostrar(context, titulo: titulo, url: url);
+  static Future<void> mostrar(BuildContext context) async {
+    final uri = Uri.parse(url);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
