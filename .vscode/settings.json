@@ -1,29 +1,6 @@
 {
-    "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#00ecfb",
-        "activityBar.background": "#00ecfb",
-        "activityBar.foreground": "#15202b",
-        "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#ff20f2",
-        "activityBarBadge.foreground": "#e7e7e7",
-        "commandCenter.border": "#15202b99",
-        "sash.hoverBorder": "#00ecfb",
-        "statusBar.background": "#00bcc8",
-        "statusBar.foreground": "#15202b",
-        "statusBarItem.hoverBackground": "#008c95",
-        "statusBarItem.remoteBackground": "#bf00b4",
-        "statusBarItem.remoteForeground": "#15202b",
-        "titleBar.activeBackground": "#00bcc8",
-        "titleBar.activeForeground": "#15202b",
-        "titleBar.inactiveBackground": "#00bcc899",
-        "titleBar.inactiveForeground": "#15202b99",
-        "activityBarTop.activeBackground": "#00ecfb",
-        "activityBarTop.background": "#00ecfb",
-        "activityBarTop.foreground": "#15202b",
-        "activityBarTop.inactiveForeground": "#15202b99",
-        "commandCenter.foreground": "#15202b",
-        "statusBar.debuggingBackground": "#00bcc8",
-        "statusBar.debuggingForeground": "#15202b"
-    },
-    "peacock.color": "#00bcc8"
+    
+    "peacock.color": "#00bcc8",
+    "python.defaultInterpreterPath": "C:\\Users\\ealopez\\AppData\\Local\\Programs\\ArcGIS\\Pro\\bin\\Python\\envs\\arcgispro-py3",
+    "cmake.sourceDirectory": "C:/Users/ealopez/Github/eventos_esri_cepa/windows/flutter"
 }
