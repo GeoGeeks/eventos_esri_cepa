@@ -1,0 +1,20 @@
+# Plantilla para la keystore de producción (upload key) de Android.
+#
+# 1. Copia este archivo a `android/key.properties` (ese nombre exacto ya está
+#    en .gitignore, nunca se sube al repo).
+# 2. Si aún no tienes una keystore de subida para esta app, genérala con
+#    (ajusta la ruta de keytool.exe a la de tu instalación de Android Studio):
+#
+#    "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkey -v ^
+#      -keystore esri-cepa-eventos.jks -keyalg RSA -keysize 2048 ^
+#      -validity 10000 -alias esri-cepa-eventos
+#
+#    Guarda el archivo .jks resultante fuera del repo (ej. junto a
+#    key.properties) y NUNCA lo pierdas: sin él no se pueden publicar
+#    actualizaciones futuras de la app.
+# 3. Completa los cuatro valores de abajo con los datos reales.
+
+storePassword=CAMBIAR
+keyPassword=CAMBIAR
+keyAlias=esri-cepa-eventos
+storeFile=../esri-cepa-eventos.jks
