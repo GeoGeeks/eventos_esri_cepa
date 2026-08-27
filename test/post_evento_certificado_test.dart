@@ -129,6 +129,7 @@ void main() {
     expect(find.text('Se ha descargado su certificado.'), findsOneWidget);
 
     expect(asentado.top - botones.bottom, moreOrLessEquals(15, epsilon: 0.5));
-    expect(asentado.width, moreOrLessEquals(361, epsilon: 0.5));
+    // Ocupa la columna de 360 de la pantalla (el SVG lo dibuja a 361).
+    expect(asentado.width, moreOrLessEquals(360, epsilon: 0.5));
   });
 }

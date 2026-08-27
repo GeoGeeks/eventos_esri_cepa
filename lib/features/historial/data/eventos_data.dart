@@ -39,13 +39,4 @@ final eventosMock = [
     image: Images.planetaEsri,
     estado: 'Finalizado',
   ),
-  Evento(
-    titulo: 'Planeta Esri',
-    fecha: 'Octubre 02',
-    hora: '11:00 a.m.',
-    direccion: 'Calle 32 # 54-34',
-    presencial: true,
-    image: Images.planetaEsri,
-    estado: 'Finalizado',
-  ),
 ];
