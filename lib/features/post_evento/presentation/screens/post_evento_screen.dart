@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
+import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../data/valoracion_store.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
@@ -44,23 +45,9 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
     _Experto(
       imagenAsset: Images.fotoInvitado,
-      nombre: 'María Fernanda Ruiz',
-      cargo: 'Directora de Analítica ArcGIS',
+      nombre: 'Geraldine Lopez',
+      cargo: 'Asesor comercial',
       descripcion: 'Analítica geoespacial aplicada a proyectos urbanos.',
-    ),
-    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
-    _Experto(
-      imagenAsset: Images.fotoInvitado,
-      nombre: 'Carlos Andrés Gómez',
-      cargo: 'Consultor SIG',
-      descripcion: 'Implementación de sistemas de información geográfica.',
-    ),
-    // TODO: reemplazar imagen/nombre/cargo por los datos reales del experto.
-    _Experto(
-      imagenAsset: Images.fotoInvitado,
-      nombre: 'Laura Patricia Méndez',
-      cargo: 'Especialista en Geointeligencia',
-      descripcion: 'Modelos predictivos con datos geoespaciales.',
     ),
   ];
 
@@ -94,136 +81,130 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
+      backgroundColor: AppColors.surface3,
       body: SafeArea(
         top: false,
         child: Stack(
           children: [
-            // 1. Fondo general de la pantalla
-            Positioned.fill(
-              child: Container(
-                color: const Color(0xFFF2F2F2),
-              ),
-            ),
-
-            // 2. Header (Imagen de fondo superior)
+            // 1. Cabecera a sangre: los 122 px de Figma.
             Positioned(
               top: 0,
               left: 0,
               right: 0,
-              height: 122,
-              child: Image.asset(
-                Images.headerInvitados,
-                fit: BoxFit.cover,
-              ),
-            ),
-
-            // 3. Contenedor blanco posicionado exactamente según el CSS
-            Positioned(
-              top: 96,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: SizedBox(
-                  width: 412,
-                  height: 821,
-                  child: Transform(
-                    transform: Matrix4.identity()..scale(1.0, -1.0),
-                    alignment: Alignment.center,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF7F7F7),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20),
-                          bottomRight: Radius.circular(20),
-                        ),
-                      ),
-                    ),
-                  ),
+              child: SizedBox(
+                height: 122,
+                width: double.infinity,
+                child: Image.asset(
+                  Images.headerInvitados,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
                 ),
               ),
             ),
 
-            // 4. Contenido (Texto, botones, pestañas y galería/expertos)
-Positioned(
-              top: 102,
+            // 2. Panel blanco — misma estructura que `InvitadosScreen`: el
+            // `Positioned` va de 96 hasta abajo, así que el panel **es** el
+            // contenedor del scroll y su alto lo fija la pantalla, no una
+            // medida suelta.
+            //
+            // El `Align(topCenter)` dentro del scroll es la pieza clave: sin
+            // él —con el `Center` que había— el `SingleChildScrollView` recibía
+            // restricciones flojas, se encogía al alto de su contenido y
+            // quedaba centrado verticalmente. Por eso, al pasar a «Agendar con
+            // expertos» (contenido mucho más corto que «Galería»), bajaba el
+            // bloque entero: fecha, botones y pestañas incluidos.
+            Positioned(
+              top: 96,
               left: 0,
               right: 0,
               bottom: 0,
-              child: Center(
-                child: SizedBox(
-                  width: 412,
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(top: 20, bottom: 100),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _InfoEvento(),
-                        const SizedBox(height: 16),
-
-                        // Los botones y el toast van en el mismo Stack: así el
-                        // toast se ancla a **15 debajo de la fila de botones**
-                        // y se superpone a las pestañas sin moverlas.
-                        Stack(
-                          clipBehavior: Clip.none,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: 360,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 26, bottom: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            _InfoEvento(),
+                            const SizedBox(height: 16),
+
+                            // Los botones y el toast van en el mismo Stack: así
+                            // el toast se ancla a **15 debajo de la fila de
+                            // botones** y se superpone a las pestañas sin
+                            // moverlas.
+                            Stack(
+                              clipBehavior: Clip.none,
                               children: [
-                                ValueListenableBuilder<bool>(
-                                  valueListenable:
-                                      ValoracionStore.eventoValorado,
-                                  builder: (_, valorado, _) => _BotonesAccion(
-                                    valorado: valorado,
-                                    onValorar: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            const ValoracionPaso1Screen(),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ValueListenableBuilder<bool>(
+                                      valueListenable:
+                                          ValoracionStore.eventoValorado,
+                                      builder: (_, valorado, _) => _BotonesAccion(
+                                        valorado: valorado,
+                                        onValorar: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const ValoracionPaso1Screen(),
+                                          ),
+                                        ),
+                                        onCertificado: () => setState(
+                                          () => _showCertificadoToast = true,
+                                        ),
                                       ),
                                     ),
-                                    onCertificado: () => setState(
-                                      () => _showCertificadoToast = true,
+                                    const SizedBox(height: 16),
+                                    _TabBar(
+                                      tabs: _tabs,
+                                      tabIndex: _tabIndex,
+                                      onTab: (i) => setState(() {
+                                        _tabIndex = i;
+                                        _showVideo = false;
+                                        if (_scrollController.hasClients) {
+                                          _scrollController.jumpTo(0);
+                                        }
+                                      }),
+                                    ),
+                                    const SizedBox(height: 11),
+                                    _buildTabContent(),
+                                  ],
+                                ),
+
+                                // 44 de la fila de botones + los 15 del diseño.
+                                if (_showCertificadoToast)
+                                  Positioned(
+                                    top: 44 + 15,
+                                    left: 0,
+                                    right: 0,
+                                    child: Center(
+                                      child: _CertificadoToast(
+                                        key: const Key('certificado-toast'),
+                                        onClose: () {
+                                          setState(
+                                            () => _showCertificadoToast = false,
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                _TabBar(
-                                  tabs: _tabs,
-                                  tabIndex: _tabIndex,
-                                  onTab: (i) => setState(() {
-                                    _tabIndex = i;
-                                    _showVideo = false;
-                                    if (_scrollController.hasClients) {
-                                      _scrollController.jumpTo(0);
-                                    }
-                                  }),
-                                ),
-                                const SizedBox(height: 11),
-                                _buildTabContent(),
                               ],
                             ),
-
-                            // 44 de la fila de botones + los 15 del diseño.
-                            if (_showCertificadoToast)
-                              Positioned(
-                                top: 44 + 15,
-                                left: 0,
-                                right: 0,
-                                child: Center(
-                                  child: _CertificadoToast(
-                                    key: const Key('certificado-toast'),
-                                    onClose: () {
-                                      setState(() => _showCertificadoToast = false);
-                                    },
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -247,8 +228,10 @@ class _HeaderBackBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Igual que en Invitados: la cabecera conserva sus 122 px y lo único que
+    // se mueve es el botón, que a 36 quedaría bajo la barra de estado.
     return Positioned(
-      top: 36,
+      top: AreaSegura.top(context, 36),
       left: 26,
       child: GestureDetector(
         onTap: () {
@@ -291,146 +274,144 @@ class _InfoEvento extends StatelessWidget {
       height: 24 / 18,
     );
 
-    return Container(
-      color: Colors.transparent,
-      padding: const EdgeInsets.fromLTRB(26, 0, 26, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 360,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/date.svg',
-                          width: 16,
-                          height: 16,
-                          colorFilter: const ColorFilter.mode(
-                            iconColor,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const SizedBox(
-                      height: 24,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('Octubre 02, 2026', style: textoStyle),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/time.svg',
-                          width: 16,
-                          height: 16,
-                          colorFilter: const ColorFilter.mode(
-                            iconColor,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const SizedBox(
-                      height: 24,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('8:00 - 11:00', style: textoStyle),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: SvgPicture.asset(
-                          'assets/icons/lugar.svg',
-                          width: 16,
-                          height: 16,
-                          colorFilter: const ColorFilter.mode(
-                            iconColor,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'Universidad Central Cra 36 # 24 - 45',
-                        style: textoStyle,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          const SizedBox(
-            width: 360,
-            child: Text(
-              'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
-              style: TextStyle(
-                fontFamily: Fonts.light,
-                fontSize: 16,
-                fontWeight: FontWeight.w300,
-                color: Color(0xFF141414),
-                height: 20 / 16,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const SizedBox(
-            width: 360,
-            child: Text.rich(
-              TextSpan(
-                text: 'Información sujeta a cambios sin aviso.',
+    // Sin canaleta propia: el ancho de 360 y los 26 px de margen los pone ya
+    // el `SizedBox` de la pantalla, como en Invitados.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 360,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  TextSpan(
-                    text: '*',
-                    style: TextStyle(color: Colors.red),
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/icons/date.svg',
+                        width: 16,
+                        height: 16,
+                        colorFilter: const ColorFilter.mode(
+                          iconColor,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const SizedBox(
+                    height: 24,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Octubre 02, 2026', style: textoStyle),
+                    ),
                   ),
                 ],
               ),
-              style: TextStyle(
-                fontFamily: Fonts.medium,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontStyle: FontStyle.italic,
-                color: Color(0xFF141414),
-                height: 16 / 14,
+              const SizedBox(height: 6),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/icons/time.svg',
+                        width: 16,
+                        height: 16,
+                        colorFilter: const ColorFilter.mode(
+                          iconColor,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const SizedBox(
+                    height: 24,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('8:00 - 11:00', style: textoStyle),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 6),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: SvgPicture.asset(
+                        'assets/icons/lugar.svg',
+                        width: 16,
+                        height: 16,
+                        colorFilter: const ColorFilter.mode(
+                          iconColor,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Universidad Central Cra 36 # 24 - 45',
+                      style: textoStyle,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        const SizedBox(
+          width: 360,
+          child: Text(
+            'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
+            style: TextStyle(
+              fontFamily: Fonts.light,
+              fontSize: 16,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFF141414),
+              height: 20 / 16,
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        const SizedBox(
+          width: 360,
+          child: Text.rich(
+            TextSpan(
+              text: 'Información sujeta a cambios sin aviso.',
+              children: [
+                TextSpan(
+                  text: '*',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ],
+            ),
+            style: TextStyle(
+              fontFamily: Fonts.medium,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontStyle: FontStyle.italic,
+              color: Color(0xFF141414),
+              height: 16 / 14,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -458,40 +439,37 @@ class _BotonesAccion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: SizedBox(
-        height: 44,
-        child: Row(
-          children: [
-            Expanded(
-              child: _Boton(
-                key: const Key('post-evento-valorar'),
-                etiqueta: 'Valorar evento',
-                icono: 'assets/icons/valorar_evento.svg',
-                // Sin valorar: relleno azul con letra blanca. Ya valorado:
-                // fondo blanco, borde y letra en #949494.
-                fondo: valorado ? _blanco : _azul,
-                contenido: valorado ? _gris : _blanco,
-                borde: valorado ? _gris : null,
-                onTap: valorado ? null : onValorar,
-              ),
+    return SizedBox(
+      height: 44,
+      child: Row(
+        children: [
+          Expanded(
+            child: _Boton(
+              key: const Key('post-evento-valorar'),
+              etiqueta: 'Valorar evento',
+              icono: 'assets/icons/valorar_evento.svg',
+              // Sin valorar: relleno azul con letra blanca. Ya valorado:
+              // fondo blanco, borde y letra en #949494.
+              fondo: valorado ? _blanco : _azul,
+              contenido: valorado ? _gris : _blanco,
+              borde: valorado ? _gris : null,
+              onTap: valorado ? null : onValorar,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _Boton(
-                key: const Key('post-evento-certificado'),
-                etiqueta: 'Certificado',
-                icono: 'assets/icons/certificado.svg',
-                // Apagado hasta que se valore; después, azul con letra blanca.
-                fondo: valorado ? _azul : _apagado,
-                contenido: valorado ? _blanco : _gris,
-                borde: valorado ? null : _gris,
-                onTap: valorado ? onCertificado : null,
-              ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _Boton(
+              key: const Key('post-evento-certificado'),
+              etiqueta: 'Certificado',
+              icono: 'assets/icons/certificado.svg',
+              // Apagado hasta que se valore; después, azul con letra blanca.
+              fondo: valorado ? _azul : _apagado,
+              contenido: valorado ? _blanco : _gris,
+              borde: valorado ? null : _gris,
+              onTap: valorado ? onCertificado : null,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -644,7 +622,9 @@ class _Panel extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: 361,
+        // El SVG lo dibuja a 361, pero la columna de la pantalla mide 360 —el
+        // ancho del diseño—, así que el toast se ajusta a ella.
+        width: 360,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           boxShadow: const [
@@ -799,6 +779,7 @@ class _Panel extends StatelessWidget {
     );
   }
 }
+
 /// Los tres tramos de 120,333 × 2 que dibuja `Alert_certificado.svg`: se van
 /// apagando de derecha a izquierda mientras corre el tiempo del toast.
 class _BarraTiempo extends StatelessWidget {
@@ -850,28 +831,25 @@ class _TabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 26),
-      child: SizedBox(
-        width: 355,
-        height: 38,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: tabs.asMap().entries.map((entry) {
-            final i = entry.key;
-            final label = entry.value;
-            final isLast = i == tabs.length - 1;
-            return Padding(
-              padding: EdgeInsets.only(right: isLast ? 0 : 20),
-              child: _TabItem(
-                label: label,
-                active: i == tabIndex,
-                width: i < _widths.length ? _widths[i] : 140,
-                onTap: () => onTab(i),
-              ),
-            );
-          }).toList(),
-        ),
+    return SizedBox(
+      width: 355,
+      height: 38,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: tabs.asMap().entries.map((entry) {
+          final i = entry.key;
+          final label = entry.value;
+          final isLast = i == tabs.length - 1;
+          return Padding(
+            padding: EdgeInsets.only(right: isLast ? 0 : 20),
+            child: _TabItem(
+              label: label,
+              active: i == tabIndex,
+              width: i < _widths.length ? _widths[i] : 140,
+              onTap: () => onTab(i),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -947,7 +925,7 @@ class _GaleriaTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+      padding: const EdgeInsets.only(bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -974,10 +952,7 @@ class _GaleriaTab extends StatelessWidget {
                 onTap: i == 0 ? onFotoTap : null,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: Image.asset(
-                    imagenes[i],
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset(imagenes[i], fit: BoxFit.cover),
                 ),
               ),
             ),
@@ -1139,7 +1114,7 @@ class _ExpertosTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+      padding: const EdgeInsets.only(bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1185,10 +1160,7 @@ class _ExpertoCard extends StatelessWidget {
       height: 114,
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
-        border: Border.all(
-          color: const Color(0xFFF2F2F2),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFF2F2F2), width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
       padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
@@ -1273,11 +1245,7 @@ class _ExpertoCard extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            Icon(
-                              Icons.add,
-                              size: 16,
-                              color: Color(0xFFFFFFFF),
-                            ),
+                            Icon(Icons.add, size: 16, color: Color(0xFFFFFFFF)),
                             SizedBox(width: 12),
                             Text(
                               'Agendar',
@@ -1318,5 +1286,3 @@ class _Experto {
     required this.descripcion,
   });
 }
-
-

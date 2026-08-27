@@ -301,6 +301,27 @@ void main() {
       expect(tester.getRect(avisoFinder), avisoSin);
     });
 
+    testWidgets('la zona desplazable llega hasta el borde del teclado', (
+      tester,
+    ) async {
+      // Sin teclado, la zona desplazable le deja sitio al logo del pie.
+      await _montar(tester, const LoginScreen());
+      final double alto =
+          tester.view.physicalSize.height / tester.view.devicePixelRatio;
+      final sinTeclado = tester.getRect(find.byType(SingleChildScrollView));
+      expect(sinTeclado.bottom, lessThan(alto - kBarraNavegacion));
+
+      // Con el teclado fuera llega justo hasta él: sin franja muerta encima
+      // —la pantalla se veía cortada, con un margen sobre el teclado—.
+      await _montar(tester, const LoginScreen(), teclado: kTeclado);
+      final conTeclado = tester.getRect(find.byType(SingleChildScrollView));
+      expect(
+        conTeclado.bottom,
+        moreOrLessEquals(alto - kTeclado, epsilon: 0.5),
+        reason: 'queda una franja muerta entre el formulario y el teclado',
+      );
+    });
+
     testWidgets('con el teclado abierto se puede llegar al botón (D20)', (
       tester,
     ) async {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/fonts.dart';
 import 'casilla_verificacion.dart';
+import 'separador_opciones.dart';
 
 class FiltroPanel extends StatelessWidget {
   final String titulo;
@@ -38,11 +39,9 @@ class FiltroPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Container(
-          width: double.infinity,
-          height: 1,
-          color: AppColors.lightGray,
-        ),
+        // La misma línea que ahora separa «Sí» de «No» en los desplegables de
+        // la encuesta.
+        const SeparadorOpciones(),
         const SizedBox(height: 12.5),
         for (var i = 0; i < opciones.length; i++) ...[
           if (i > 0) const SizedBox(height: 10),

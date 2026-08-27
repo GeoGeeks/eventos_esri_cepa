@@ -22,18 +22,10 @@ class ProximoEvento {
   });
 }
 
+/// Los dos próximos eventos. De aquí sale el carrusel «Próximos eventos» de
+/// Inicio y el listado completo de la pantalla Eventos («Ver todos»), así que
+/// las dos pantallas muestran siempre lo mismo.
 const List<ProximoEvento> proximosEventosMock = [
-  ProximoEvento(
-    id: '1',
-    titulo: 'Planeta Esri Villavicencio',
-    fecha: 'Agosto 20',
-    hora: '08:00 a.m.',
-    direccion: 'Universidad de los Llanos',
-    image: Images.planetaEsri,
-    presencial: true,
-    descripcion:
-        'Este evento es el espacio ideal para compartir conocimientos, experiencias y soluciones que están marcando la diferencia en la comunidad académica y profesional.',
-  ),
   ProximoEvento(
     id: '2',
     titulo: 'Planeta Esri Bogotá',

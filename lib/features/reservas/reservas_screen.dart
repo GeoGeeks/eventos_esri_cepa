@@ -34,13 +34,6 @@ const _events = [
     image: Images.esriEventos,
     mode: 'Presencial',
   ),
-  _ReservedEvent(
-    title: 'Planeta Esri',
-    date: 'Oct 02 - 11:00 a.m.',
-    location: 'Calle 32 # 54-34',
-    image: Images.planetaEsri,
-    mode: 'Presencial',
-  ),
 ];
 
 class ReservasScreen extends StatefulWidget {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../core/widgets/bottom_nav.dart';
 import '../features/inicio/inicio.dart';
-import '../features/eventos/data/proximos_eventos_data.dart';
 import '../features/eventos/eventos_screen.dart';
 import '../features/historial/presentation/screens/historial_screen.dart';
 import '../features/reservas/reservas_screen.dart';
@@ -28,10 +27,6 @@ class _MenuState extends State<Menu> {
   bool _showPostEvento = false;
   bool _showEventosFromInicio = false;
 
-  /// Evento cuyo modal de detalle debe abrirse al entrar a Eventos desde el
-  /// "Ver más" de una tarjeta de Inicio. Nulo si se llegó por "Ver todos".
-  ProximoEvento? _eventoDetalle;
-
   @override
   void initState() {
     super.initState();
@@ -42,7 +37,6 @@ class _MenuState extends State<Menu> {
     setState(() {
       currentIndex = index;
       _showEventosFromInicio = false; // Reset al tocar cualquier ícono del menú
-      _eventoDetalle = null;
       _showPostEvento = false; // Reset al tocar cualquier ícono del menú
       if (index == 4) {
         _showEcard = false;
@@ -58,25 +52,17 @@ class _MenuState extends State<Menu> {
       );
     }
 
-    // Si viene desde "Ver todos" o desde el "Ver más" de una tarjeta de Inicio
+    // Si viene desde el "Ver todos" de Inicio
     if (_showEventosFromInicio) {
-      return EventosScreen(
-        // La clave hace que Flutter reconstruya la pantalla al cambiar de
-        // evento; si no, initState no vuelve a correr y el modal no se abre.
-        key: ValueKey(_eventoDetalle?.id ?? 'todos'),
-        eventoInicial: _eventoDetalle,
-      );
+      return const EventosScreen();
     }
 
     switch (index) {
       case 0:
         return InicioApp(
           onGoToNotifications: () => _onNavTap(3),
-          onGoToEventos: (evento) {
-            setState(() {
-              _showEventosFromInicio = true;
-              _eventoDetalle = evento;
-            });
+          onGoToEventos: () {
+            setState(() => _showEventosFromInicio = true);
           },
         );
 

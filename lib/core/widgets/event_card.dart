@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../constants/fonts.dart';
+import '../utils/formato_fecha.dart';
 
 class EventCard extends StatelessWidget {
   final String title;
@@ -84,7 +85,9 @@ class EventCard extends StatelessWidget {
                                   children: [
                                     _InfoRow(
                                       iconPath: 'assets/icons/date-time.svg',
-                                      text: date,
+                                      // El mes va siempre abreviado, venga
+                                      // como venga en los datos.
+                                      text: FormatoFecha.mesCorto(date),
                                     ),
                                     const SizedBox(height: 4), // gap: 4px
                                     _InfoRow(

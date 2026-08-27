@@ -1,6 +1,3 @@
-import 'dart:math' as math;
-
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -8,8 +5,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/widgets/app_icons.dart';
+import '../../../../core/widgets/desplegable_si_no.dart';
+import '../../../../core/widgets/mensaje_error_campo.dart';
 
 import '../../data/valoracion_store.dart';
+import '../widgets/politica_privacidad_modal.dart';
 import '../widgets/valoracion_success_dialog.dart';
 
 class ValoracionPaso2Screen extends StatefulWidget {
@@ -26,19 +26,47 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
   String? laboratorio2;
   String? volveria2;
 
-  // Estados de apertura individual para cada dropdown
-  bool openDeseaContacto = false;
-  bool openVolveria1 = false;
-  bool openLaboratorio1 = false;
-  bool openLaboratorio2 = false;
-  bool openVolveria2 = false;
-
   bool dia1 = false;
   bool dia2 = false;
   bool dia3 = false;
 
   bool acepta1 = false;
   bool acepta2 = false;
+
+  /// Igual que en el paso 1: los errores no salen hasta pulsar «Enviar».
+  bool _mostrarErrores = false;
+
+  // ── Campos obligatorios (los marcados con * en el diseño) ──
+  bool get _faltaDias => !dia1 && !dia2 && !dia3;
+
+  bool get _formularioCompleto =>
+      deseaContacto != null &&
+      volveria1 != null &&
+      laboratorio1 != null &&
+      laboratorio2 != null &&
+      volveria2 != null &&
+      !_faltaDias;
+
+  /// Texto del error de un campo, o nulo si no hay que mostrarlo todavía.
+  String? _error(bool falta) =>
+      _mostrarErrores && falta ? MensajeErrorCampo.obligatorio : null;
+
+  void _enviar() {
+    setState(() => _mostrarErrores = true);
+
+    // Sin los obligatorios no se envía la encuesta.
+    if (!_formularioCompleto) return;
+
+    // A partir de aquí el evento queda valorado: en Post-evento se apaga
+    // «Valorar evento» y se enciende «Certificado».
+    ValoracionStore.marcarValorado();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) => const ValoracionSuccessDialog(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,48 +156,40 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
               const SizedBox(height: 28),
 
               /// Desea ser contactado
-              _buildDropdown(
-                label: 'Desea ser contactado',
-                value: deseaContacto,
-                isOpen: openDeseaContacto,
-                onMenuStateChange: (isOpen) =>
-                    setState(() => openDeseaContacto = isOpen),
+              DesplegableSiNo(
+                etiqueta: 'Desea ser contactado',
+                valor: deseaContacto,
+                error: _error(deseaContacto == null),
                 onChanged: (v) => setState(() => deseaContacto = v),
               ),
 
               const SizedBox(height: 12),
 
               /// Volvería a participar (1)
-              _buildDropdown(
-                label: 'Volvería a participar',
-                value: volveria1,
-                isOpen: openVolveria1,
-                onMenuStateChange: (isOpen) =>
-                    setState(() => openVolveria1 = isOpen),
+              DesplegableSiNo(
+                etiqueta: 'Volvería a participar',
+                valor: volveria1,
+                error: _error(volveria1 == null),
                 onChanged: (v) => setState(() => volveria1 = v),
               ),
 
               const SizedBox(height: 12),
 
               /// Participó en los Laboratorios de entrenamiento (1)
-              _buildDropdown(
-                label: 'Participó en los Laboratorios de entrenamiento',
-                value: laboratorio1,
-                isOpen: openLaboratorio1,
-                onMenuStateChange: (isOpen) =>
-                    setState(() => openLaboratorio1 = isOpen),
+              DesplegableSiNo(
+                etiqueta: 'Participó en los Laboratorios de entrenamiento',
+                valor: laboratorio1,
+                error: _error(laboratorio1 == null),
                 onChanged: (v) => setState(() => laboratorio1 = v),
               ),
 
               const SizedBox(height: 12),
 
               /// Participó en los Laboratorios de entrenamiento (2)
-              _buildDropdown(
-                label: 'Participó en los Laboratorios de entrenamiento',
-                value: laboratorio2,
-                isOpen: openLaboratorio2,
-                onMenuStateChange: (isOpen) =>
-                    setState(() => openLaboratorio2 = isOpen),
+              DesplegableSiNo(
+                etiqueta: 'Participó en los Laboratorios de entrenamiento',
+                valor: laboratorio2,
+                error: _error(laboratorio2 == null),
                 onChanged: (v) => setState(() => laboratorio2 = v),
               ),
 
@@ -218,15 +238,16 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                 ],
               ),
 
+              if (_error(_faltaDias) != null)
+                MensajeErrorCampo(texto: _error(_faltaDias)!),
+
               const SizedBox(height: 12),
 
               /// Volvería a participar (2)
-              _buildDropdown(
-                label: 'Volvería a participar',
-                value: volveria2,
-                isOpen: openVolveria2,
-                onMenuStateChange: (isOpen) =>
-                    setState(() => openVolveria2 = isOpen),
+              DesplegableSiNo(
+                etiqueta: 'Volvería a participar',
+                valor: volveria2,
+                error: _error(volveria2 == null),
                 onChanged: (v) => setState(() => volveria2 = v),
               ),
 
@@ -260,17 +281,7 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                     ),
                     elevation: 0,
                   ),
-                  onPressed: () {
-                    // A partir de aquí el evento queda valorado: en Post-evento
-                    // se apaga «Valorar evento» y se enciende «Certificado».
-                    ValoracionStore.marcarValorado();
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      barrierColor: Colors.black54,
-                      builder: (_) => const ValoracionSuccessDialog(),
-                    );
-                  },
+                  onPressed: _enviar,
                   child: const Text(
                     'Enviar',
                     style: TextStyle(
@@ -289,116 +300,6 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
           ),
         ),
       ),
-    );
-  }
-
-  /// Dropdown adaptado con DropdownButton2
-  Widget _buildDropdown({
-    required String label,
-    required String? value,
-    required bool isOpen,
-    required ValueChanged<bool> onMenuStateChange,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            style: const TextStyle(
-              fontFamily: Fonts.regular,
-              fontWeight: Fonts.wRegular,
-              fontSize: Fonts.text0h,
-              height: 20 / 16,
-              color: Color(0xFF141414),
-            ),
-            children: [
-              TextSpan(text: label),
-              const TextSpan(
-                text: ' *',
-                style: TextStyle(color: Color(0xFFD83020)),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
-            border: Border.all(color: const Color(0xFF949494), width: 1),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton2<String>(
-              value: value,
-              isExpanded: true,
-              onMenuStateChange: onMenuStateChange,
-              buttonStyleData: const ButtonStyleData(
-                padding: EdgeInsets.only(left: 16, right: 10),
-              ),
-              iconStyleData: IconStyleData(
-                icon: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Center(
-                    child: Transform.rotate(
-                      angle: isOpen ? math.pi / 2 : -math.pi / 2,
-                      child: const AppIcon(
-                        SvgIcon.back,
-                        width: 8.414,
-                        height: 14,
-                        color: Color(0xFF6B6B6B),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              dropdownStyleData: DropdownStyleData(
-                offset: const Offset(0, -2),
-                width: MediaQuery.of(context).size.width - 52,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFFFFF),
-                ),
-              ),
-              hint: const Text(
-                'Seleccione',
-                style: TextStyle(
-                  fontFamily: Fonts.light,
-                  fontWeight: Fonts.wLight,
-                  fontSize: Fonts.text0h,
-                  height: 20 / 16,
-                  color: Color(0xFF6B6B6B),
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'si',
-                  child: Text(
-                    'Sí',
-                    style: TextStyle(
-                      fontFamily: Fonts.regular,
-                      fontSize: Fonts.text0h,
-                      color: Color(0xFF141414),
-                    ),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'no',
-                  child: Text(
-                    'No',
-                    style: TextStyle(
-                      fontFamily: Fonts.regular,
-                      fontSize: Fonts.text0h,
-                      color: Color(0xFF141414),
-                    ),
-                  ),
-                ),
-              ],
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -511,10 +412,11 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                             style: const TextStyle(
                               color: Color(0xFF007AC2),
                             ),
+                            // Abre «Política de privacidad | Esri Colombia».
                             recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                // TODO: navegar a Términos y Condiciones
-                              },
+                              ..onTap = () => PoliticaPrivacidadModal.mostrar(
+                                    context,
+                                  ),
                           ),
                         ],
                       ),
