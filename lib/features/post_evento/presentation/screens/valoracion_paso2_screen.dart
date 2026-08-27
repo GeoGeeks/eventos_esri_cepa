@@ -362,15 +362,22 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
     required ValueChanged<bool> onChanged,
     required bool showLink,
   }) {
+    // Nota: el toggle NO envuelve toda la fila con un único GestureDetector.
+    // Cuando [showLink] es true, el enlace «Términos y Condiciones.» vive en
+    // un TapGestureRecognizer propio dentro del RichText; un GestureDetector
+    // exterior opaco compite por el mismo toque en la arena de gestos y se
+    // queda con él, dejando el enlace muerto (nunca abre el modal). Por eso
+    // el toggle se ata por separado: al ícono, y —dentro del RichText— al
+    // TextSpan que no es el enlace.
     return Padding(
       padding: const EdgeInsets.only(top: 12),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onChanged(!value),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onChanged(!value),
+            child: Padding(
               padding: const EdgeInsets.only(top: 2),
               child: value
                   ? Container(
@@ -390,38 +397,42 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                       color: const Color(0xFF949494),
                     ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: showLink
-                  ? RichText(
-                      text: TextSpan(
-                        style: const TextStyle(
-                          fontFamily: Fonts.light,
-                          fontWeight: Fonts.wLight,
-                          fontSize: 14,
-                          height: 16 / 14,
-                          color: Color(0xFF141414),
-                        ),
-                        children: [
-                          const TextSpan(
-                            text:
-                                'Autorizo el tratamiento de mis datos y acepto los ',
-                          ),
-                          TextSpan(
-                            text: 'Términos y Condiciones.',
-                            style: const TextStyle(
-                              color: Color(0xFF007AC2),
-                            ),
-                            // Abre «Política de privacidad | Esri Colombia».
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () => PoliticaPrivacidadModal.mostrar(
-                                    context,
-                                  ),
-                          ),
-                        ],
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: showLink
+                ? RichText(
+                    text: TextSpan(
+                      style: const TextStyle(
+                        fontFamily: Fonts.light,
+                        fontWeight: Fonts.wLight,
+                        fontSize: 14,
+                        height: 16 / 14,
+                        color: Color(0xFF141414),
                       ),
-                    )
-                  : const Text(
+                      children: [
+                        TextSpan(
+                          text:
+                              'Autorizo el tratamiento de mis datos y acepto los ',
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => onChanged(!value),
+                        ),
+                        TextSpan(
+                          text: 'Términos y Condiciones.',
+                          style: const TextStyle(color: Color(0xFF007AC2)),
+                          // Abre «Política de privacidad | Esri Colombia».
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => PoliticaPrivacidadModal.mostrar(
+                                  context,
+                                ),
+                        ),
+                      ],
+                    ),
+                  )
+                : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onChanged(!value),
+                    child: const Text(
                       'Autorizo el tratamiento de mis datos y acepto los '
                       'Términos y Condiciones.',
                       style: TextStyle(
@@ -432,9 +443,9 @@ class _ValoracionPaso2ScreenState extends State<ValoracionPaso2Screen> {
                         color: Color(0xFF141414),
                       ),
                     ),
-            ),
-          ],
-        ),
+                  ),
+          ),
+        ],
       ),
     );
   }

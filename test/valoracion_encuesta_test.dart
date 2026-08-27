@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:url_launcher_platform_interface/link.dart' show LinkDelegate;
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
 import 'package:esri_eventos/core/widgets/desplegable_si_no.dart';
-import 'package:esri_eventos/core/widgets/formulario_web_modal.dart';
 import 'package:esri_eventos/core/widgets/mensaje_error_campo.dart';
 import 'package:esri_eventos/core/widgets/separador_opciones.dart';
 import 'package:esri_eventos/features/post_evento/presentation/screens/valoracion_paso1_screen.dart';
@@ -175,12 +177,18 @@ void main() {
       expect(PoliticaPrivacidadModal.titulo, 'Política de privacidad');
     });
 
-    testWidgets('se abre dentro de la app, en la ventana web del proyecto', (
+    testWidgets('abre la URL en el navegador externo del dispositivo', (
       tester,
     ) async {
-      await _montar(tester, const ValoracionPaso2Screen());
+      // La política de privacidad es una página externa (ver el doc-comment
+      // de PoliticaPrivacidadModal): no se embebe en un FormularioWebModal,
+      // se delega al navegador del dispositivo vía url_launcher.
+      final urlLauncherFalso = _UrlLauncherFalso();
+      final original = UrlLauncherPlatform.instance;
+      UrlLauncherPlatform.instance = urlLauncherFalso;
+      addTearDown(() => UrlLauncherPlatform.instance = original);
 
-      expect(find.byType(FormularioWebModal), findsNothing);
+      await _montar(tester, const ValoracionPaso2Screen());
 
       // Los dos «Autorizo…» llevan el mismo texto; el enlace es el primero.
       await tester.tapOnText(
@@ -188,12 +196,29 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final modal = tester.widget<FormularioWebModal>(
-        find.byType(FormularioWebModal),
+      expect(urlLauncherFalso.urlLanzada, PoliticaPrivacidadModal.url);
+      expect(
+        urlLauncherFalso.modoLanzado,
+        PreferredLaunchMode.externalApplication,
       );
-      expect(modal.titulo, PoliticaPrivacidadModal.titulo);
-      expect(modal.enlace, PoliticaPrivacidadModal.url);
-      expect(find.text('Política de privacidad'), findsOneWidget);
     });
   });
+}
+
+/// Reemplaza [UrlLauncherPlatform.instance] en el test: no hay canal de
+/// plataforma real en `flutter test`, así que se registra este falso para
+/// capturar con qué URL y modo se habría lanzado el navegador.
+class _UrlLauncherFalso extends UrlLauncherPlatform {
+  String? urlLanzada;
+  PreferredLaunchMode? modoLanzado;
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    urlLanzada = url;
+    modoLanzado = options.mode;
+    return true;
+  }
 }

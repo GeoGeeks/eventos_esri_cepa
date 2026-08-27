@@ -128,7 +128,7 @@ void main() {
     // Expertos: sus dos tarjetas, sin rejilla.
     expect(find.byType(GridView), findsNothing);
     expect(find.text('Edwin Chirivi'), findsOneWidget);
-    expect(find.text('María Fernanda Ruiz'), findsOneWidget);
+    expect(find.text('Geraldine Lopez'), findsOneWidget);
     expect(find.text('Agendar'), findsNWidgets(2));
   });
 }
