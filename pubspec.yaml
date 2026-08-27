@@ -37,6 +37,35 @@ dev_dependencies:
   # canal de plataforma real bajo `flutter test`).
   url_launcher_platform_interface: ^2.3.2
 
+  # Genera los íconos de lanzador (Android) y de app (iOS) a partir de una
+  # sola imagen fuente. Falta colocar el PNG de marca en assets/icon/icon.png
+  # (cuadrado, 1024x1024, sin transparencia recomendable para Android) y
+  # correr: dart run flutter_launcher_icons
+  flutter_launcher_icons: ^0.14.3
+
+  # Genera la pantalla de splash nativa (Android + iOS) a partir de una config
+  # declarativa, sin tocar Xcode a mano. Reutiliza el mismo ícono de marca
+  # (assets/icon/icon.png) centrado sobre el azul primario de la app. Correr:
+  # dart run flutter_native_splash:create
+  flutter_native_splash: ^2.4.4
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#007AC2"
+  image: assets/icon/icon.png
+  android_12:
+    color: "#007AC2"
+    image: assets/icon/icon.png
+  # Ajustar si el splash real de Figma usa el fondo degradado azul oscuro de
+  # LoginScreen (FondoInicio) en vez de un color plano - ver CLAUDE.md.
+  # Cambiar `color` por el hex exacto, o `background_image` por un asset
+  # propio, si diseño confirma que el splash no es azul plano.
+
 flutter:
   uses-material-design: true
 

@@ -4,9 +4,9 @@
          release. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="esri_eventos"
+        android:label="Eventos Esri Colombia"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
