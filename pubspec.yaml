@@ -27,6 +27,8 @@ dependencies:
   # Formulario de registro: registroeventos.esri.co es una SPA que se pinta con
   # JavaScript, así que se muestra dentro de la app en un WebView.
   webview_flutter: ^4.13.0
+  dio: ^5.11.0
+  flutter_secure_storage: ^10.3.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -48,6 +50,7 @@ dev_dependencies:
   # (assets/icon/icon.png) centrado sobre el azul primario de la app. Correr:
   # dart run flutter_native_splash:create
   flutter_native_splash: ^2.4.4
+  mocktail: ^1.0.5
 
 flutter_launcher_icons:
   android: "launcher_icon"

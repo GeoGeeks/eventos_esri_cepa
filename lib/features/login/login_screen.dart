@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -6,7 +7,8 @@ import '../../../core/constants/fonts.dart';
 import '../../../core/constants/icons.dart';
 
 import '../onboarding/presentation/screens/onboarding_screen.dart';
-import 'data/login_mock_data.dart';
+import 'presentation/bloc/auth_cubit.dart';
+import 'presentation/bloc/auth_state.dart';
 import 'verificacion_screen.dart';
 import 'widgets/fondo_inicio.dart';
 
@@ -39,59 +41,74 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _mensajeError = null);
+    context.read<AuthCubit>().iniciarSesion(documento);
+  }
 
-    if (!LoginMockData.estaRegistrado(documento)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const VerificacionScreen()),
-      );
-      return;
+  void _escucharCambiosDeAuth(BuildContext context, AuthState state) {
+    switch (state) {
+      case AuthAutenticado():
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        );
+      case AuthNoEncontrado():
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const VerificacionScreen()),
+        );
+      case AuthError(:final mensaje):
+        // Caso distinto de "no encontramos tu registro" (AuthNoEncontrado):
+        // aquí no hubo respuesta del backend, es un problema de conexión.
+        setState(() => _mensajeError = mensaje);
+      case AuthInicial() || AuthCargando():
+        break;
     }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // El teclado no encoge la pantalla: FondoInicio recorta sólo su propia
-      // zona desplazable, para que ni el fondo ni el logo del pie se muevan.
-      resizeToAvoidBottomInset: false,
-      body: FondoInicio(
-        child: Container(
-          width: 360,
-          padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 48),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(2),
-          ),
+    final cargando = context.watch<AuthCubit>().state is AuthCargando;
 
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Iniciar Sesión',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: Fonts.medium,
-                  fontSize: 26,
-                  height: 32 / 26,
-                  color: AppColors.textTitle,
+    return BlocListener<AuthCubit, AuthState>(
+      listener: _escucharCambiosDeAuth,
+      child: Scaffold(
+        // El teclado no encoge la pantalla: FondoInicio recorta sólo su
+        // propia zona desplazable, para que ni el fondo ni el logo del pie
+        // se muevan.
+        resizeToAvoidBottomInset: false,
+        body: FondoInicio(
+          child: Container(
+            width: 360,
+            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 48),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(2),
+            ),
+
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Iniciar Sesión',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: Fonts.medium,
+                    fontSize: 26,
+                    height: 32 / 26,
+                    color: AppColors.textTitle,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              _campoDocumento(),
+                _campoDocumento(),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              _botonIngresar(),
-            ],
+                _botonIngresar(cargando),
+              ],
+            ),
           ),
         ),
       ),
@@ -185,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _botonIngresar() {
+  Widget _botonIngresar(bool cargando) {
     return SizedBox(
       height: 44,
       child: ElevatedButton(
@@ -196,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
           elevation: 0,
         ),
 
-        onPressed: ingresar,
+        onPressed: cargando ? null : ingresar,
 
         child: Text(
           'Ingresar',

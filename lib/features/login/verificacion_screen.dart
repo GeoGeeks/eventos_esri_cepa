@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -6,7 +7,8 @@ import '../../../core/constants/fonts.dart';
 import '../../../core/constants/icons.dart';
 
 import '../onboarding/presentation/screens/onboarding_screen.dart';
-import 'data/login_mock_data.dart';
+import 'presentation/bloc/auth_cubit.dart';
+import 'presentation/bloc/auth_state.dart';
 import 'soporte_screen.dart';
 import 'widgets/fondo_inicio.dart';
 
@@ -19,6 +21,8 @@ class VerificacionScreen extends StatefulWidget {
 
 class _VerificacionScreenState extends State<VerificacionScreen> {
   final TextEditingController documentoController = TextEditingController();
+
+  String? _mensajeErrorConexion;
 
   @override
   void dispose() {
@@ -35,104 +39,122 @@ class _VerificacionScreenState extends State<VerificacionScreen> {
 
   void ingresar() {
     final documento = documentoController.text.trim();
-    if (!LoginMockData.estaRegistrado(documento)) return;
+    if (documento.isEmpty) return;
+    context.read<AuthCubit>().iniciarSesion(documento);
+  }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-    );
+  void _escucharCambiosDeAuth(BuildContext context, AuthState state) {
+    switch (state) {
+      case AuthAutenticado():
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        );
+      case AuthError(:final mensaje):
+        setState(() => _mensajeErrorConexion = mensaje);
+      // AuthNoEncontrado se queda en esta misma pantalla (ya es el "no te
+      // encontramos" del flujo) - el mensaje de "No encontramos este
+      // número" ya está siempre visible en el diseño de esta pantalla.
+      case AuthNoEncontrado() || AuthInicial() || AuthCargando():
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // Ver login_screen.dart: el desplazamiento lo administra FondoInicio.
-      resizeToAvoidBottomInset: false,
-      body: FondoInicio(
-        aviso: _AvisoRegistro(
-          onSoporte: irASoporte,
-          onCerrar: () => Navigator.pop(context),
-        ),
+    final cargando = context.watch<AuthCubit>().state is AuthCargando;
 
-        child: Container(
-          width: 360,
-          padding: const EdgeInsets.symmetric(vertical: 40),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(2),
+    return BlocListener<AuthCubit, AuthState>(
+      listener: _escucharCambiosDeAuth,
+      child: Scaffold(
+        // Ver login_screen.dart: el desplazamiento lo administra FondoInicio.
+        resizeToAvoidBottomInset: false,
+        body: FondoInicio(
+          aviso: _AvisoRegistro(
+            onSoporte: irASoporte,
+            onCerrar: () => Navigator.pop(context),
           ),
 
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 36),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Iniciar Sesión',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: Fonts.medium,
-                        fontSize: 26,
-                        height: 32 / 26,
-                        color: AppColors.textTitle,
-                      ),
-                    ),
+          child: Container(
+            width: 360,
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(2),
+            ),
 
-                    const SizedBox(height: 24),
-
-                    Text(
-                      'Número de Identificación',
-                      style: TextStyle(
-                        fontFamily: Fonts.regular,
-                        fontSize: 16,
-                        height: 20 / 16,
-                        color: AppColors.textTitle,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    _campo(),
-
-                    const SizedBox(height: 4),
-
-                    _mensajeError(),
-
-                    const SizedBox(height: 20),
-
-                    SizedBox(
-                      height: 44,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: const RoundedRectangleBorder(),
-                          padding: EdgeInsets.zero,
-                          elevation: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 36),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Iniciar Sesión',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: Fonts.medium,
+                          fontSize: 26,
+                          height: 32 / 26,
+                          color: AppColors.textTitle,
                         ),
-                        onPressed: ingresar,
-                        child: Text(
-                          'Ingresar',
-                          style: TextStyle(
-                            fontFamily: Fonts.regular,
-                            fontSize: 16,
-                            height: 20 / 16,
-                            color: AppColors.white,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      Text(
+                        'Número de Identificación',
+                        style: TextStyle(
+                          fontFamily: Fonts.regular,
+                          fontSize: 16,
+                          height: 20 / 16,
+                          color: AppColors.textTitle,
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      _campo(),
+
+                      const SizedBox(height: 4),
+
+                      _mensajeError(),
+
+                      const SizedBox(height: 20),
+
+                      SizedBox(
+                        height: 44,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: const RoundedRectangleBorder(),
+                            padding: EdgeInsets.zero,
+                            elevation: 0,
+                          ),
+                          onPressed: cargando ? null : ingresar,
+                          child: Text(
+                            'Ingresar',
+                            style: TextStyle(
+                              fontFamily: Fonts.regular,
+                              fontSize: 16,
+                              height: 20 / 16,
+                              color: AppColors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-              _enlaceSoporte(),
-            ],
+                _enlaceSoporte(),
+              ],
+            ),
           ),
         ),
       ),
@@ -236,7 +258,8 @@ class _VerificacionScreenState extends State<VerificacionScreen> {
 
           Expanded(
             child: Text(
-              'No encontramos este número. Revisa que esté bien escrito.',
+              _mensajeErrorConexion ??
+                  'No encontramos este número. Revisa que esté bien escrito.',
               style: TextStyle(
                 fontFamily: Fonts.light,
                 fontSize: 14,

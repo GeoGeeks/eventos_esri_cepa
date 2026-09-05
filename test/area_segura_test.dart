@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,7 +9,10 @@ import 'package:esri_eventos/features/favoritos/favoritos.dart';
 import 'package:esri_eventos/features/historial/presentation/screens/historial_screen.dart';
 import 'package:esri_eventos/features/inicio/inicio.dart';
 import 'package:esri_eventos/features/invitados/invitados.dart';
+import 'package:esri_eventos/features/login/data/auth_repository.dart';
+import 'package:esri_eventos/features/login/data/perfil_usuario.dart';
 import 'package:esri_eventos/features/login/login_screen.dart';
+import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 import 'package:esri_eventos/features/login/soporte_screen.dart';
 import 'package:esri_eventos/features/login/verificacion_screen.dart';
 import 'package:esri_eventos/features/notifications/presentation/screens/notifications_screen.dart';
@@ -17,6 +21,38 @@ import 'package:esri_eventos/features/profile/presentation/screens/profile_menu_
 import 'package:esri_eventos/features/reservas/reservas_screen.dart';
 
 import 'fuentes_de_prueba.dart';
+
+/// LoginScreen/VerificacionScreen/Inicio/ProfileMenuScreen leen AuthCubit
+/// del context - doble sin red, estos tests son de área segura/insets, no
+/// ejercitan el login. `restaurarSesion` devuelve un perfil fijo, no `null`,
+/// porque Inicio/ProfileMenuScreen muestran el nombre/cargo del perfil
+/// autenticado (antes hardcodeado como "María López"/"Ingeniera Civil").
+final _perfilDePrueba = PerfilUsuario(
+  id: 'a1b2c3d4-0000-0000-0000-000000000000',
+  tipoDocumento: 'CC',
+  numeroDocumento: '1007694735',
+  nombres: 'María',
+  apellidos: 'López',
+  email: 'maria.lopez@example.com',
+  celular: '3000000000',
+  organizacion: 'Procalculo',
+  cargo: 'Ingeniera Civil',
+  activo: true,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+);
+
+class _AuthRepositorySinRed implements AuthRepository {
+  @override
+  Future<PerfilUsuario> iniciarSesion(String numeroDocumento) =>
+      Future.error(UnimplementedError());
+
+  @override
+  Future<PerfilUsuario?> restaurarSesion() async => _perfilDePrueba;
+
+  @override
+  Future<void> cerrarSesion() async {}
+}
 
 /// Barra de estado medida en el emulador `sdk gphone16k x86 64`:
 /// `WindowInsets … statusBars:[0,128,0,0]` a densidad 420 → 128 / 2,625 = 48,76.
@@ -46,22 +82,30 @@ Future<void> _montar(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
+  // Se resuelve antes de pumpWidget (no via create:) para que Inicio/
+  // ProfileMenuScreen ya vean AuthAutenticado en el primer build.
+  final authCubit = AuthCubit(repository: _AuthRepositorySinRed());
+  await authCubit.verificarSesionExistente();
+
   await tester.pumpWidget(
-    MaterialApp(
-      home: Builder(
-        builder: (context) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            padding: EdgeInsets.only(
-              top: barra,
-              bottom: teclado > 0 ? 0 : kBarraNavegacion,
+    BlocProvider.value(
+      value: authCubit,
+      child: MaterialApp(
+        home: Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: EdgeInsets.only(
+                top: barra,
+                bottom: teclado > 0 ? 0 : kBarraNavegacion,
+              ),
+              viewPadding: EdgeInsets.only(
+                top: barra,
+                bottom: kBarraNavegacion,
+              ),
+              viewInsets: EdgeInsets.only(bottom: teclado),
             ),
-            viewPadding: EdgeInsets.only(
-              top: barra,
-              bottom: kBarraNavegacion,
-            ),
-            viewInsets: EdgeInsets.only(bottom: teclado),
+            child: pantalla,
           ),
-          child: pantalla,
         ),
       ),
     ),

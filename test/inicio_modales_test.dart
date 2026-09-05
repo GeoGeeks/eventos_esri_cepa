@@ -1,12 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:esri_eventos/core/widgets/formulario_web_modal.dart';
 import 'package:esri_eventos/core/widgets/upcoming_event_card.dart';
 import 'package:esri_eventos/features/eventos/detalle_evento_modal.dart';
 import 'package:esri_eventos/features/inicio/inicio.dart';
+import 'package:esri_eventos/features/login/data/auth_repository.dart';
+import 'package:esri_eventos/features/login/data/perfil_usuario.dart';
+import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 
 import 'fuentes_de_prueba.dart';
+
+/// El _Header de Inicio lee AuthCubit del context - doble sin red, estos
+/// tests son de navegación/modales, no ejercitan el login.
+class _AuthRepositorySinRed implements AuthRepository {
+  @override
+  Future<PerfilUsuario> iniciarSesion(String numeroDocumento) =>
+      Future.error(UnimplementedError());
+
+  @override
+  Future<PerfilUsuario?> restaurarSesion() async => null;
+
+  @override
+  Future<void> cerrarSesion() async {}
+}
 
 /// Monta Inicio y devuelve cuántas veces pidió ir a la pantalla Eventos.
 Future<List<int>> _montarInicio(WidgetTester tester) async {
@@ -17,8 +35,11 @@ Future<List<int>> _montarInicio(WidgetTester tester) async {
 
   final vecesQueNavego = [0];
   await tester.pumpWidget(
-    MaterialApp(
-      home: InicioApp(onGoToEventos: () => vecesQueNavego[0]++),
+    BlocProvider(
+      create: (_) => AuthCubit(repository: _AuthRepositorySinRed()),
+      child: MaterialApp(
+        home: InicioApp(onGoToEventos: () => vecesQueNavego[0]++),
+      ),
     ),
   );
   await tester.pump();
