@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:esri_eventos/features/login/data/auth_repository.dart';
+import 'package:esri_eventos/features/login/data/perfil_usuario.dart';
 import 'package:esri_eventos/features/login/login_screen.dart';
+import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 import 'package:esri_eventos/features/login/soporte_screen.dart';
 import 'package:esri_eventos/features/login/verificacion_screen.dart';
 
 import 'fuentes_de_prueba.dart';
+
+/// LoginScreen/VerificacionScreen leen AuthCubit del context - doble sin red,
+/// estos tests son de scroll/overscroll, no ejercitan el login.
+class _AuthRepositorySinRed implements AuthRepository {
+  @override
+  Future<PerfilUsuario> iniciarSesion(String numeroDocumento) =>
+      Future.error(UnimplementedError());
+
+  @override
+  Future<PerfilUsuario?> restaurarSesion() async => null;
+
+  @override
+  Future<void> cerrarSesion() async {}
+}
 
 /// Tamaños reales: el del diseño y el del emulador (411,43 dp, no 412).
 const List<Size> _lienzos = [Size(412, 917), Size(1080 / 2.625, 869)];
@@ -20,9 +38,12 @@ Future<void> _montar(WidgetTester tester, Widget pantalla, Size lienzo) async {
   // scroll en el indicador que estira, así que sin fijarla el test no probaría
   // nada en un equipo que no sea Android.
   await tester.pumpWidget(
-    MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.android),
-      home: pantalla,
+    BlocProvider(
+      create: (_) => AuthCubit(repository: _AuthRepositorySinRed()),
+      child: MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: pantalla,
+      ),
     ),
   );
   await tester.pumpAndSettle();

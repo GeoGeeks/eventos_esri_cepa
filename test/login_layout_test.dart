@@ -1,10 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:esri_eventos/features/login/data/auth_repository.dart';
+import 'package:esri_eventos/features/login/data/perfil_usuario.dart';
 import 'package:esri_eventos/features/login/login_screen.dart';
+import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 
 import 'fuentes_de_prueba.dart';
+
+/// LoginScreen lee AuthCubit del context (context.watch/read) - un doble
+/// simple basta, este test es de layout puro, no ejercita el login.
+class _AuthRepositorySinRed implements AuthRepository {
+  @override
+  Future<PerfilUsuario> iniciarSesion(String numeroDocumento) =>
+      Future.error(UnimplementedError());
+
+  @override
+  Future<PerfilUsuario?> restaurarSesion() async => null;
+
+  @override
+  Future<void> cerrarSesion() async {}
+}
 
 Future<void> _montarLogin(WidgetTester tester) async {
   tester.view.physicalSize = const Size(412, 917);
@@ -12,7 +30,12 @@ Future<void> _montarLogin(WidgetTester tester) async {
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  await tester.pumpWidget(const MaterialApp(home: LoginScreen()));
+  await tester.pumpWidget(
+    BlocProvider(
+      create: (_) => AuthCubit(repository: _AuthRepositorySinRed()),
+      child: const MaterialApp(home: LoginScreen()),
+    ),
+  );
   await tester.pump();
 }
 

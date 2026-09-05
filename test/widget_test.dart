@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:esri_eventos/features/login/data/login_mock_data.dart';
+import 'package:esri_eventos/features/login/data/auth_exceptions.dart';
+import 'package:esri_eventos/features/login/data/auth_repository.dart';
+import 'package:esri_eventos/features/login/data/perfil_usuario.dart';
 import 'package:esri_eventos/features/login/login_screen.dart';
+import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 import 'package:esri_eventos/features/login/soporte_screen.dart';
 import 'package:esri_eventos/features/login/verificacion_screen.dart';
 import 'package:esri_eventos/features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -10,14 +13,50 @@ import 'package:esri_eventos/main.dart';
 
 import 'fuentes_de_prueba.dart';
 
+// Mismo documento de prueba usado en auth_cubit_test.dart y acordado para
+// probar login real contra el backend.
+const _documentoRegistrado = '1007694735';
+
+final _perfilDePrueba = PerfilUsuario(
+  id: 'a1b2c3d4-0000-0000-0000-000000000000',
+  tipoDocumento: 'CC',
+  numeroDocumento: _documentoRegistrado,
+  nombres: 'Ana',
+  apellidos: 'Pérez',
+  email: 'ana.perez@example.com',
+  celular: '3001234567',
+  activo: true,
+  createdAt: DateTime(2026),
+  updatedAt: DateTime(2026),
+);
+
+/// Doble de [AuthRepository] sin red real - sin sesión guardada
+/// (`restaurarSesion` siempre `null`, así que la app arranca en
+/// `LoginScreen` como antes), y solo [_documentoRegistrado] "existe".
+class _FakeAuthRepository implements AuthRepository {
+  @override
+  Future<PerfilUsuario> iniciarSesion(String numeroDocumento) async {
+    if (numeroDocumento == _documentoRegistrado) return _perfilDePrueba;
+    throw const DocumentoNoEncontradoException();
+  }
+
+  @override
+  Future<PerfilUsuario?> restaurarSesion() async => null;
+
+  @override
+  Future<void> cerrarSesion() async {}
+}
+
 Future<void> _arrancarApp(WidgetTester tester) async {
   tester.view.physicalSize = const Size(412, 917);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  await tester.pumpWidget(const EsriEventosApp());
-  await tester.pump();
+  await tester.pumpWidget(
+    EsriEventosApp(authCubit: AuthCubit(repository: _FakeAuthRepository())),
+  );
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -58,10 +97,7 @@ void main() {
     (WidgetTester tester) async {
       await _arrancarApp(tester);
 
-      await tester.enterText(
-        find.byType(TextField),
-        LoginMockData.documentosRegistrados.first,
-      );
+      await tester.enterText(find.byType(TextField), _documentoRegistrado);
       await tester.tap(find.text('Ingresar'));
       await tester.pumpAndSettle();
 

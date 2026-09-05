@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../login/login_screen.dart';
+import '../../../login/presentation/bloc/auth_cubit.dart';
+import '../../../login/presentation/bloc/auth_state.dart';
 import '../widgets/logout_button.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/profile_section_title.dart';
@@ -26,6 +29,14 @@ class ProfileMenuScreen extends StatelessWidget {
     // Con una barra de 48,76 dp el avatar baja 6,76 y termina en 92,76:
     // sigue cabiendo de sobra en los 110 de la cabecera.
     final double d = AreaSegura.desplazamiento(context, _topAvatar);
+
+    // Ver Inicio (inicio.dart) - el perfil siempre debería estar disponible
+    // acá (esta pantalla solo se ve autenticado), fallback por si acaso.
+    final estadoAuth = context.watch<AuthCubit>().state;
+    final perfil = estadoAuth is AuthAutenticado ? estadoAuth.perfil : null;
+    final iniciales = perfil?.iniciales ?? '';
+    final nombre = perfil?.nombreCompleto ?? '';
+    final cargo = perfil?.cargo;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -69,10 +80,10 @@ class ProfileMenuScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
-                        child: const Text(
-                          'ML',
+                        child: Text(
+                          iniciales,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: Fonts.bold,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -84,14 +95,14 @@ class ProfileMenuScreen extends StatelessWidget {
 
                       const SizedBox(width: 17), // gap: 17px
                       // Fotograma 1 (Texto) - Con Expanded para no truncar
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'María López',
-                              style: TextStyle(
+                              nombre,
+                              style: const TextStyle(
                                 fontFamily: Fonts.bold,
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
@@ -99,18 +110,21 @@ class ProfileMenuScreen extends StatelessWidget {
                                 height: 1.20,
                               ),
                               maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Text(
-                              'Ingeniera Civil',
-                              style: TextStyle(
-                                fontFamily: Fonts.light,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w300,
-                                color: AppColors.white,
-                                height: 1.25,
+                            if (cargo != null)
+                              Text(
+                                cargo,
+                                style: const TextStyle(
+                                  fontFamily: Fonts.light,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w300,
+                                  color: AppColors.white,
+                                  height: 1.25,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 1,
-                            ),
                           ],
                         ),
                       ),
@@ -209,13 +223,21 @@ class ProfileMenuScreen extends StatelessWidget {
                         const SizedBox(height: 16),
 
                         LogoutButton(
-                          onPressed: () => Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
-                            ),
-                            (route) => false,
-                          ),
+                          onPressed: () async {
+                            // Sin esto el token quedaba en
+                            // flutter_secure_storage y, al reabrir la app,
+                            // verificarSesionExistente() volvía a autenticar
+                            // solo - "cerrar sesión" no cerraba nada.
+                            await context.read<AuthCubit>().cerrarSesion();
+                            if (!context.mounted) return;
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                              (route) => false,
+                            );
+                          },
                         ),
                         const SizedBox(height: 10),
                         Center(

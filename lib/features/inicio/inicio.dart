@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/images.dart';
@@ -9,6 +10,8 @@ import '../credencial/presentation/credencial_modal.dart';
 import '../eventos/data/proximos_eventos_data.dart';
 import '../eventos/detalle_evento_modal.dart';
 import '../invitados/invitados.dart';
+import '../login/presentation/bloc/auth_cubit.dart';
+import '../login/presentation/bloc/auth_state.dart';
 import '../registro/presentation/registro_modal.dart';
 
 class _ReservedEvent {
@@ -169,6 +172,14 @@ class _Header extends StatelessWidget {
     // diferencia que tienen en Figma.
     final double d = AreaSegura.desplazamiento(context, _topTexto);
 
+    // Menu (y por lo tanto Inicio) solo se muestra tras AuthAutenticado, ver
+    // main.dart (_Arranque) - el perfil siempre debería estar disponible
+    // acá, pero se deja el fallback por si acaso en vez de asumirlo.
+    final estadoAuth = context.watch<AuthCubit>().state;
+    final perfil = estadoAuth is AuthAutenticado ? estadoAuth.perfil : null;
+    final nombre = perfil?.nombreCompleto ?? '';
+    final subtitulo = perfil?.cargoYOrganizacion;
+
     return Container(
       key: const Key('inicio-header'),
       width: double.infinity,
@@ -191,6 +202,11 @@ class _Header extends StatelessWidget {
           children: [
             Positioned(
               left: 26,
+              // 76 = 26 (margen de la campana) + 40 (su ancho) + 10 (aire) -
+              // a diferencia del mock "María López", un nombre real puede
+              // no caber; sin este right: el texto se sale de la pantalla
+              // por debajo/detrás de la campana en vez de truncarse.
+              right: 76,
               top: _topTexto + d,
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,26 +221,44 @@ class _Header extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
-                      'María López',
-                      style: TextStyle(
-                        fontFamily: Fonts.bold,
-                        color: AppColors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        height: 1.25,
+                    // FittedBox en vez de maxLines+ellipsis: a diferencia del
+                    // mock "María López", un nombre real puede no caber a
+                    // 32px — con ellipsis se cortaba a mitad de palabra
+                    // (p.ej. "VALENTINA PIRAV..."); así se reduce el tamaño
+                    // hasta que quepa completo en una línea, sin agrandar
+                    // nombres cortos (scaleDown nunca escala hacia arriba).
+                    SizedBox(
+                      width: double.infinity,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          nombre,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontFamily: Fonts.bold,
+                            color: AppColors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            height: 1.25,
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Ingeniera Civil · Procalculo',
-                      style: TextStyle(
-                        fontFamily: Fonts.regular,
-                        color: const Color(0xFFD6EFFF),
-                        fontSize: 14,
-                        height: 1.14,
+                    if (subtitulo != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitulo,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: Fonts.regular,
+                          color: const Color(0xFFD6EFFF),
+                          fontSize: 14,
+                          height: 1.14,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
