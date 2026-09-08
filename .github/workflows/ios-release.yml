@@ -89,9 +89,21 @@ jobs:
           echo -n "$APPSTORE_API_KEY_BASE64" | base64 --decode \
             -o ~/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
 
+          shopt -s nullglob
+          ipas=(build/ios/ipa/*.ipa)
+          shopt -u nullglob
+
+          if [ "${#ipas[@]}" -ne 1 ]; then
+            echo "Error: se esperaba exactamente un .ipa en build/ios/ipa/, se encontraron ${#ipas[@]}: ${ipas[*]}" >&2
+            exit 1
+          fi
+
+          IPA_PATH="${ipas[0]}"
+          echo "Subiendo IPA: $IPA_PATH"
+
           xcrun altool --upload-app \
             --type ios \
-            --file "build/ios/ipa/*.ipa" \
+            --file "$IPA_PATH" \
             --apiKey "$APPSTORE_API_KEY_ID" \
             --apiIssuer "$APPSTORE_API_ISSUER_ID"
 
