@@ -78,6 +78,16 @@ jobs:
           flutter build ipa --release --verbose \
             --export-options-plist=ios/ExportOptions.plist
 
+      - name: Exportar IPA (xcodebuild directo)
+        run: |
+          set -euo pipefail
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates 2>&1 | tee /tmp/export_archive.log
+          echo "----- Fin del log de exportArchive -----"
+
       - name: Subir a TestFlight
         env:
           APPSTORE_API_KEY_BASE64: ${{ secrets.APPSTORE_API_KEY_BASE64 }}
