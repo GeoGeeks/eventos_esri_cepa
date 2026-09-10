@@ -64,7 +64,7 @@ jobs:
             <key>teamID</key>
             <string>${APPLE_TEAM_ID}</string>
             <key>signingStyle</key>
-            <string>manual</string>
+            <string>automatic</string>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
