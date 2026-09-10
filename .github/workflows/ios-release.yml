@@ -93,8 +93,15 @@ jobs:
           ipas=(build/ios/ipa/*.ipa)
           shopt -u nullglob
 
-          if [ "${#ipas[@]}" -ne 1 ]; then
-            echo "Error: se esperaba exactamente un .ipa en build/ios/ipa/, se encontraron ${#ipas[@]}: ${ipas[*]}" >&2
+          count="${#ipas[@]}"
+          if [ "$count" -eq 0 ]; then
+            echo "Error: no se encontro ningun .ipa en build/ios/ipa/" >&2
+            echo "Contenido de build/ios/ipa/:" >&2
+            ls -la build/ios/ipa/ 2>&1 >&2 || true
+            exit 1
+          elif [ "$count" -gt 1 ]; then
+            echo "Error: se encontraron $count archivos .ipa, se esperaba 1:" >&2
+            printf ' - %s\n' "${ipas[@]}" >&2
             exit 1
           fi
 
