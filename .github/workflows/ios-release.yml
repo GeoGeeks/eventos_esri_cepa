@@ -84,8 +84,7 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath build/ios/archive/Runner.xcarchive \
             -exportPath build/ios/ipa \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -allowProvisioningUpdates 2>&1 | tee /tmp/export_archive.log
+            -exportOptionsPlist ios/ExportOptions.plist 2>&1 | tee /tmp/export_archive.log
           echo "----- Fin del log de exportArchive -----"
 
       - name: Subir a TestFlight
