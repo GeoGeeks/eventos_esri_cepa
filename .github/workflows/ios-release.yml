@@ -75,7 +75,7 @@ jobs:
 
       - name: flutter build ipa
         run: |
-          flutter build ipa --release \
+          flutter build ipa --release --verbose \
             --export-options-plist=ios/ExportOptions.plist
 
       - name: Subir a TestFlight
