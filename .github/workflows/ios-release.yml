@@ -5,15 +5,25 @@ on:
 
 jobs:
   build-and-upload:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 60
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Seleccionar Xcode 16.2
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
+      - name: Seleccionar Xcode mas reciente disponible
+        run: |
+          echo "Versiones de Xcode instaladas en el runner:"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "(ninguna encontrada con ese patron)"
+          LATEST_XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$LATEST_XCODE" ]; then
+            echo "No se encontro ninguna app Xcode_*.app, usando /Applications/Xcode.app por defecto"
+            LATEST_XCODE="/Applications/Xcode.app"
+          fi
+          echo "Usando: $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+          xcodebuild -version
 
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
