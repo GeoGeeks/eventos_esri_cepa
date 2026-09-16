@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:esri_eventos/core/constants/icons.dart';
 import 'package:esri_eventos/core/widgets/app_icons.dart';
 import 'package:esri_eventos/core/widgets/etiqueta_chip.dart';
+import 'package:esri_eventos/core/widgets/fila_meta.dart';
 import 'package:esri_eventos/features/agenda/data/agenda_mock_data.dart';
 import 'package:esri_eventos/features/agenda/data/charla.dart';
 import 'package:esri_eventos/features/agenda/data/catalogo_item.dart';
@@ -89,20 +90,13 @@ void main() {
     });
 
     testWidgets(
-      'con datos incompletos, el hueco antes de las etiquetas se achica',
+      'el hueco antes de las etiquetas se queda en 10 aunque falten ponente/aforo',
       (tester) async {
-        // Mismo título/horario/lugar en las dos para que la única
-        // diferencia de alto sea el hueco fijo antes de las etiquetas, no
-        // el número de líneas de texto.
-        const completa = Actividad(
-          titulo: 'Plenaria',
-          horario: '08:00 - 10:00',
-          ponente: 'Julian Gutiérrez',
-          lugar: 'Piso 5',
-          aforo: 'Aforo 30 personas',
-          etiquetas: ['Basico'],
-          descripcion: '',
-        );
+        // 2026-09-18: se probó achicar este hueco a 6 cuando faltaban
+        // datos, y quedó "muy pegado" (reporte del usuario, con
+        // screenshot) - se revirtió a un valor fijo de 10 siempre, igual
+        // que el diseño original. Este test documenta esa decisión para
+        // que no se repita el mismo ida y vuelta.
         const incompleta = Actividad(
           titulo: 'Plenaria',
           horario: '08:00 - 10:00',
@@ -116,33 +110,16 @@ void main() {
         await _montar(
           tester,
           ActividadCard(
-            actividad: completa,
-            expandida: false,
-            onExpandir: () {},
-            onValorar: () {},
-          ),
-        );
-        final altoCompleta = tester
-            .getRect(find.byType(ActividadCard))
-            .height;
-
-        await _montar(
-          tester,
-          ActividadCard(
             actividad: incompleta,
             expandida: false,
             onExpandir: () {},
             onValorar: () {},
           ),
         );
-        final altoIncompleta = tester
-            .getRect(find.byType(ActividadCard))
-            .height;
 
-        // Sin aforo desaparece esa fila entera (16 + 2 de separación) y el
-        // hueco fijo baja de 10 a 6 - la tarjeta incompleta debe quedar
-        // notablemente más baja, no solo unos décimos de píxel.
-        expect(altoIncompleta, lessThan(altoCompleta - 15));
+        final lugar = tester.getRect(find.byType(FilaMeta));
+        final chip = tester.getRect(find.byType(EtiquetaChip).first);
+        expect(chip.top - lugar.bottom, moreOrLessEquals(10, epsilon: 0.5));
       },
     );
   });
