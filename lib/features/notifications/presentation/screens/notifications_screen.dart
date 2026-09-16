@@ -4,11 +4,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/utils/area_segura.dart';
+import '../../../notificaciones/data/notificacion_recibida.dart';
+import '../../../notificaciones/data/notificaciones_repository.dart';
 import '../widgets/empty_notifications.dart';
 import '../widgets/notification_item.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+  /// Seam para tests (inyectar un doble sin red real) - mismo patrón que
+  /// `Menu({pushNotificaciones})`.
+  final NotificacionesRepository? repository;
+
+  const NotificationsScreen({super.key, this.repository});
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -20,54 +26,75 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   static final Color _deleteRedLight =
       AppColors.requiredField.withOpacity(0.05);
 
-  final List<Map<String, dynamic>> notifications = [
-    {
-      'id': '1',
-      'title': 'Actualización del evento',
-      'description': 'Se ha modificado la hora de inicio.',
-      'date': '20/06',
-      'isNew': true,
-      'group': 'Hoy',
-    },
-    {
-      'id': '2',
-      'title': 'Actualización del evento',
-      'description': 'Se ha modificado la hora de inicio.',
-      'date': '19/06',
-      'isNew': false,
-      'group': 'Hoy',
-    },
-    {
-      'id': '3',
-      'title': 'Actualización del evento',
-      'description': 'Se ha modificado la hora de inicio.',
-      'date': '19/06',
-      'isNew': false,
-      'group': 'Semana pasada',
-    },
-    {
-      'id': '4',
-      'title': 'Actualización del evento',
-      'description': 'Se ha modificado la hora de inicio.',
-      'date': '19/06',
-      'isNew': false,
-      'group': 'Semana pasada',
-    },
-    {
-      'id': '5',
-      'title': 'Actualización del evento',
-      'description': 'Se ha modificado la hora de inicio.',
-      'date': '19/06',
-      'isNew': false,
-      'group': 'Semana pasada',
-    },
-  ];
+  late final NotificacionesRepository _repository =
+      widget.repository ?? NotificacionesRepository();
+
+  bool _cargando = true;
+  String? _mensajeError;
+  List<NotificacionRecibida> _notificaciones = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _cargar();
+  }
+
+  Future<void> _cargar() async {
+    setState(() {
+      _cargando = true;
+      _mensajeError = null;
+    });
+    try {
+      final notificaciones = await _repository.listarMisNotificaciones();
+      if (!mounted) return;
+      setState(() {
+        _notificaciones = notificaciones;
+        _cargando = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _mensajeError =
+            'No se pudieron cargar las notificaciones. Intenta de nuevo.';
+        _cargando = false;
+      });
+    }
+  }
+
+  /// Optimista: limpia la lista de una vez y solo la restaura si el borrado
+  /// en el backend falla - "Borrar todo" no tiene diálogo de confirmación
+  /// en el diseño original, así que tampoco lo agrega esta conexión.
+  Future<void> _borrarTodo() async {
+    final anteriores = _notificaciones;
+    setState(() => _notificaciones = const []);
+    try {
+      await _repository.borrarTodas();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _notificaciones = anteriores);
+    }
+  }
+
+  /// También optimista (el `Dismissible` ya animó la salida del ítem) - si
+  /// falla, se vuelve a cargar la lista completa en vez de reinsertar el
+  /// ítem a mano, para no pelear con la animación de salida ya en curso.
+  Future<void> _borrarUna(NotificacionRecibida item) async {
+    setState(
+      () => _notificaciones =
+          _notificaciones.where((n) => n.id != item.id).toList(),
+    );
+    try {
+      await _repository.borrarUna(item.id);
+    } catch (_) {
+      await _cargar();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final groups = <String, List<Map<String, dynamic>>>{};
-    for (final n in notifications) {
-      groups.putIfAbsent(n['group'] as String, () => []).add(n);
+    final groups = <String, List<NotificacionRecibida>>{};
+    for (final n in _notificaciones) {
+      groups.putIfAbsent(n.grupo, () => []).add(n);
     }
 
     return Scaffold(
@@ -103,7 +130,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => setState(() => notifications.clear()),
+                        onTap: _notificaciones.isEmpty ? null : _borrarTodo,
                         child: Container(
                           height: 32,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -133,95 +160,134 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
                   const SizedBox(height: 12),
 
-                  /// CONTENIDO: Lista o Estado Vacío
+                  /// CONTENIDO: cargando / error / lista o estado vacío
                   Expanded(
-                    child: notifications.isEmpty
-                        ? const Center(
-                            child: EmptyNotifications(),
+                    child: _cargando
+                        ? const Padding(
+                            padding: EdgeInsets.only(top: 40),
+                            child: Center(child: CircularProgressIndicator()),
                           )
-                        : SingleChildScrollView(
-                            physics: const BouncingScrollPhysics(),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (final entry in groups.entries) ...[
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: Text(
-                                      entry.key,
-                                      style: const TextStyle(
-                                        fontFamily: Fonts.medium,
-                                        fontWeight: Fonts.wMedium,
-                                        fontSize: Fonts.text0h, // 16px
-                                        height: 20 / 16,
-                                        color: AppColors.modalSubtitle,
+                        : _mensajeError != null
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 40),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _mensajeError!,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontFamily: Fonts.regular,
+                                          color: Colors.grey,
+                                        ),
                                       ),
+                                      const SizedBox(height: 12),
+                                      TextButton(
+                                        onPressed: _cargar,
+                                        child: const Text('Reintentar'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : _notificaciones.isEmpty
+                                ? const Center(child: EmptyNotifications())
+                                : SingleChildScrollView(
+                                    physics: const BouncingScrollPhysics(),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        for (final entry in groups.entries) ...[
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              bottom: 12,
+                                            ),
+                                            child: Text(
+                                              entry.key,
+                                              style: const TextStyle(
+                                                fontFamily: Fonts.medium,
+                                                fontWeight: Fonts.wMedium,
+                                                fontSize: Fonts.text0h, // 16px
+                                                height: 20 / 16,
+                                                color: AppColors.modalSubtitle,
+                                              ),
+                                            ),
+                                          ),
+                                          for (final item in entry.value)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 12,
+                                              ),
+                                              child: Dismissible(
+                                                key: Key(item.id),
+                                                direction:
+                                                    DismissDirection.endToStart,
+                                                background: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color:
+                                                              _deleteRedLight,
+                                                          borderRadius:
+                                                              const BorderRadius
+                                                                  .horizontal(
+                                                            left:
+                                                                Radius.circular(
+                                                              8,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      width: 48,
+                                                      height: 88,
+                                                      alignment:
+                                                          Alignment.center,
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                        color: AppColors
+                                                            .requiredField,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .horizontal(
+                                                          right:
+                                                              Radius.circular(
+                                                            8,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      child: SvgPicture.asset(
+                                                        _eliminarIcon,
+                                                        width: 24,
+                                                        height: 24,
+                                                        colorFilter:
+                                                            const ColorFilter
+                                                                .mode(
+                                                          AppColors.white,
+                                                          BlendMode.srcIn,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                onDismissed: (_) =>
+                                                    _borrarUna(item),
+                                                child: NotificationItem(
+                                                  title: item.titulo,
+                                                  description: item.cuerpo,
+                                                  date: item.fechaFormateada,
+                                                  isNew: !item.leida,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ],
                                     ),
                                   ),
-                                  for (final item in entry.value)
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 12),
-                                      child: Dismissible(
-                                        key: Key(item['id']),
-                                        direction: DismissDirection.endToStart,
-                                        background: Row(
-                                          children: [
-                                            Expanded(
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: _deleteRedLight,
-                                                  borderRadius:
-                                                      const BorderRadius
-                                                          .horizontal(
-                                                    left: Radius.circular(8),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                              width: 48,
-                                              height: 88,
-                                              alignment: Alignment.center,
-                                              decoration: const BoxDecoration(
-                                                color: AppColors.requiredField,
-                                                borderRadius:
-                                                    BorderRadius.horizontal(
-                                                  right: Radius.circular(8),
-                                                ),
-                                              ),
-                                              child: SvgPicture.asset(
-                                                _eliminarIcon,
-                                                width: 24,
-                                                height: 24,
-                                                colorFilter:
-                                                    const ColorFilter.mode(
-                                                  AppColors.white,
-                                                  BlendMode.srcIn,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        onDismissed: (_) {
-                                          setState(() {
-                                            notifications.removeWhere(
-                                              (n) => n['id'] == item['id'],
-                                            );
-                                          });
-                                        },
-                                        child: NotificationItem(
-                                          title: item['title'],
-                                          description: item['description'],
-                                          date: item['date'],
-                                          isNew: item['isNew'],
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ],
-                            ),
-                          ),
                   ),
                 ],
               ),
