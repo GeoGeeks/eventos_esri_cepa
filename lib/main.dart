@@ -8,6 +8,7 @@ import 'features/login/login_screen.dart';
 import 'features/login/presentation/bloc/auth_cubit.dart';
 import 'features/login/presentation/bloc/auth_state.dart';
 import 'features/notificaciones/data/push_notificaciones_service.dart';
+import 'features/onboarding/data/onboarding_storage.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'navigation/menu.dart';
 
@@ -28,11 +29,19 @@ Future<void> main() async {
 class EsriEventosApp extends StatelessWidget {
   /// [authCubit] es un seam para tests (inyectar un Cubit con un
   /// `AuthRepository` mockeado, sin llamadas de red reales); en la app real
-  /// se deja `null` y se crea uno de verdad.
-  const EsriEventosApp({super.key, AuthCubit? authCubit})
-      : _authCubit = authCubit;
+  /// se deja `null` y se crea uno de verdad. [onboardingStorage] es el mismo
+  /// tipo de seam para `OnboardingStorage` (ver `LoginScreen`) - sin
+  /// inyectar un doble, el canal de `flutter_secure_storage` no existe bajo
+  /// `flutter_test` y la llamada real se queda pendiente para siempre.
+  const EsriEventosApp({
+    super.key,
+    AuthCubit? authCubit,
+    OnboardingStorage? onboardingStorage,
+  })  : _authCubit = authCubit,
+        _onboardingStorage = onboardingStorage;
 
   final AuthCubit? _authCubit;
+  final OnboardingStorage? _onboardingStorage;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +60,7 @@ class EsriEventosApp extends StatelessWidget {
         // El arranque verifica si hay una sesión guardada antes de decidir
         // entre LoginScreen (sin sesión) o Menu (sesión guardada y válida)
         // - ver _Arranque.
-        home: const _Arranque(),
+        home: _Arranque(onboardingStorage: _onboardingStorage),
       ),
     );
   }
@@ -75,7 +84,10 @@ class EsriEventosApp extends StatelessWidget {
 /// puede volver a interceptar nada de lo que pase después dentro de
 /// `LoginScreen`.
 class _Arranque extends StatefulWidget {
-  const _Arranque();
+  const _Arranque({OnboardingStorage? onboardingStorage})
+      : _onboardingStorage = onboardingStorage;
+
+  final OnboardingStorage? _onboardingStorage;
 
   @override
   State<_Arranque> createState() => _ArranqueState();
@@ -95,7 +107,9 @@ class _ArranqueState extends State<_Arranque> {
     final autenticado = cubit.state is AuthAutenticado;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => autenticado ? const Menu() : const LoginScreen(),
+        builder: (_) => autenticado
+            ? const Menu()
+            : LoginScreen(onboardingStorage: widget._onboardingStorage),
       ),
     );
   }

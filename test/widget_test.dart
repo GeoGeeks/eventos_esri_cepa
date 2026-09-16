@@ -8,8 +8,10 @@ import 'package:esri_eventos/features/login/login_screen.dart';
 import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 import 'package:esri_eventos/features/login/soporte_screen.dart';
 import 'package:esri_eventos/features/login/verificacion_screen.dart';
+import 'package:esri_eventos/features/onboarding/data/onboarding_storage.dart';
 import 'package:esri_eventos/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:esri_eventos/main.dart';
+import 'package:esri_eventos/navigation/menu.dart';
 
 import 'fuentes_de_prueba.dart';
 
@@ -48,14 +50,35 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> cerrarSesion() async {}
 }
 
-Future<void> _arrancarApp(WidgetTester tester) async {
+/// Doble de [OnboardingStorage] en memoria (sin canal de plataforma real,
+/// que bajo `flutter_test` se queda pendiente para siempre en vez de
+/// lanzar - ver `LoginScreen._irTrasAutenticar`).
+class _FakeOnboardingStorage implements OnboardingStorage {
+  _FakeOnboardingStorage({bool yaVisto = false}) : _yaVisto = yaVisto;
+
+  bool _yaVisto;
+
+  @override
+  Future<bool> yaVisto() async => _yaVisto;
+
+  @override
+  Future<void> marcarVisto() async => _yaVisto = true;
+}
+
+Future<void> _arrancarApp(
+  WidgetTester tester, {
+  bool onboardingYaVisto = false,
+}) async {
   tester.view.physicalSize = const Size(412, 917);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
   await tester.pumpWidget(
-    EsriEventosApp(authCubit: AuthCubit(repository: _FakeAuthRepository())),
+    EsriEventosApp(
+      authCubit: AuthCubit(repository: _FakeAuthRepository()),
+      onboardingStorage: _FakeOnboardingStorage(yaVisto: onboardingYaVisto),
+    ),
   );
   await tester.pumpAndSettle();
 }
@@ -103,6 +126,32 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(OnboardingScreen), findsOneWidget);
+      expect(find.byType(LoginScreen), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'documento registrado, onboarding ya visto → directo a Menu, sin Onboarding',
+    (WidgetTester tester) async {
+      await _arrancarApp(tester, onboardingYaVisto: true);
+
+      await tester.enterText(find.byType(TextField), _documentoRegistrado);
+      await tester.tap(find.text('Ingresar'));
+      // Sin `pumpAndSettle`: `Menu` dispara una llamada de red real
+      // (`EventosStore.cargar`, sin seam de inyección) que se queda
+      // "cargando" en este entorno de test - un `CircularProgressIndicator`
+      // (animación indefinida) hace que `pumpAndSettle` nunca se considere
+      // asentado. Un solo `pump(duration)` grande avanza el reloj virtual de
+      // una vez, de sobra para la cadena de await/microtasks (AuthCargando →
+      // AuthAutenticado → `_irTrasAutenticar` → Navigator.pushReplacement) y
+      // para que la transición de salida de `MaterialPageRoute` (300ms)
+      // termine y remueva `LoginScreen` del árbol - ver el mismo comentario
+      // en `onboarding_visto_test.dart`.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(Menu), findsOneWidget);
+      expect(find.byType(OnboardingScreen), findsNothing);
       expect(find.byType(LoginScreen), findsNothing);
     },
   );
