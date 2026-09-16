@@ -1134,12 +1134,15 @@ class SesionCard extends StatelessWidget {
           ),
           if (expandida) ...[
             const SizedBox(height: 10),
-            Row(
+            // `Wrap` (no `Row`) - con varias etiquetas reales (temática +
+            // producto + nivel juntos) un `Row` desbordaba en vez de pasar
+            // a la siguiente línea.
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                for (final etiqueta in sesion.etiquetas) ...[
+                for (final etiqueta in sesion.etiquetas)
                   EtiquetaChip(texto: etiqueta),
-                  const SizedBox(width: 8),
-                ],
               ],
             ),
             const SizedBox(height: 10),

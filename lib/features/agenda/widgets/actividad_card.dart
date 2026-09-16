@@ -185,12 +185,22 @@ class ActividadCard extends StatelessWidget {
           const SizedBox(height: 10),
 
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final etiqueta in actividad.etiquetas) ...[
-                EtiquetaChip(texto: etiqueta),
-                const SizedBox(width: 8),
-              ],
-              const Spacer(),
+              // `Wrap` dentro del `Expanded` (no un `Row` a secas) - con
+              // varias etiquetas reales (temática + producto + nivel
+              // juntos) desbordaba en vez de pasar a la siguiente línea.
+              // La estrella se queda fija a la derecha igual que antes.
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final etiqueta in actividad.etiquetas)
+                      EtiquetaChip(texto: etiqueta),
+                  ],
+                ),
+              ),
               GestureDetector(
                 key: const Key('actividad-favorito'),
                 onTap: onFavorito,
