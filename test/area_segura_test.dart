@@ -40,6 +40,7 @@ final _perfilDePrueba = PerfilUsuario(
   activo: true,
   createdAt: DateTime(2026),
   updatedAt: DateTime(2026),
+  origen: 'externo',
   // 'F' porque el fixture es "María López" - PerfilUsuario.saludo usa esto
   // para "Bienvenida"/"Bienvenido" (2026-09-16); sin este dato caería al
   // masculino genérico y las aserciones de find.text('Bienvenida') de abajo

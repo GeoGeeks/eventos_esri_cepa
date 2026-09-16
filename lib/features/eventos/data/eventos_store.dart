@@ -50,8 +50,18 @@ class EventosStore {
     const EventosSinCargar(),
   );
 
+  /// [esColaborador]: un colaborador interno nunca tiene
+  /// `eventosdb.RegistroEvento` (ver CLAUDE.md de `eventos_esri_cepa_api`,
+  /// "Colaboradores internos"), así que `GET /eventos/mis-inscripciones`
+  /// siempre le devuelve vacío - pedido explícito del dueño: para un
+  /// colaborador, TODOS los eventos activos y vigentes cuentan como
+  /// "reservados" (tiene acceso a cualquiera, no solo a los que
+  /// "elige"), ninguno queda en "próximos". Con `esColaborador: true` ni
+  /// siquiera se llama `listarIdsInscritos()` - sería una llamada de red
+  /// para un resultado que ya se sabe vacío.
   static Future<void> cargar({
     EventosRepository? repository,
+    bool esColaborador = false,
     bool forzar = false,
   }) async {
     if (!forzar &&
@@ -62,10 +72,10 @@ class EventosStore {
     estado.value = const EventosCargando();
     final repo = repository ?? EventosRepository();
     try {
-      final activosFuture = repo.listarActivos();
-      final idsInscritosFuture = repo.listarIdsInscritos();
-      final activos = await activosFuture;
-      final idsInscritos = await idsInscritosFuture;
+      final activos = await repo.listarActivos();
+      final idsInscritos = esColaborador
+          ? const <String>{}
+          : await repo.listarIdsInscritos();
 
       // "Activo" en eventosdb.Evento (IDEstadoEvento) no quiere decir
       // "todavía no pasó" - excluye aquí lo que ya terminó (ver
@@ -77,12 +87,14 @@ class EventosStore {
       estado.value = EventosCargados(
         reservados: [
           for (final e in vigentes)
-            if (idsInscritos.contains(e.id)) e,
+            if (esColaborador || idsInscritos.contains(e.id)) e,
         ],
-        proximos: [
-          for (final e in vigentes)
-            if (!idsInscritos.contains(e.id)) e,
-        ],
+        proximos: esColaborador
+            ? const []
+            : [
+                for (final e in vigentes)
+                  if (!idsInscritos.contains(e.id)) e,
+              ],
       );
     } catch (_) {
       estado.value = const EventosError(

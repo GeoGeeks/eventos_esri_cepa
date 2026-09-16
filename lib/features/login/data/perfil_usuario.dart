@@ -14,6 +14,7 @@ class PerfilUsuario {
     required this.activo,
     required this.createdAt,
     required this.updatedAt,
+    required this.origen,
     this.genero,
   });
 
@@ -31,10 +32,20 @@ class PerfilUsuario {
   final bool activo;
   final DateTime createdAt;
   final DateTime updatedAt;
+  /// 'externo' (eventosdb.RegistroEvento) | 'colaborador' (SuccessFactors) -
+  /// ver [esColaborador].
+  final String origen;
   /// SOLO para un colaborador interno (viene de SuccessFactors) - un
   /// asistente externo no tiene esta fuente de dato, siempre null. Valor
   /// crudo del backend, sin normalizar - ver [saludo].
   final String? genero;
+
+  /// Un colaborador interno no tiene eventosdb.RegistroEvento (ver CLAUDE.md
+  /// de eventos_esri_cepa_api, "Colaboradores internos") - entra a
+  /// cualquier evento activo sin restricción. `EventosStore` lo usa para
+  /// tratar TODOS los eventos activos como "reservados", no solo los que
+  /// devuelve mis-inscripciones (que para un colaborador siempre está vacío).
+  bool get esColaborador => origen == 'colaborador';
 
   /// "Nombres Apellidos" en formato título, como se muestra en Inicio/Perfil
   /// (ej. "Valentina Piragauta"). `nombres`/`apellidos` llegan tal cual los
@@ -89,6 +100,7 @@ class PerfilUsuario {
       activo: json['activo'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      origen: json['origen'] as String,
       genero: json['genero'] as String?,
     );
   }
@@ -109,6 +121,7 @@ class PerfilUsuario {
         other.activo == activo &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
+        other.origen == origen &&
         other.genero == genero;
   }
 
@@ -123,7 +136,7 @@ class PerfilUsuario {
         celular,
         organizacion,
         cargo,
-        Object.hash(activo, createdAt, updatedAt, genero),
+        Object.hash(activo, createdAt, updatedAt, origen, genero),
       );
 }
 
