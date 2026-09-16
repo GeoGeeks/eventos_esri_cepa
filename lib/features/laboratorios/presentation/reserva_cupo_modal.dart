@@ -44,11 +44,14 @@ class ReservaCupoModal extends StatefulWidget {
 }
 
 class _ReservaCupoModalState extends State<ReservaCupoModal> {
-  final Set<int> _dias = {};
+  /// Selección única: un laboratorio ocurre en un solo día, no tendría
+  /// sentido reservarlo para los dos a la vez - antes eran casillas
+  /// independientes y se podían marcar ambas.
+  int? _dia;
   String? _horario;
   bool _desplegado = false;
 
-  bool get _puedeReservar => _dias.isNotEmpty && _horario != null;
+  bool get _puedeReservar => _dia != null && _horario != null;
 
   @override
   Widget build(BuildContext context) {
@@ -164,13 +167,15 @@ class _ReservaCupoModalState extends State<ReservaCupoModal> {
               height: 32,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
+                // Vuelve a tocar el mismo día ya marcado para desmarcarlo;
+                // tocar el otro lo reemplaza - nunca los dos a la vez.
                 onTap: () => setState(() {
-                  if (!_dias.remove(i)) _dias.add(i);
+                  _dia = _dia == i ? null : i;
                 }),
                 child: Row(
                   children: [
                     const SizedBox(width: 10),
-                    CasillaVerificacion(marcada: _dias.contains(i)),
+                    CasillaVerificacion(marcada: _dia == i),
                     const SizedBox(width: 10),
                     Text(
                       LaboratorioData.dias[i],
