@@ -1180,14 +1180,43 @@ class SesionCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: BotonCupo(
-                  estado: estadoCupo!,
-                  onReservar: onReservar,
-                  onCancelar: onCancelar,
+              // Ya reservado: el botón «Cancelar reserva» pasa a la
+              // derecha y a la izquierda se deja visible la franja
+              // reservada (día - hora), que si no queda oculta al no
+              // haber otra forma de verla sin cancelar primero.
+              if (estadoCupo == EstadoCupo.reservado)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        sesion.fecha,
+                        style: const TextStyle(
+                          fontFamily: Fonts.regular,
+                          fontSize: Fonts.textSm,
+                          fontWeight: Fonts.wRegular,
+                          height: 16 / 14,
+                          letterSpacing: 0,
+                          color: AppColors.textSubtle,
+                        ),
+                      ),
+                    ),
+                    BotonCupo(
+                      estado: estadoCupo!,
+                      onReservar: onReservar,
+                      onCancelar: onCancelar,
+                    ),
+                  ],
+                )
+              else
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: BotonCupo(
+                    estado: estadoCupo!,
+                    onReservar: onReservar,
+                    onCancelar: onCancelar,
+                  ),
                 ),
-              ),
             ],
           ],
         ],
