@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/widgets/bottom_nav.dart';
+import '../features/eventos/data/eventos_store.dart';
 import '../features/inicio/inicio.dart';
 import '../features/eventos/eventos_screen.dart';
 import '../features/historial/presentation/screens/historial_screen.dart';
@@ -31,6 +32,11 @@ class _MenuState extends State<Menu> {
   void initState() {
     super.initState();
     currentIndex = widget.initialIndex;
+    // Se llega a Menu solo tras iniciar sesión (ver main.dart, _Arranque) -
+    // es el punto de entrada correcto para cargar los eventos reales una
+    // sola vez por sesión. Idempotente: si Inicio/Eventos/Reservas ya lo
+    // dispararon (o si se vuelve a este Menu), no repite la llamada.
+    EventosStore.cargar();
   }
 
   void _onNavTap(int index) {

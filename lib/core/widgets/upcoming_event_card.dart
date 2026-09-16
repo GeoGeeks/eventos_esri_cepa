@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../constants/fonts.dart';
 import '../utils/formato_fecha.dart';
+import 'imagen_evento.dart';
 
 class UpcomingEventCard extends StatelessWidget {
   final String title;
@@ -62,10 +63,7 @@ class UpcomingEventCard extends StatelessWidget {
                     // IMAGE - Ancho fijo según CSS (138px)
                     SizedBox(
                       width: 138,
-                      child: Image.asset(
-                        image,
-                        fit: BoxFit.cover,
-                      ),
+                      child: ImagenEvento(url: image),
                     ),
 
                     // CONTENT CONTAINER - Ocupa todo el espacio disponible sin desbordar

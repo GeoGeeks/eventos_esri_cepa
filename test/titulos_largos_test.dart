@@ -4,7 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:esri_eventos/core/widgets/alerta_guardado.dart';
 import 'package:esri_eventos/features/agenda/agenda.dart';
 import 'package:esri_eventos/features/agenda/data/agenda_mock_data.dart';
-import 'package:esri_eventos/features/eventos/data/proximos_eventos_data.dart';
+import 'package:esri_eventos/core/constants/images.dart';
+import 'package:esri_eventos/features/eventos/data/evento.dart';
 import 'package:esri_eventos/features/eventos/detalle_evento_modal.dart';
 import 'package:esri_eventos/features/favoritos/favoritos.dart';
 import 'package:esri_eventos/features/post_evento/presentation/screens/post_evento_screen.dart';
@@ -78,14 +79,15 @@ void main() {
 
     testWidgets('un título largo no se recorta en el detalle de evento a '
         '$lienzo', (tester) async {
-      final evento = ProximoEvento(
+      final evento = Evento(
         id: 'x',
-        titulo: _tituloLargo,
-        fecha: 'Octubre 01, 2026',
-        hora: '8:00 - 11:00',
-        direccion: 'Universidad Central Cra 36 # 24 – 45',
-        image: proximosEventosMock.first.image,
-        presencial: true,
+        nombre: _tituloLargo,
+        fechaInicio: DateTime(2026, 10, 1),
+        fechaFinalizacion: DateTime(2026, 10, 1),
+        horaInicio: DateTime(2026, 10, 1, 8),
+        horaFin: DateTime(2026, 10, 1, 11),
+        lugar: 'Universidad Central Cra 36 # 24 – 45',
+        imagenUrl: Images.esriEventos,
         descripcion: 'Descripción del evento.',
       );
 

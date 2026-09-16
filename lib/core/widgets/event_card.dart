@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../constants/fonts.dart';
 import '../utils/formato_fecha.dart';
+import 'imagen_evento.dart';
 
 class EventCard extends StatelessWidget {
   final String title;
@@ -44,12 +45,7 @@ class EventCard extends StatelessWidget {
               child: Column(
                 children: [
                   // IMAGE (.card-image)
-                  Image.asset(
-                    image,
-                    width: 237,
-                    height: 131,
-                    fit: BoxFit.cover,
-                  ),
+                  ImagenEvento(url: image, width: 237, height: 131),
 
                   // CONTENT (.card-content)
                   SizedBox(

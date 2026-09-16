@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:esri_eventos/core/widgets/formulario_web_modal.dart';
 import 'package:esri_eventos/core/widgets/upcoming_event_card.dart';
+import 'package:esri_eventos/features/eventos/data/evento.dart';
+import 'package:esri_eventos/features/eventos/data/eventos_store.dart';
 import 'package:esri_eventos/features/eventos/detalle_evento_modal.dart';
 import 'package:esri_eventos/features/inicio/inicio.dart';
 import 'package:esri_eventos/features/login/data/auth_repository.dart';
@@ -11,6 +13,29 @@ import 'package:esri_eventos/features/login/data/perfil_usuario.dart';
 import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 
 import 'fuentes_de_prueba.dart';
+
+/// Mismos dos eventos que ya asumía este archivo cuando los datos eran
+/// mock (CUE 2026 reservado, Planeta Esri Bogotá "próximo") - ahora se
+/// inyectan directo en `EventosStore` en vez de venir de
+/// `proximosEventosMock` (retirado al conectar `EventosRepository`).
+final _cueReservado = Evento(
+  id: 'cue',
+  nombre: 'CUE 2026',
+  fechaInicio: DateTime(2026, 10, 2),
+  fechaFinalizacion: DateTime(2026, 10, 2),
+  horaInicio: DateTime(2026, 10, 2, 11),
+);
+// Fecha a futuro a propósito: EventosStore.cargar() excluye eventos ya
+// pasados de "próximos" (ver ese archivo) - un fixture con fecha pasada acá
+// contradiría esa regla, aunque este test la inyecte directo sin pasar por
+// ese filtro.
+final _planetaProximo = Evento(
+  id: 'planeta',
+  nombre: 'Planeta Esri Bogotá',
+  fechaInicio: DateTime(2026, 12, 10),
+  fechaFinalizacion: DateTime(2026, 12, 10),
+  horaInicio: DateTime(2026, 12, 10, 8),
+);
 
 /// El _Header de Inicio lee AuthCubit del context - doble sin red, estos
 /// tests son de navegación/modales, no ejercitan el login.
@@ -63,6 +88,17 @@ Future<void> _tocar(WidgetTester tester, Finder boton) async {
 
 void main() {
   setUpAll(cargarFuentesReales);
+
+  setUp(() {
+    EventosStore.estado.value = EventosCargados(
+      reservados: [_cueReservado],
+      proximos: [_planetaProximo],
+    );
+  });
+
+  tearDown(() {
+    EventosStore.estado.value = const EventosSinCargar();
+  });
 
   testWidgets('«Próximos eventos» solo destaca Planeta Esri Bogotá', (
     tester,
