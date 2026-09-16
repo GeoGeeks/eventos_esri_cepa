@@ -14,6 +14,7 @@ class PerfilUsuario {
     required this.activo,
     required this.createdAt,
     required this.updatedAt,
+    this.genero,
   });
 
   final String id;
@@ -30,6 +31,10 @@ class PerfilUsuario {
   final bool activo;
   final DateTime createdAt;
   final DateTime updatedAt;
+  /// SOLO para un colaborador interno (viene de SuccessFactors) - un
+  /// asistente externo no tiene esta fuente de dato, siempre null. Valor
+  /// crudo del backend, sin normalizar - ver [saludo].
+  final String? genero;
 
   /// "Nombres Apellidos" en formato título, como se muestra en Inicio/Perfil
   /// (ej. "Valentina Piragauta"). `nombres`/`apellidos` llegan tal cual los
@@ -44,6 +49,20 @@ class PerfilUsuario {
     final inicialApellido =
         apellidos.isNotEmpty ? apellidos[0].toUpperCase() : '';
     return '$inicialNombre$inicialApellido';
+  }
+
+  /// "Bienvenido"/"Bienvenida" para el saludo de Inicio, según [genero].
+  /// Compara solo la primera letra (sin distinguir mayúsculas) porque no hay
+  /// confirmado todavía qué valores exactos manda SuccessFactors ('M'/'F'
+  /// vs. 'Masculino'/'Femenino', etc.) - más seguro que comparar el string
+  /// completo. Sin dato (asistente externo, o colaborador sin género
+  /// diligenciado) cae al masculino genérico, el uso por defecto habitual en
+  /// español ante la ausencia del dato - no hay una forma neutral de una
+  /// sola palabra que calce con el resto de la copy de la app.
+  String get saludo {
+    final valor = genero?.trim().toLowerCase();
+    if (valor != null && valor.startsWith('f')) return 'Bienvenida';
+    return 'Bienvenido';
   }
 
   /// "Cargo · Organización" para el subtítulo de Inicio/Perfil - null si no
@@ -70,6 +89,7 @@ class PerfilUsuario {
       activo: json['activo'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      genero: json['genero'] as String?,
     );
   }
 
@@ -88,7 +108,8 @@ class PerfilUsuario {
         other.cargo == cargo &&
         other.activo == activo &&
         other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
+        other.updatedAt == updatedAt &&
+        other.genero == genero;
   }
 
   @override
@@ -102,7 +123,7 @@ class PerfilUsuario {
         celular,
         organizacion,
         cargo,
-        Object.hash(activo, createdAt, updatedAt),
+        Object.hash(activo, createdAt, updatedAt, genero),
       );
 }
 

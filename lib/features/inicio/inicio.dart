@@ -179,6 +179,7 @@ class _Header extends StatelessWidget {
     final perfil = estadoAuth is AuthAutenticado ? estadoAuth.perfil : null;
     final nombre = perfil?.nombreCompleto ?? '';
     final subtitulo = perfil?.cargoYOrganizacion;
+    final saludo = perfil?.saludo ?? 'Bienvenido';
 
     return Container(
       key: const Key('inicio-header'),
@@ -211,9 +212,9 @@ class _Header extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Bienvenida',
-                      style: TextStyle(
+                    Text(
+                      saludo,
+                      style: const TextStyle(
                         fontFamily: Fonts.medium,
                         color: AppColors.white,
                         fontSize: 14,
