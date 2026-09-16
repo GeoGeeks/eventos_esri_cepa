@@ -51,12 +51,14 @@ class Charla {
   /// Temáticas + productos + nivel, aplanados en un solo texto - es lo que
   /// `ActividadCard`/`AgendaScreen._coincideFiltro` esperan como
   /// `etiquetas` (lista plana, sin distinguir de qué catálogo viene cada
-  /// una - mismo criterio que ya usaba el mock).
+  /// una - mismo criterio que ya usaba el mock). Se descarta cualquier
+  /// `valor` vacío - `EtiquetaChip` sin texto se pintaba como un círculo
+  /// azul vacío en la tarjeta.
   List<String> get etiquetas => [
         ...tematicas.map((t) => t.valor),
         ...productosEsri.map((p) => p.valor),
         ...nivelesSesion.map((n) => n.valor),
-      ];
+      ].where((valor) => valor.trim().isNotEmpty).toList();
 
   static String _horaCorta(DateTime hora) {
     final h = hora.hour.toString().padLeft(2, '0');

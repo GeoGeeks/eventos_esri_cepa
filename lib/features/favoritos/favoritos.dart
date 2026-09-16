@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/utils/area_segura.dart';
+import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/filtro_modal.dart';
 import '../../navigation/menu.dart';
@@ -187,9 +188,8 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                TextButton(
+                BotonReintentar(
                   onPressed: () => FavoritosStore.cargar(forzar: true),
-                  child: const Text('Reintentar'),
                 ),
               ],
             ),

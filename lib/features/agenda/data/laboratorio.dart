@@ -62,11 +62,13 @@ class Laboratorio {
         '$h12:$m ${esPm ? 'p.m.' : 'a.m.'}';
   }
 
+  /// Ver el doc-comment equivalente en `Charla.etiquetas` (mismo criterio,
+  /// descarta cualquier `valor` vacío).
   List<String> get etiquetas => [
         ...tematicas.map((t) => t.valor),
         ...productosEsri.map((p) => p.valor),
         ...nivelesSesion.map((n) => n.valor),
-      ];
+      ].where((valor) => valor.trim().isNotEmpty).toList();
 
   factory Laboratorio.fromJson(Map<String, dynamic> json) {
     List<CatalogoItem> catalogo(String clave) =>

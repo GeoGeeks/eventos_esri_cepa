@@ -108,21 +108,27 @@ class ActividadCard extends StatelessWidget {
             height: 16,
             child: Row(
               children: [
-                const AppIcon(
-                  SvgIcon.perfil,
-                  width: 16,
-                  height: 16,
-                  color: AppColors.textSubtle,
-                ),
-                const SizedBox(width: 2),
-                Expanded(
-                  child: Text(
-                    actividad.ponente,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FilaMeta.estiloTexto,
+                // Sin ponente (la Charla real no siempre lo trae, ver el
+                // doc-comment de esa clase) no se pinta ni el ícono ni el
+                // texto - «Valorar» se corre a la derecha igual.
+                if (actividad.ponente.isNotEmpty) ...[
+                  const AppIcon(
+                    SvgIcon.perfil,
+                    width: 16,
+                    height: 16,
+                    color: AppColors.textSubtle,
                   ),
-                ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    child: Text(
+                      actividad.ponente,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FilaMeta.estiloTexto,
+                    ),
+                  ),
+                ] else
+                  const Spacer(),
                 // Una vez valorada, la palabra **sigue viéndose** y tanto ella
                 // como la línea de debajo pasan de azul a #949494.
                 GestureDetector(
@@ -158,10 +164,17 @@ class ActividadCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 2),
-          FilaMeta(icono: SvgIcon.lugar, texto: actividad.lugar),
-          const SizedBox(height: 2),
-          FilaMeta(icono: SvgIcon.aforo, texto: actividad.aforo),
+          // Sin lugar/aforo (la Charla real no siempre los trae) no se
+          // pinta ni el ícono ni la fila entera - antes quedaba el ícono
+          // solo, sin texto al lado.
+          if (actividad.lugar.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            FilaMeta(icono: SvgIcon.lugar, texto: actividad.lugar),
+          ],
+          if (actividad.aforo.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            FilaMeta(icono: SvgIcon.aforo, texto: actividad.aforo),
+          ],
 
           const SizedBox(height: 10),
 

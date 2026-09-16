@@ -10,6 +10,7 @@ import '../../core/utils/area_segura.dart';
 import '../../core/widgets/alerta_guardado.dart';
 import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/boton_cupo.dart';
+import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/tarjeta_experiencia.dart';
 import '../laboratorios/data/laboratorio_data.dart';
 import '../laboratorios/presentation/alertas_laboratorio.dart';
@@ -384,10 +385,9 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              TextButton(
+              BotonReintentar(
                 onPressed: () =>
                     _cargarLaboratoriosReales(widget.eventoReal!.id),
-                child: const Text('Reintentar'),
               ),
             ],
           ),
@@ -1105,8 +1105,12 @@ class SesionCard extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           FilaMeta(icono: SvgIcon.date, texto: sesion.fecha),
-          const SizedBox(height: 4),
-          FilaMeta(icono: SvgIcon.lugar, texto: sesion.lugar),
+          // Sin lugar (el Laboratorio real no siempre lo trae) no se pinta
+          // ni el ícono ni la fila - mismo criterio que `ActividadCard`.
+          if (sesion.lugar.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            FilaMeta(icono: SvgIcon.lugar, texto: sesion.lugar),
+          ],
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,

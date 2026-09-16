@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/images.dart';
 import '../../core/utils/area_segura.dart';
+import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../credencial/presentation/credencial_modal.dart';
@@ -111,9 +112,8 @@ class _SeccionEventos extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextButton(
+                  BotonReintentar(
                     onPressed: () => EventosStore.cargar(forzar: true),
-                    child: const Text('Reintentar'),
                   ),
                 ],
               ),

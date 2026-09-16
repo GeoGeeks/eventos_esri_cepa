@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/utils/area_segura.dart';
 import '../../core/widgets/alerta_guardado.dart';
+import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/filtro_modal.dart';
 import '../../navigation/menu.dart';
@@ -301,10 +302,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => _cargarReal(widget.idEvento!),
-                  child: const Text('Reintentar'),
-                ),
+                BotonReintentar(onPressed: () => _cargarReal(widget.idEvento!)),
               ],
             ),
           ),
