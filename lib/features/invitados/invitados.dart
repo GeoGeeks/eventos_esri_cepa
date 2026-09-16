@@ -1189,16 +1189,34 @@ class SesionCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
-                        sesion.fecha,
-                        style: const TextStyle(
-                          fontFamily: Fonts.regular,
-                          fontSize: Fonts.textSm,
-                          fontWeight: Fonts.wRegular,
-                          height: 16 / 14,
-                          letterSpacing: 0,
-                          color: AppColors.textSubtle,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Reserva:',
+                            style: TextStyle(
+                              fontFamily: Fonts.regular,
+                              fontSize: Fonts.textXs,
+                              fontWeight: Fonts.wRegular,
+                              height: 14 / 12,
+                              letterSpacing: 0,
+                              color: AppColors.textSubtle,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            sesion.fecha,
+                            style: const TextStyle(
+                              fontFamily: Fonts.regular,
+                              fontSize: Fonts.textSm,
+                              fontWeight: Fonts.wRegular,
+                              height: 16 / 14,
+                              letterSpacing: 0,
+                              color: AppColors.textSubtle,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     BotonCupo(
