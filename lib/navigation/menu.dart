@@ -51,16 +51,7 @@ class _MenuState extends State<Menu> {
     // sola vez por sesión. Idempotente: si Inicio/Eventos/Reservas ya lo
     // dispararon (o si se vuelve a este Menu), no repite la llamada.
     //
-    // Un colaborador interno nunca tiene eventosdb.RegistroEvento (ver
-    // CLAUDE.md de eventos_esri_cepa_api, "Colaboradores internos"), asi
-    // que GET /eventos/mis-inscripciones siempre le devuelve vacio - pedido
-    // explicito: para un colaborador, TODOS los eventos activos cuentan
-    // como "reservados" (tiene acceso a cualquiera, no solo a los que
-    // "elige"), ninguno queda en "próximos". Ver EventosStore.cargar.
-    final estadoAuth = context.read<AuthCubit>().state;
-    final esColaborador =
-        estadoAuth is AuthAutenticado && estadoAuth.perfil.esColaborador;
-    EventosStore.cargar(esColaborador: esColaborador);
+    EventosStore.cargar(esColaborador: _esColaborador());
 
     // `Menu` solo se construye con sesión ya autenticada - es el punto
     // natural para pedir permiso de push y registrar el device token, sin
@@ -85,6 +76,17 @@ class _MenuState extends State<Menu> {
     }
   }
 
+  /// Un colaborador interno nunca tiene eventosdb.RegistroEvento (ver
+  /// CLAUDE.md de eventos_esri_cepa_api, "Colaboradores internos"), asi que
+  /// GET /eventos/mis-inscripciones siempre le devuelve vacio - pedido
+  /// explicito: para un colaborador, TODOS los eventos activos cuentan
+  /// como "reservados" (tiene acceso a cualquiera, no solo a los que
+  /// "elige"), ninguno queda en "próximos". Ver EventosStore.cargar.
+  bool _esColaborador() {
+    final estadoAuth = context.read<AuthCubit>().state;
+    return estadoAuth is AuthAutenticado && estadoAuth.perfil.esColaborador;
+  }
+
   void _onNavTap(int index) {
     setState(() {
       currentIndex = index;
@@ -94,6 +96,15 @@ class _MenuState extends State<Menu> {
         _showEcard = false;
       }
     });
+
+    // Refresh silencioso al volver a Inicio (ver el doc-comment de
+    // EventosStore.cargar) - un cambio hecho desde el panel de
+    // administración (ej. subir la portada de un evento) no se reflejaba
+    // hasta cerrar sesión o reiniciar la app, porque `cargar()` solo pedía
+    // los datos una vez por sesión.
+    if (index == 0) {
+      EventosStore.cargar(esColaborador: _esColaborador(), forzar: true);
+    }
   }
 
   Widget _buildPage(int index) {
