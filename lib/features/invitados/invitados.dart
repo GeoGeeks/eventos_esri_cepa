@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -9,6 +10,7 @@ import '../../core/constants/images.dart';
 import '../../core/utils/area_segura.dart';
 import '../../core/widgets/alerta_guardado.dart';
 import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/boton_cupo.dart';
 import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/tarjeta_experiencia.dart';
@@ -231,16 +233,25 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
         await _registroRepository.registrar(sesion.id!);
       } on RegistroLaboratorioRechazadoException catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.mensaje)));
+        mostrarSnackBar(context, e.mensaje);
         return;
-      } catch (_) {
+      } catch (e) {
+        // Diagnóstico temporal (mismo criterio que AgendaScreen): imprime
+        // la causa real en `flutter logs`/logcat en vez de solo mostrar el
+        // mensaje genérico al usuario.
+        if (e is DioException) {
+          debugPrint(
+            '[InvitadosScreen] registrar(${sesion.id}) falló: '
+            'status=${e.response?.statusCode} data=${e.response?.data} '
+            '(${e.message})',
+          );
+        } else {
+          debugPrint('[InvitadosScreen] registrar(${sesion.id}) falló: $e');
+        }
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo completar el registro. Intenta de nuevo.'),
-          ),
+        mostrarSnackBar(
+          context,
+          'No se pudo completar el registro. Intenta de nuevo.',
         );
         return;
       }

@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/utils/area_segura.dart';
 import '../../core/widgets/alerta_guardado.dart';
+import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/filtro_modal.dart';
@@ -321,18 +322,13 @@ class _AgendaScreenState extends State<AgendaScreen> {
         );
       } on ValoracionRechazadaException catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.mensaje)));
+        mostrarSnackBar(context, e.mensaje);
         return;
       } catch (_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'No se pudo enviar la valoración. Intenta de nuevo.',
-            ),
-          ),
+        mostrarSnackBar(
+          context,
+          'No se pudo enviar la valoración. Intenta de nuevo.',
         );
         return;
       }
