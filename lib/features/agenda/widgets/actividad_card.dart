@@ -102,67 +102,73 @@ class ActividadCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 4),
-
-          SizedBox(
-            height: 16,
-            child: Row(
-              children: [
-                // Sin ponente (la Charla real no siempre lo trae, ver el
-                // doc-comment de esa clase) no se pinta ni el ícono ni el
-                // texto - «Valorar» se corre a la derecha igual.
-                if (actividad.ponente.isNotEmpty) ...[
-                  const AppIcon(
-                    SvgIcon.perfil,
-                    width: 16,
-                    height: 16,
-                    color: AppColors.textSubtle,
-                  ),
-                  const SizedBox(width: 2),
-                  Expanded(
-                    child: Text(
-                      actividad.ponente,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: FilaMeta.estiloTexto,
+          // Sin ponente NI «Valorar» (charla real que todavía no terminó,
+          // o sin `horaFin` - ver `Actividad.mostrarValorar`) no queda
+          // nada que pintar en esta fila: se oculta entera, igual que
+          // lugar/aforo más abajo.
+          if (actividad.ponente.isNotEmpty || actividad.mostrarValorar) ...[
+            const SizedBox(height: 4),
+            SizedBox(
+              height: 16,
+              child: Row(
+                children: [
+                  // Sin ponente (la Charla real no siempre lo trae, ver el
+                  // doc-comment de esa clase) no se pinta ni el ícono ni el
+                  // texto - «Valorar» se corre a la derecha igual.
+                  if (actividad.ponente.isNotEmpty) ...[
+                    const AppIcon(
+                      SvgIcon.perfil,
+                      width: 16,
+                      height: 16,
+                      color: AppColors.textSubtle,
                     ),
-                  ),
-                ] else
-                  const Spacer(),
-                // Una vez valorada, la palabra **sigue viéndose** y tanto ella
-                // como la línea de debajo pasan de azul a #949494.
-                GestureDetector(
-                  key: const Key('actividad-valorar'),
-                  onTap: actividad.valorada ? null : onValorar,
-                  child: Container(
-                    height: 16,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: actividad.valorada
-                              ? AppColors.textSubtle
-                              : const Color(0x66007AC2),
+                    const SizedBox(width: 2),
+                    Expanded(
+                      child: Text(
+                        actividad.ponente,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: FilaMeta.estiloTexto,
+                      ),
+                    ),
+                  ] else if (actividad.mostrarValorar)
+                    const Spacer(),
+                  // Una vez valorada, la palabra **sigue viéndose** y tanto
+                  // ella como la línea de debajo pasan de azul a #949494.
+                  if (actividad.mostrarValorar)
+                    GestureDetector(
+                      key: const Key('actividad-valorar'),
+                      onTap: actividad.valorada ? null : onValorar,
+                      child: Container(
+                        height: 16,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: actividad.valorada
+                                  ? AppColors.textSubtle
+                                  : const Color(0x66007AC2),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Valorar',
+                          style: TextStyle(
+                            fontFamily: Fonts.regular,
+                            fontSize: Fonts.textSm,
+                            fontWeight: Fonts.wRegular,
+                            height: 16 / 14,
+                            letterSpacing: 0,
+                            color: actividad.valorada
+                                ? AppColors.textSubtle
+                                : AppColors.primary,
+                          ),
                         ),
                       ),
                     ),
-                    child: Text(
-                      'Valorar',
-                      style: TextStyle(
-                        fontFamily: Fonts.regular,
-                        fontSize: Fonts.textSm,
-                        fontWeight: Fonts.wRegular,
-                        height: 16 / 14,
-                        letterSpacing: 0,
-                        color: actividad.valorada
-                            ? AppColors.textSubtle
-                            : AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
 
           // Sin lugar/aforo (la Charla real no siempre los trae) no se
           // pinta ni el ícono ni la fila entera - antes quedaba el ícono

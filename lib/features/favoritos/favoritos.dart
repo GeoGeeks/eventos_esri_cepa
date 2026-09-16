@@ -68,6 +68,10 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
         etiquetas: charla.etiquetas,
         descripcion: charla.descripcion ?? '',
         favorita: true,
+        // Sin `horaFin` a propósito: `onValorar` es un no-op en esta
+        // pantalla (ver más abajo) - pasar `horaFin` mostraría «Valorar»
+        // como si funcionara. `mostrarValorar` con `horaFin: null` lo deja
+        // oculto en vez de un enlace muerto.
       );
     }
     final laboratorio = favorito.laboratorio!;

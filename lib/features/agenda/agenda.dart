@@ -11,6 +11,8 @@ import '../../core/widgets/filtro_modal.dart';
 import '../../navigation/menu.dart';
 import '../favoritos/favoritos.dart';
 import '../favoritos/favoritos_store.dart';
+import '../valoraciones/data/valoracion.dart';
+import '../valoraciones/data/valoraciones_repository.dart';
 import 'data/agenda_mock_data.dart';
 import 'data/agenda_repository.dart';
 import 'data/catalogo_item.dart';
@@ -30,14 +32,16 @@ class AgendaScreen extends StatefulWidget {
   /// de layout/pixel-fidelity.
   final String? idEvento;
 
-  /// Seam para tests (inyectar un doble sin red real).
+  /// Seams para tests (inyectar dobles sin red real).
   final AgendaRepository? repository;
+  final ValoracionesRepository? valoracionesRepository;
 
   const AgendaScreen({
     super.key,
     this.actividades = AgendaMockData.actividades,
     this.idEvento,
     this.repository,
+    this.valoracionesRepository,
   });
 
   @override
@@ -52,6 +56,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   late final AgendaRepository _repository =
       widget.repository ?? AgendaRepository();
+  late final ValoracionesRepository _valoracionesRepository =
+      widget.valoracionesRepository ?? ValoracionesRepository();
 
   late List<Actividad> _actividades = List.of(widget.actividades);
   final Set<int> _expandidas = {};
@@ -84,13 +90,23 @@ class _AgendaScreenState extends State<AgendaScreen> {
     final futuroCatalogos = _repository.listarCatalogos().catchError(
           (_) => CatalogosAgenda.vacio,
         );
+    // Igual: si falla, simplemente ninguna charla aparece como ya
+    // valorada - no bloquea ver la agenda.
+    final futuroValoraciones = _valoracionesRepository
+        .misValoraciones()
+        .catchError((_) => <Valoracion>[]);
     try {
       final charlas = await _repository.listarCharlas(idEvento);
       await FavoritosStore.cargar();
       final catalogos = await futuroCatalogos;
+      final valoraciones = await futuroValoraciones;
+      final charlasValoradas = {for (final v in valoraciones) v.charlaId};
       if (!mounted) return;
       setState(() {
-        _actividades = [for (final c in charlas) _actividadDesdeCharla(c)];
+        _actividades = [
+          for (final c in charlas)
+            _actividadDesdeCharla(c, charlasValoradas.contains(c.id)),
+        ];
         _gruposFiltro = _gruposFiltroReales(charlas, catalogos);
         _cargando = false;
       });
@@ -119,7 +135,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   /// `ponente`/`aforo` quedan vacíos a propósito: la Charla real del
   /// backend no trae esos dos campos - ver el doc-comment de esa clase.
-  Actividad _actividadDesdeCharla(Charla charla) => Actividad(
+  Actividad _actividadDesdeCharla(Charla charla, bool yaValorada) =>
+      Actividad(
         id: charla.id,
         titulo: charla.nombre,
         horario: charla.horarioFormateado,
@@ -130,6 +147,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
         descripcion: charla.descripcion ?? '',
         objetivos: const [],
         favorita: FavoritosStore.contiene(charla.id),
+        valorada: yaValorada,
+        horaFin: charla.horaFin,
       );
 
   /// "Lugar" y "Tipo de Actividad" no tienen catálogo real en el backend
@@ -264,8 +283,15 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   /// Abre la encuesta y, si se envía, marca la actividad como valorada y
   /// muestra la alerta de agradecimiento del diseño.
+  ///
+  /// En modo mock (`actividad.id == null`) el comportamiento es exactamente
+  /// el de siempre, sin red. En modo real, la valoración se manda al
+  /// backend después de cerrarse el modal - si lo rechaza (la charla no ha
+  /// terminado, o ya estaba valorada), se avisa con un `SnackBar` en vez de
+  /// la alerta de agradecimiento.
   Future<void> _abrirValoracion(int indice) async {
     final actividad = _actividades[indice];
+    ValoracionEnviada? enviada;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -273,13 +299,49 @@ class _AgendaScreenState extends State<AgendaScreen> {
       barrierColor: AppColors.modalOverlay,
       builder: (_) => ValoracionModal(
         actividad: actividad.titulo,
-        onEnviar: (_) {
-          setState(() {
-            _actividades[indice] = actividad.copyWith(valorada: true);
-          });
+        onEnviar: (valor) {
+          if (actividad.id == null) {
+            setState(() {
+              _actividades[indice] = actividad.copyWith(valorada: true);
+            });
+          } else {
+            enviada = valor;
+          }
         },
       ),
     );
+    if (!mounted) return;
+
+    if (actividad.id != null && enviada != null) {
+      try {
+        await _valoracionesRepository.crear(
+          charlaId: actividad.id!,
+          estrellas: enviada!.estrellas,
+          comentario: enviada!.comentario,
+        );
+      } on ValoracionRechazadaException catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.mensaje)));
+        return;
+      } catch (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No se pudo enviar la valoración. Intenta de nuevo.',
+            ),
+          ),
+        );
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        _actividades[indice] = actividad.copyWith(valorada: true);
+      });
+    }
+
     if (!mounted || !_actividades[indice].valorada) return;
     await AlertaValoracion.mostrar(context, actividad.titulo);
   }
