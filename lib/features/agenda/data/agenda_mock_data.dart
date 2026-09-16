@@ -1,4 +1,9 @@
 class Actividad {
+  /// Id real de la Charla que esto representa - `null` cuando la actividad
+  /// es mock/de prueba. `AgendaScreen`/`FavoritosScreen` lo usan para
+  /// llamar al backend real (favoritos); sin él, la pantalla se queda en el
+  /// comportamiento local de siempre (ver `AgendaScreen._alternarFavorita`).
+  final String? id;
   final String titulo;
   final String horario;
   final String ponente;
@@ -14,6 +19,7 @@ class Actividad {
   final bool valorada;
 
   const Actividad({
+    this.id,
     required this.titulo,
     required this.horario,
     required this.ponente,
@@ -28,6 +34,7 @@ class Actividad {
   });
 
   Actividad copyWith({bool? favorita, bool? valorada}) => Actividad(
+    id: id,
     titulo: titulo,
     horario: horario,
     ponente: ponente,

@@ -140,7 +140,7 @@ class _SeccionEventos extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const InvitadosScreen(),
+                            builder: (_) => InvitadosScreen(eventoReal: e),
                           ),
                         );
                       },

@@ -62,6 +62,10 @@ class ExperienciaEvento {
 
 /// Sesión de **Laboratorios**.
 class SesionEvento {
+  /// Id real del Laboratorio que esto representa - `null` cuando la sesión
+  /// es mock/de prueba. Ver el doc-comment equivalente en `Actividad`
+  /// (`agenda/data/agenda_mock_data.dart`).
+  final String? id;
   final String titulo;
   final String fecha;
   final String lugar;
@@ -82,6 +86,7 @@ class SesionEvento {
   final EstadoCupo estadoCupo;
 
   const SesionEvento({
+    this.id,
     required this.titulo,
     required this.fecha,
     required this.lugar,

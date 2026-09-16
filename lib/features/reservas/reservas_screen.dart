@@ -58,10 +58,10 @@ class _ReservasScreenState extends State<ReservasScreen> {
     }).toList();
   }
 
-  void _abrirInvitados() {
+  void _abrirInvitados(Evento evento) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const InvitadosScreen()),
+      MaterialPageRoute(builder: (_) => InvitadosScreen(eventoReal: evento)),
     );
   }
 
@@ -477,7 +477,7 @@ class _SplitFilterButton extends StatelessWidget {
 /// en `eventos_screen.dart`.
 class _ListadoReservados extends StatelessWidget {
   final List<Evento> Function(List<Evento>) filtrar;
-  final VoidCallback onVerMas;
+  final void Function(Evento) onVerMas;
 
   const _ListadoReservados({required this.filtrar, required this.onVerMas});
 
@@ -559,7 +559,7 @@ class _ListadoReservados extends StatelessWidget {
                 actionsGap: 11,
                 viewMoreWidth: 75,
                 secondaryWidth: 110,
-                onViewMore: onVerMas,
+                onViewMore: () => onVerMas(eventos[i]),
                 onRegister: () => CredencialModal.mostrar(context),
               ),
             ),
