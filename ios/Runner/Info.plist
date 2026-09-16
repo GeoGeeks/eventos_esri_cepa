@@ -49,6 +49,12 @@
 		</dict>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
+		<!-- Firebase Cloud Messaging (2026-09-16): permite que el sistema
+		     despierte la app para procesar push silenciosos/en segundo plano. -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>

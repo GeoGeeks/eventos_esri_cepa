@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "679067320386",
+    "project_id": "eventos-esri-cepa",
+    "storage_bucket": "eventos-esri-cepa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:679067320386:android:1b0115070339f27d516ddb",
+        "android_client_info": {
+          "package_name": "com.esrico.eventoscepa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArajNb__c8NK9NcCmssWIUmcs6-HYVJP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
