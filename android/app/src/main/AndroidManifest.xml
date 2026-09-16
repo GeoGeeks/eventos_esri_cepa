@@ -3,6 +3,11 @@
          funciona en debug (lo declara debug/AndroidManifest.xml) pero no en
          release. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Firebase Cloud Messaging (2026-09-17): requerido en Android 13+
+         (API 33) para poder mostrar cualquier notificación, push incluido -
+         sin esto, el permiso que pide FirebaseMessaging.requestPermission()
+         en Dart no tiene efecto. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="Eventos Esri Colombia"
         android:name="${applicationName}"
@@ -34,6 +39,17 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Firebase Cloud Messaging (2026-09-17): canal e ícono por
+             defecto para el push que Android muestra solo (background/
+             terminada) - ver PushNotificacionesService, que crea este mismo
+             canal ("push_general") a mano para las notificaciones que sí
+             pasan por Dart (foreground). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="push_general" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/launcher_icon" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

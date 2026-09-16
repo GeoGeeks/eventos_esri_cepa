@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -5,10 +7,21 @@ import 'core/constants/fonts.dart';
 import 'features/login/login_screen.dart';
 import 'features/login/presentation/bloc/auth_cubit.dart';
 import 'features/login/presentation/bloc/auth_state.dart';
+import 'features/notificaciones/data/push_notificaciones_service.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'navigation/menu.dart';
 
-void main() {
+Future<void> main() async {
+  // `ensureInitialized` + `await` antes de `runApp`: Firebase.initializeApp
+  // usa canales de plataforma, que necesitan el binding listo primero. Sin
+  // esto, cualquier llamada a FirebaseMessaging (permiso, token) falla con
+  // "Firebase has not been initialized" apenas alguien inicia sesión.
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  // Debe registrarse una sola vez, antes de `runApp` y con una función de
+  // nivel superior (ver el comentario de `manejarMensajeEnSegundoPlano`) -
+  // así el sistema operativo puede invocar la app en background/terminada.
+  FirebaseMessaging.onBackgroundMessage(manejarMensajeEnSegundoPlano);
   runApp(const EsriEventosApp());
 }
 
