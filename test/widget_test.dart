@@ -28,6 +28,7 @@ final _perfilDePrueba = PerfilUsuario(
   activo: true,
   createdAt: DateTime(2026),
   updatedAt: DateTime(2026),
+  origen: 'externo',
 );
 
 /// Doble de [AuthRepository] sin red real - sin sesión guardada

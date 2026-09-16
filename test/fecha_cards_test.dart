@@ -5,7 +5,11 @@ import 'package:esri_eventos/core/constants/images.dart';
 import 'package:esri_eventos/core/utils/formato_fecha.dart';
 import 'package:esri_eventos/core/widgets/event_card.dart';
 import 'package:esri_eventos/core/widgets/upcoming_event_card.dart';
-import 'package:esri_eventos/features/eventos/data/proximos_eventos_data.dart';
+// `Evento` colisiona con la clase del mismo nombre en eventos_data.dart
+// (mock de Historial, sin relación) - alias para poder usar las dos en este
+// archivo.
+import 'package:esri_eventos/features/eventos/data/evento.dart'
+    as eventos_reales;
 import 'package:esri_eventos/features/historial/data/eventos_data.dart';
 
 import 'fuentes_de_prueba.dart';
@@ -155,8 +159,29 @@ void main() {
     });
 
     test('ningún mock de las cards queda con el mes largo al pintarse', () {
+      // Eventos reales, uno por cada mes "largo" que debería abreviarse -
+      // antes salían de proximosEventosMock (retirado al conectar
+      // EventosRepository a datos reales), ahora se arman a mano para
+      // seguir cubriendo el mismo caso: la fecha que arma Evento nunca
+      // debe quedar con el mes sin abreviar al pintarse en una card.
+      final eventosReales = [
+        eventos_reales.Evento(
+          id: 'ev-1',
+          nombre: 'Planeta Esri Bogotá',
+          fechaInicio: DateTime(2026, 9, 10),
+          fechaFinalizacion: DateTime(2026, 9, 10),
+          horaInicio: DateTime(2026, 9, 10, 8),
+        ),
+        eventos_reales.Evento(
+          id: 'ev-2',
+          nombre: 'CUE Colombia',
+          fechaInicio: DateTime(2026, 10, 1),
+          fechaFinalizacion: DateTime(2026, 10, 1),
+          horaInicio: DateTime(2026, 10, 1, 8),
+        ),
+      ];
       final fechas = [
-        for (final e in proximosEventosMock) '${e.fecha} - ${e.hora}',
+        for (final e in eventosReales) e.fechaYHoraFormateada,
         for (final e in eventosMock) '${e.fecha} - ${e.hora}',
       ];
 

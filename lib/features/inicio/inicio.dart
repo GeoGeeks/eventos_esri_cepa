@@ -7,44 +7,13 @@ import '../../core/utils/area_segura.dart';
 import '../../core/widgets/event_card.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../credencial/presentation/credencial_modal.dart';
-import '../eventos/data/proximos_eventos_data.dart';
+import '../eventos/data/evento.dart';
+import '../eventos/data/eventos_store.dart';
 import '../eventos/detalle_evento_modal.dart';
 import '../invitados/invitados.dart';
 import '../login/presentation/bloc/auth_cubit.dart';
 import '../login/presentation/bloc/auth_state.dart';
 import '../registro/presentation/registro_modal.dart';
-
-class _ReservedEvent {
-  final String title, date, location, image;
-
-  const _ReservedEvent({
-    required this.title,
-    required this.date,
-    required this.location,
-    required this.image,
-  });
-}
-
-/// Una sola tarjeta. El carrusel no cambia: si mañana entran más eventos
-/// reservados, se añaden a esta lista y vuelve a deslizarse solo.
-const _reservedEvents = [
-  _ReservedEvent(
-    title: 'CUE 2026',
-    date: 'Oct 02 - 11:00 a.m.',
-    location: 'Ágora Bogotá',
-    image: Images.esriEventos,
-  ),
-];
-
-/// Ids de los «Próximos eventos» que Inicio destaca. Salen de la misma lista
-/// que la pantalla Eventos —así el "Ver más" abre el modal de detalle de ese
-/// mismo evento—, pero aquí solo se muestran los destacados; el listado
-/// completo sigue en Eventos («Ver todos»).
-const _idsProximosDestacados = {'2'};
-
-final _upcomingEvents = proximosEventosMock
-    .where((e) => _idsProximosDestacados.contains(e.id))
-    .toList();
 
 class InicioApp extends StatelessWidget {
   final VoidCallback? onGoToNotifications;
@@ -61,7 +30,7 @@ class InicioApp extends StatelessWidget {
 
   /// Misma «ventana evento» que la pantalla Eventos, superpuesta sobre Inicio.
   /// El scrim del diseño es #000000 al 50 % — modalOverlay es 0x80.
-  void _abrirModalDetalle(BuildContext context, ProximoEvento evento) {
+  void _abrirModalDetalle(BuildContext context, Evento evento) {
     showDialog(
       context: context,
       barrierColor: AppColors.modalOverlay,
@@ -86,57 +55,10 @@ class InicioApp extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      const _SectionTitle(title: 'Eventos reservados'),
-                      const SizedBox(height: 12),
-                      _HorizontalCarousel(
-                        itemCount: _reservedEvents.length,
-                        itemWidth: 237,
-                        itemBuilder: (context, i) {
-                          final e = _reservedEvents[i];
-                          return EventCard(
-                            title: e.title,
-                            date: e.date,
-                            location: e.location,
-                            image: e.image,
-                            // "Ver más" de un evento reservado → Invitados.
-                            onViewMore: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const InvitadosScreen(),
-                                ),
-                              );
-                            },
-                            // "Mi credencial" → el modal de la credencial.
-                            onCredential: () =>
-                                CredencialModal.mostrar(context),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      _SectionTitle(
-                        title: 'Próximos eventos',
-                        action: _SeeAllChip(
-                          onTap: () => onGoToEventos?.call(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ..._upcomingEvents.map(
-                        (e) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: UpcomingEventCard(
-                            title: e.titulo,
-                            date: '${e.fecha} - ${e.hora}',
-                            location: e.direccion,
-                            image: e.image,
-                            mode: e.presencial ? 'Presencial' : 'Virtual',
-                            // "Ver más" → el modal de detalle del evento,
-                            // sin salir de Inicio.
-                            onViewMore: () => _abrirModalDetalle(context, e),
-                            // "Registrarse" → el formulario de registro.
-                            onRegister: () => RegistroModal.mostrar(context),
-                          ),
-                        ),
+                      _SeccionEventos(
+                        onVerTodos: onGoToEventos,
+                        onAbrirDetalle: (evento) =>
+                            _abrirModalDetalle(context, evento),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -152,6 +74,118 @@ class InicioApp extends StatelessWidget {
 }
 
 // --- SUBWIDGETS ---
+
+/// "Eventos reservados" (carrusel) + "Próximos eventos" (lista) - las dos
+/// secciones reales de `EventosCargados`, separadas de `InicioApp` para
+/// reaccionar solas a `EventosStore.estado` sin reconstruir la cabecera.
+class _SeccionEventos extends StatelessWidget {
+  final VoidCallback? onVerTodos;
+  final void Function(Evento) onAbrirDetalle;
+
+  const _SeccionEventos({
+    required this.onVerTodos,
+    required this.onAbrirDetalle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<EventosEstado>(
+      valueListenable: EventosStore.estado,
+      builder: (context, estado, _) {
+        return switch (estado) {
+          EventosSinCargar() || EventosCargando() => const Padding(
+            padding: EdgeInsets.only(top: 24),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          EventosError(:final mensaje) => Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    mensaje,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: Fonts.regular,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => EventosStore.cargar(forzar: true),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          EventosCargados(:final reservados, :final proximos) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (reservados.isNotEmpty) ...[
+                const _SectionTitle(title: 'Eventos reservados'),
+                const SizedBox(height: 12),
+                _HorizontalCarousel(
+                  itemCount: reservados.length,
+                  itemWidth: 237,
+                  itemBuilder: (context, i) {
+                    final e = reservados[i];
+                    return EventCard(
+                      title: e.nombre,
+                      date: e.fechaYHoraFormateada,
+                      location: e.lugar ?? '',
+                      image: e.imagenParaCarta,
+                      // "Ver más" de un evento reservado → Invitados.
+                      onViewMore: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const InvitadosScreen(),
+                          ),
+                        );
+                      },
+                      // "Mi credencial" → el modal de la credencial.
+                      onCredential: () => CredencialModal.mostrar(context),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
+              _SectionTitle(
+                title: 'Próximos eventos',
+                action: _SeeAllChip(onTap: () => onVerTodos?.call()),
+              ),
+              const SizedBox(height: 12),
+              if (proximos.isEmpty)
+                const Text(
+                  'No hay más eventos por ahora.',
+                  style: TextStyle(fontFamily: Fonts.regular, color: Colors.grey),
+                )
+              else
+                ...proximos.map(
+                  (e) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: UpcomingEventCard(
+                      title: e.nombre,
+                      date: e.fechaYHoraFormateada,
+                      location: e.lugar ?? '',
+                      image: e.imagenParaCarta,
+                      mode: e.presencial ? 'Presencial' : 'Virtual',
+                      // "Ver más" → el modal de detalle del evento, sin
+                      // salir de Inicio.
+                      onViewMore: () => onAbrirDetalle(e),
+                      // "Registrarse" → el formulario de registro.
+                      onRegister: () => RegistroModal.mostrar(context),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        };
+      },
+    );
+  }
+}
 
 class _Header extends StatelessWidget {
   final VoidCallback? onGoToNotifications;
@@ -179,6 +213,7 @@ class _Header extends StatelessWidget {
     final perfil = estadoAuth is AuthAutenticado ? estadoAuth.perfil : null;
     final nombre = perfil?.nombreCompleto ?? '';
     final subtitulo = perfil?.cargoYOrganizacion;
+    final saludo = perfil?.saludo ?? 'Bienvenido';
 
     return Container(
       key: const Key('inicio-header'),
@@ -211,9 +246,9 @@ class _Header extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Bienvenida',
-                      style: TextStyle(
+                    Text(
+                      saludo,
+                      style: const TextStyle(
                         fontFamily: Fonts.medium,
                         color: AppColors.white,
                         fontSize: 14,
