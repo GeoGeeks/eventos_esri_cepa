@@ -110,7 +110,7 @@ class AuthRepository {
       case DioExceptionType.receiveTimeout:
         return 'La conexión tardó demasiado. Intenta de nuevo.';
       case DioExceptionType.connectionError:
-        return 'No hay conexión con el servidor. Revisa tu internet.';
+        return 'No hay conexión a internet. Verifica tu conexión e intenta de nuevo.';
       default:
         return 'Ocurrió un error de conexión. Intenta de nuevo.';
     }
