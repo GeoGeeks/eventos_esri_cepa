@@ -76,40 +76,63 @@ class _LoginScreenState extends State<LoginScreen> {
         // propia zona desplazable, para que ni el fondo ni el logo del pie
         // se muevan.
         resizeToAvoidBottomInset: false,
-        body: FondoInicio(
-          child: Container(
-            width: 360,
-            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 48),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(2),
-            ),
-
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Iniciar Sesión',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: Fonts.medium,
-                    fontSize: 26,
-                    height: 32 / 26,
-                    color: AppColors.textTitle,
-                  ),
+        body: Stack(
+          children: [
+            FondoInicio(
+              child: Container(
+                width: 360,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 36, vertical: 48),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(2),
                 ),
 
-                const SizedBox(height: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Iniciar Sesión',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: Fonts.medium,
+                        fontSize: 26,
+                        height: 32 / 26,
+                        color: AppColors.textTitle,
+                      ),
+                    ),
 
-                _campoDocumento(),
+                    const SizedBox(height: 24),
 
-                const SizedBox(height: 24),
+                    _campoDocumento(),
 
-                _botonIngresar(cargando),
-              ],
+                    const SizedBox(height: 24),
+
+                    _botonIngresar(cargando),
+                  ],
+                ),
+              ),
             ),
-          ),
+
+            // Overlay semitransparente MIENTRAS se valida el login - sobre
+            // la propia pantalla de inicio, no una pantalla de carga aparte
+            // (2026-09-16, pedido explícito: el loading en blanco de
+            // pantalla completa no daba ninguna referencia de dónde volvía
+            // el usuario si cancelaba/fallaba). Sin `IgnorePointer` a
+            // propósito: el `Container` opaco absorbe los toques, así el
+            // usuario no puede tocar el campo/botón mientras la petición
+            // está en curso.
+            if (cargando)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

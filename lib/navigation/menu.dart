@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/widgets/bottom_nav.dart';
+import '../features/eventos/data/eventos_store.dart';
 import '../features/inicio/inicio.dart';
+import '../features/login/presentation/bloc/auth_cubit.dart';
+import '../features/login/presentation/bloc/auth_state.dart';
 import '../features/eventos/eventos_screen.dart';
 import '../features/historial/presentation/screens/historial_screen.dart';
 import '../features/notificaciones/data/push_notificaciones_service.dart';
@@ -42,10 +46,26 @@ class _MenuState extends State<Menu> {
     super.initState();
     currentIndex = widget.initialIndex;
 
-    // `Menu` solo se construye con sesión ya autenticada (ver `_Arranque`
-    // en main.dart) - es el punto natural para pedir permiso de push y
-    // registrar el device token, sin importar si la sesión vino de un login
-    // recién hecho o de una restaurada al abrir la app.
+    // Se llega a Menu solo tras iniciar sesión (ver main.dart, _Arranque) -
+    // es el punto de entrada correcto para cargar los eventos reales una
+    // sola vez por sesión. Idempotente: si Inicio/Eventos/Reservas ya lo
+    // dispararon (o si se vuelve a este Menu), no repite la llamada.
+    //
+    // Un colaborador interno nunca tiene eventosdb.RegistroEvento (ver
+    // CLAUDE.md de eventos_esri_cepa_api, "Colaboradores internos"), asi
+    // que GET /eventos/mis-inscripciones siempre le devuelve vacio - pedido
+    // explicito: para un colaborador, TODOS los eventos activos cuentan
+    // como "reservados" (tiene acceso a cualquiera, no solo a los que
+    // "elige"), ninguno queda en "próximos". Ver EventosStore.cargar.
+    final estadoAuth = context.read<AuthCubit>().state;
+    final esColaborador =
+        estadoAuth is AuthAutenticado && estadoAuth.perfil.esColaborador;
+    EventosStore.cargar(esColaborador: esColaborador);
+
+    // `Menu` solo se construye con sesión ya autenticada - es el punto
+    // natural para pedir permiso de push y registrar el device token, sin
+    // importar si la sesión vino de un login recién hecho o de una
+    // restaurada al abrir la app.
     //
     // Envuelto en try/catch a propósito: el push es "mejor esfuerzo" - si
     // Firebase no llegó a inicializarse (falta Google Play Services en el
@@ -115,8 +135,6 @@ class _MenuState extends State<Menu> {
             : ProfileMenuScreen(
                 onOpenEcard: () => setState(() => _showEcard = true),
               );
-        
-      
 
       default:
         return const SizedBox.shrink();

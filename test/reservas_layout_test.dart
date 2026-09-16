@@ -6,9 +6,23 @@ import 'package:esri_eventos/core/constants/app_colors.dart';
 import 'package:esri_eventos/core/constants/icons.dart';
 import 'package:esri_eventos/core/widgets/casilla_verificacion.dart';
 import 'package:esri_eventos/core/widgets/upcoming_event_card.dart';
+import 'package:esri_eventos/features/eventos/data/evento.dart';
+import 'package:esri_eventos/features/eventos/data/eventos_store.dart';
 import 'package:esri_eventos/features/reservas/reservas_screen.dart';
 
 import 'fuentes_de_prueba.dart';
+
+/// Mismo único evento reservado que ya asumía este archivo cuando los datos
+/// eran mock (`_events` en reservas_screen.dart, retirado al conectar
+/// `EventosRepository`) - fecha a futuro a propósito, ver la misma nota en
+/// inicio_modales_test.dart.
+final _cueReservado = Evento(
+  id: 'cue',
+  nombre: 'CUE 2026',
+  fechaInicio: DateTime(2026, 12, 2),
+  fechaFinalizacion: DateTime(2026, 12, 2),
+  horaInicio: DateTime(2026, 12, 2, 11),
+);
 
 Future<void> _montarReservas(WidgetTester tester) async {
   tester.view.physicalSize = const Size(412, 917);
@@ -24,6 +38,17 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(cargarFuentesReales);
+
+  setUp(() {
+    EventosStore.estado.value = EventosCargados(
+      reservados: [_cueReservado],
+      proximos: const [],
+    );
+  });
+
+  tearDown(() {
+    EventosStore.estado.value = const EventosSinCargar();
+  });
 
   testWidgets('título y subtítulo caen donde los pone Figma', (tester) async {
     await _montarReservas(tester);

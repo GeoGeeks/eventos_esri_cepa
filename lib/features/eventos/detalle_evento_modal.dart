@@ -4,10 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/icons.dart';
 import '../registro/presentation/registro_modal.dart';
-import 'data/proximos_eventos_data.dart';
+import 'data/evento.dart';
 
 class DetalleEventoModal extends StatelessWidget {
-  final ProximoEvento evento;
+  final Evento evento;
 
   const DetalleEventoModal({
     super.key,
@@ -48,7 +48,7 @@ class DetalleEventoModal extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      evento.titulo,
+                      evento.nombre,
                       style: const TextStyle(
                         fontFamily: Fonts.medium,
                         fontSize: 26,
@@ -94,31 +94,39 @@ class DetalleEventoModal extends StatelessWidget {
                   _DetailRow(
                     iconAsset: 'assets/icons/date.svg',
                     fallbackIcon: Icons.calendar_today_outlined,
-                    text: evento.fecha,
+                    text: evento.fechaFormateada,
                   ),
-                  const SizedBox(height: 4),
-                  _DetailRow(
-                    iconAsset: 'assets/icons/time.svg',
-                    fallbackIcon: Icons.access_time_outlined,
-                    text: evento.hora,
-                  ),
-                  const SizedBox(height: 4),
-                  _DetailRow(
-                    iconAsset: 'assets/icons/lugar.svg',
-                    fallbackIcon: Icons.location_on_outlined,
-                    text: evento.direccion,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    evento.descripcion,
-                    style: const TextStyle(
-                      fontFamily: Fonts.light,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300,
-                      height: 16 / 14,
-                      color: Color(0xFF141414),
+                  // Sin hora si el admin todavia no se la puso al evento
+                  // (ver Evento.horaFormateada) - no inventar una.
+                  if (evento.horaFormateada != null) ...[
+                    const SizedBox(height: 4),
+                    _DetailRow(
+                      iconAsset: 'assets/icons/time.svg',
+                      fallbackIcon: Icons.access_time_outlined,
+                      text: evento.horaFormateada!,
                     ),
-                  ),
+                  ],
+                  if (evento.lugar != null) ...[
+                    const SizedBox(height: 4),
+                    _DetailRow(
+                      iconAsset: 'assets/icons/lugar.svg',
+                      fallbackIcon: Icons.location_on_outlined,
+                      text: evento.lugar!,
+                    ),
+                  ],
+                  if (evento.descripcion != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      evento.descripcion!,
+                      style: const TextStyle(
+                        fontFamily: Fonts.light,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        height: 16 / 14,
+                        color: Color(0xFF141414),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

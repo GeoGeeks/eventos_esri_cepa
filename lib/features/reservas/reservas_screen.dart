@@ -6,35 +6,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/icons.dart';
-import '../../core/constants/images.dart';
 import '../../core/utils/area_segura.dart';
 import '../../core/widgets/casilla_verificacion.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../credencial/presentation/credencial_modal.dart';
+import '../eventos/data/evento.dart';
+import '../eventos/data/eventos_store.dart';
 import '../invitados/invitados.dart';
-
-class _ReservedEvent {
-  final String title, date, location, image, mode;
-  const _ReservedEvent({
-    required this.title,
-    required this.date,
-    required this.location,
-    required this.image,
-    required this.mode,
-  });
-
-  bool get isPresencial => mode == 'Presencial';
-}
-
-const _events = [
-  _ReservedEvent(
-    title: 'CUE 2026',
-    date: 'Oct 02 - 11:00 a.m.',
-    location: 'Calle 32 # 54-34',
-    image: Images.esriEventos,
-    mode: 'Presencial',
-  ),
-];
 
 class ReservasScreen extends StatefulWidget {
   const ReservasScreen({super.key});
@@ -62,18 +40,18 @@ class _ReservasScreenState extends State<ReservasScreen> {
     return str;
   }
 
-  List<_ReservedEvent> get _filtered {
+  List<Evento> _filtrar(List<Evento> eventos) {
     final cleanQuery = _normalizeText(_query);
 
-    return _events.where((e) {
+    return eventos.where((e) {
       final matchesSearch =
-          cleanQuery.isEmpty || _normalizeText(e.title).contains(cleanQuery);
+          cleanQuery.isEmpty || _normalizeText(e.nombre).contains(cleanQuery);
 
       bool matchesFilter = true;
       if (_virtualSelected && !_presencialSelected) {
-        matchesFilter = !e.isPresencial;
+        matchesFilter = !e.presencial;
       } else if (!_virtualSelected && _presencialSelected) {
-        matchesFilter = e.isPresencial;
+        matchesFilter = e.presencial;
       }
 
       return matchesSearch && matchesFilter;
@@ -89,7 +67,6 @@ class _ReservasScreenState extends State<ReservasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final eventos = _filtered;
     final screenWidth = MediaQuery.of(context).size.width;
     final rightPadding = math.max(0.0, (screenWidth - 360) / 2);
 
@@ -232,46 +209,10 @@ class _ReservasScreenState extends State<ReservasScreen> {
 
                           const SizedBox(height: 24),
 
-                          if (eventos.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Center(
-                                child: Text(
-                                  'No se encontraron eventos',
-                                  style: TextStyle(
-                                    fontFamily: Fonts.regular,
-                                    fontSize: 14,
-                                    fontWeight: Fonts.wRegular,
-                                    color: AppColors.textSubtle,
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            for (var i = 0; i < eventos.length; i++)
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: i == eventos.length - 1 ? 0 : 24,
-                                ),
-                                child: SizedBox(
-                                  width: 360,
-                                  height: 122,
-                                  child: UpcomingEventCard(
-                                    title: eventos[i].title,
-                                    date: eventos[i].date,
-                                    location: eventos[i].location,
-                                    image: eventos[i].image,
-                                    mode: eventos[i].mode,
-                                    secondaryLabel: 'Mi credencial',
-                                    actionsGap: 11,
-                                    viewMoreWidth: 75,
-                                    secondaryWidth: 110,
-                                    onViewMore: _abrirInvitados,
-                                    onRegister: () =>
-                                        CredencialModal.mostrar(context),
-                                  ),
-                                ),
-                              ),
+                          _ListadoReservados(
+                            filtrar: _filtrar,
+                            onVerMas: _abrirInvitados,
+                          ),
                         ],
                       ),
                     ),
@@ -525,6 +466,105 @@ class _SplitFilterButton extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Lista de "Eventos reservados" - solo la mitad `reservados` de
+/// `EventosCargados` (a los que la persona ya esta inscrita, ver
+/// `EventosRepository.listarIdsInscritos`). Widget aparte para reaccionar
+/// solo esta seccion a `EventosStore.estado`, igual que `_ListadoEventos`
+/// en `eventos_screen.dart`.
+class _ListadoReservados extends StatelessWidget {
+  final List<Evento> Function(List<Evento>) filtrar;
+  final VoidCallback onVerMas;
+
+  const _ListadoReservados({required this.filtrar, required this.onVerMas});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<EventosEstado>(
+      valueListenable: EventosStore.estado,
+      builder: (context, estado, _) {
+        return switch (estado) {
+          EventosSinCargar() || EventosCargando() => const Padding(
+            padding: EdgeInsets.only(top: 40),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          EventosError(:final mensaje) => Padding(
+            padding: const EdgeInsets.only(top: 40),
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    mensaje,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontSize: 14,
+                      color: AppColors.textSubtle,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => EventosStore.cargar(forzar: true),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          EventosCargados(:final reservados) => _construirLista(
+            context,
+            filtrar(reservados),
+          ),
+        };
+      },
+    );
+  }
+
+  Widget _construirLista(BuildContext context, List<Evento> eventos) {
+    if (eventos.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(
+          child: Text(
+            'No se encontraron eventos',
+            style: TextStyle(
+              fontFamily: Fonts.regular,
+              fontSize: 14,
+              fontWeight: Fonts.wRegular,
+              color: AppColors.textSubtle,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (var i = 0; i < eventos.length; i++)
+          Padding(
+            padding: EdgeInsets.only(bottom: i == eventos.length - 1 ? 0 : 24),
+            child: SizedBox(
+              width: 360,
+              height: 122,
+              child: UpcomingEventCard(
+                title: eventos[i].nombre,
+                date: eventos[i].fechaYHoraFormateada,
+                location: eventos[i].lugar ?? '',
+                image: eventos[i].imagenParaCarta,
+                mode: eventos[i].presencial ? 'Presencial' : 'Virtual',
+                secondaryLabel: 'Mi credencial',
+                actionsGap: 11,
+                viewMoreWidth: 75,
+                secondaryWidth: 110,
+                onViewMore: onVerMas,
+                onRegister: () => CredencialModal.mostrar(context),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

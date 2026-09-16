@@ -8,13 +8,14 @@ import '../../core/utils/area_segura.dart';
 import '../../core/widgets/casilla_verificacion.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../registro/presentation/registro_modal.dart';
-import 'data/proximos_eventos_data.dart';
+import 'data/evento.dart';
+import 'data/eventos_store.dart';
 import 'detalle_evento_modal.dart';
 
 class EventosScreen extends StatefulWidget {
   /// Si viene un evento, la pantalla abre su modal de detalle en cuanto se
   /// dibuja: es la «ventana evento» a la que lleva el "Ver más" de Inicio.
-  final ProximoEvento? eventoInicial;
+  final Evento? eventoInicial;
 
   const EventosScreen({super.key, this.eventoInicial});
 
@@ -53,12 +54,12 @@ class _EventosScreenState extends State<EventosScreen> {
     return str;
   }
 
-  List<ProximoEvento> get _filtered {
+  List<Evento> _filtrar(List<Evento> eventos) {
     final cleanQuery = _normalizeText(_query);
 
-    return proximosEventosMock.where((e) {
-      final matchesSearch = cleanQuery.isEmpty ||
-          _normalizeText(e.titulo).contains(cleanQuery);
+    return eventos.where((e) {
+      final matchesSearch =
+          cleanQuery.isEmpty || _normalizeText(e.nombre).contains(cleanQuery);
 
       bool matchesFilter = true;
       if (_virtualSelected && !_presencialSelected) {
@@ -71,16 +72,16 @@ class _EventosScreenState extends State<EventosScreen> {
     }).toList();
   }
 
-  Map<String, List<ProximoEvento>> get _groupedByMonth {
-    final Map<String, List<ProximoEvento>> map = {};
-    for (final e in _filtered) {
-      final mes = e.fecha.split(' ').first;
+  Map<String, List<Evento>> _agruparPorMes(List<Evento> eventos) {
+    final Map<String, List<Evento>> map = {};
+    for (final e in eventos) {
+      final mes = e.fechaFormateada.split(' ').first;
       map.putIfAbsent(mes, () => []).add(e);
     }
     return map;
   }
 
-  void _abrirModalDetalle(ProximoEvento evento) {
+  void _abrirModalDetalle(Evento evento) {
     showDialog(
       context: context,
       // El scrim del diseño es #000000 al 50 % — modalOverlay es 0x80.
@@ -91,8 +92,6 @@ class _EventosScreenState extends State<EventosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final grouped = _groupedByMonth;
-    final entries = grouped.entries.toList();
     final screenWidth = MediaQuery.of(context).size.width;
     final rightPadding = math.max(0.0, (screenWidth - 360) / 2);
 
@@ -233,89 +232,11 @@ class _EventosScreenState extends State<EventosScreen> {
                           const SizedBox(height: 20),
 
                           // --- LISTA DE EVENTOS ---
-                          if (_filtered.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Center(
-                                child: Text(
-                                  'No se encontraron eventos',
-                                  style: TextStyle(
-                                    fontFamily: Fonts.regular,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            for (int index = 0;
-                                index < entries.length;
-                                index++) ...[
-                              Builder(
-                                builder: (context) {
-                                  final mes = entries[index].key;
-                                  final eventos = entries[index].value;
-                                  final isLastMonth =
-                                      index == entries.length - 1;
-
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: isLastMonth ? 0 : 20,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          width: 360,
-                                          height: 20,
-                                          child: Text(
-                                            mes,
-                                            style: const TextStyle(
-                                              fontFamily: Fonts.medium,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                              height: 20 / 16,
-                                              color: Color(0xFF4A4A4A),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        for (var i = 0;
-                                            i < eventos.length;
-                                            i++)
-                                          Padding(
-                                            padding: EdgeInsets.only(
-                                                bottom: i == eventos.length - 1
-                                                    ? 0
-                                                    : 8),
-                                            // Sin alto fijo: la tarjeta crece
-                                            // si el título ocupa más líneas.
-                                            child: SizedBox(
-                                              width: 360,
-                                              child: UpcomingEventCard(
-                                                title: eventos[i].titulo,
-                                                date:
-                                                    '${eventos[i].fecha} - ${eventos[i].hora}',
-                                                location: eventos[i].direccion,
-                                                image: eventos[i].image,
-                                                mode: eventos[i].presencial
-                                                    ? 'Presencial'
-                                                    : 'Virtual',
-                                                onViewMore: () =>
-                                                    _abrirModalDetalle(
-                                                        eventos[i]),
-                                                onRegister: () =>
-                                                    RegistroModal.mostrar(
-                                                        context),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                          _ListadoEventos(
+                            filtrar: _filtrar,
+                            agruparPorMes: _agruparPorMes,
+                            onVerMas: _abrirModalDetalle,
+                          ),
                         ],
                       ),
                     ),
@@ -567,3 +488,131 @@ class _SplitFilterButton extends StatelessWidget {
   }
 }
 
+
+/// La lista de eventos en sí, separada de `_EventosScreenState` para poder
+/// reaccionar sola a `EventosStore.estado` (cargando/error/cargados) sin
+/// reconstruir el buscador ni el resto de la pantalla.
+class _ListadoEventos extends StatelessWidget {
+  final List<Evento> Function(List<Evento>) filtrar;
+  final Map<String, List<Evento>> Function(List<Evento>) agruparPorMes;
+  final void Function(Evento) onVerMas;
+
+  const _ListadoEventos({
+    required this.filtrar,
+    required this.agruparPorMes,
+    required this.onVerMas,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<EventosEstado>(
+      valueListenable: EventosStore.estado,
+      builder: (context, estado, _) {
+        return switch (estado) {
+          EventosSinCargar() || EventosCargando() => const Padding(
+            padding: EdgeInsets.only(top: 40),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          EventosError(:final mensaje) => Padding(
+            padding: const EdgeInsets.only(top: 40),
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    mensaje,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: Fonts.regular,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => EventosStore.cargar(forzar: true),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          EventosCargados(:final proximos) => _construirLista(
+            context,
+            agruparPorMes(filtrar(proximos)),
+          ),
+        };
+      },
+    );
+  }
+
+  Widget _construirLista(
+    BuildContext context,
+    Map<String, List<Evento>> grouped,
+  ) {
+    final entries = grouped.entries.toList();
+    if (entries.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(
+          child: Text(
+            'No se encontraron eventos',
+            style: TextStyle(fontFamily: Fonts.regular, color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int index = 0; index < entries.length; index++)
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: index == entries.length - 1 ? 0 : 20,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 360,
+                  height: 20,
+                  child: Text(
+                    entries[index].key,
+                    style: const TextStyle(
+                      fontFamily: Fonts.medium,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      height: 20 / 16,
+                      color: Color(0xFF4A4A4A),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (var i = 0; i < entries[index].value.length; i++)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: i == entries[index].value.length - 1 ? 0 : 8,
+                    ),
+                    // Sin alto fijo: la tarjeta crece si el título ocupa
+                    // más líneas.
+                    child: SizedBox(
+                      width: 360,
+                      child: UpcomingEventCard(
+                        title: entries[index].value[i].nombre,
+                        date: entries[index].value[i].fechaYHoraFormateada,
+                        location: entries[index].value[i].lugar ?? '',
+                        image: entries[index].value[i].imagenParaCarta,
+                        mode: entries[index].value[i].presencial
+                            ? 'Presencial'
+                            : 'Virtual',
+                        onViewMore: () => onVerMas(entries[index].value[i]),
+                        onRegister: () => RegistroModal.mostrar(context),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}

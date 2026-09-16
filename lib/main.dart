@@ -62,6 +62,18 @@ class EsriEventosApp extends StatelessWidget {
 /// (`AuthCubit.verificarSesionExistente`). Antes de esto, la app siempre
 /// arrancaba en `LoginScreen` sin importar si ya había una sesión - gap
 /// documentado en `CLAUDE.md` de este repo, ya resuelto.
+///
+/// Decisión de UNA SOLA VEZ, no un `BlocBuilder` (2026-09-16, corrige un bug
+/// real: un `BlocBuilder` aquí queda escuchando el `AuthCubit` para
+/// siempre, así que un `AuthCargando`/`AuthError` disparado DESPUÉS por
+/// `LoginScreen.ingresar()` - un login que el usuario intenta a mano, nada
+/// que ver con esta verificación de arranque - también lo capturaba: tapar
+/// toda la pantalla con el loading blanco de arranque, reemplazando
+/// `LoginScreen` por una instancia nueva que nunca llega a ver el `AuthError`
+/// que ya había pasado - el mensaje de error quedaba mudo). `pushReplacement`
+/// saca a `_Arranque` del árbol para siempre en cuanto decide, así que no
+/// puede volver a interceptar nada de lo que pase después dentro de
+/// `LoginScreen`.
 class _Arranque extends StatefulWidget {
   const _Arranque();
 
@@ -73,26 +85,23 @@ class _ArranqueState extends State<_Arranque> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthCubit>().verificarSesionExistente();
+    _decidirPantallaInicial();
+  }
+
+  Future<void> _decidirPantallaInicial() async {
+    final cubit = context.read<AuthCubit>();
+    await cubit.verificarSesionExistente();
+    if (!mounted) return;
+    final autenticado = cubit.state is AuthAutenticado;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => autenticado ? const Menu() : const LoginScreen(),
+      ),
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      builder: (context, state) {
-        return switch (state) {
-          AuthAutenticado() => const Menu(),
-          AuthCargando() => const _CargandoInicio(),
-          // AuthInicial (sin sesión guardada), AuthError (no se pudo
-          // verificar - se deja intentar login manual) y AuthNoEncontrado
-          // (no debería ocurrir aquí, solo la deja login) van todas a
-          // LoginScreen.
-          AuthInicial() || AuthNoEncontrado() || AuthError() =>
-            const LoginScreen(),
-        };
-      },
-    );
-  }
+  Widget build(BuildContext context) => const _CargandoInicio();
 }
 
 class _CargandoInicio extends StatelessWidget {
