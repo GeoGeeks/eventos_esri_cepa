@@ -33,6 +33,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications (2026-09-17) lo exige en su AAR -
+        // sin esto, el build falla en checkDebugAarMetadata con "requires
+        // core library desugaring to be enabled".
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -76,4 +80,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Requerido por compileOptions.isCoreLibraryDesugaringEnabled de arriba.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

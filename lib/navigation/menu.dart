@@ -8,6 +8,7 @@ import '../features/login/presentation/bloc/auth_cubit.dart';
 import '../features/login/presentation/bloc/auth_state.dart';
 import '../features/eventos/eventos_screen.dart';
 import '../features/historial/presentation/screens/historial_screen.dart';
+import '../features/notificaciones/data/push_notificaciones_service.dart';
 import '../features/reservas/reservas_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
 import '../features/profile/presentation/screens/profile_menu_screen.dart';
@@ -17,7 +18,16 @@ import '../features/post_evento/presentation/screens/post_evento_screen.dart';
 class Menu extends StatefulWidget {
   final int initialIndex;
 
-  const Menu({super.key, this.initialIndex = 0});
+  /// Seam para tests (inyectar un doble sin tocar Firebase real) - mismo
+  /// patrón que `EsriEventosApp({AuthCubit? authCubit})`. En la app real se
+  /// deja `null` y se crea uno de verdad.
+  final PushNotificacionesService? pushNotificaciones;
+
+  const Menu({
+    super.key,
+    this.initialIndex = 0,
+    this.pushNotificaciones,
+  });
 
   @override
   State<Menu> createState() => _MenuState();
@@ -35,6 +45,7 @@ class _MenuState extends State<Menu> {
   void initState() {
     super.initState();
     currentIndex = widget.initialIndex;
+
     // Se llega a Menu solo tras iniciar sesión (ver main.dart, _Arranque) -
     // es el punto de entrada correcto para cargar los eventos reales una
     // sola vez por sesión. Idempotente: si Inicio/Eventos/Reservas ya lo
@@ -50,6 +61,28 @@ class _MenuState extends State<Menu> {
     final esColaborador =
         estadoAuth is AuthAutenticado && estadoAuth.perfil.esColaborador;
     EventosStore.cargar(esColaborador: esColaborador);
+
+    // `Menu` solo se construye con sesión ya autenticada - es el punto
+    // natural para pedir permiso de push y registrar el device token, sin
+    // importar si la sesión vino de un login recién hecho o de una
+    // restaurada al abrir la app.
+    //
+    // Envuelto en try/catch a propósito: el push es "mejor esfuerzo" - si
+    // Firebase no llegó a inicializarse (falta Google Play Services en el
+    // dispositivo, o el entorno de test de este widget, que nunca corre
+    // `main()`/`Firebase.initializeApp()`), la app debe seguir funcionando
+    // igual, solo sin notificaciones, no tumbar la pantalla principal.
+    _inicializarPush();
+  }
+
+  Future<void> _inicializarPush() async {
+    try {
+      final push = widget.pushNotificaciones ?? PushNotificacionesService();
+      await push.registrarParaSesionActual();
+      push.configurarListeners();
+    } catch (_) {
+      // Ver comentario de `initState`.
+    }
   }
 
   void _onNavTap(int index) {
@@ -102,8 +135,6 @@ class _MenuState extends State<Menu> {
             : ProfileMenuScreen(
                 onOpenEcard: () => setState(() => _showEcard = true),
               );
-        
-      
 
       default:
         return const SizedBox.shrink();
