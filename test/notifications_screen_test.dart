@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:url_launcher_platform_interface/link.dart' show LinkDelegate;
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
 import 'package:esri_eventos/features/notificaciones/data/notificacion_recibida.dart';
 import 'package:esri_eventos/features/notificaciones/data/notificaciones_repository.dart';
@@ -13,6 +15,7 @@ NotificacionRecibida _item(
   String id, {
   bool leida = false,
   DateTime? fecha,
+  String? accionRuta,
 }) {
   return NotificacionRecibida(
     id: id,
@@ -21,7 +24,23 @@ NotificacionRecibida _item(
     cuerpo: 'Se ha modificado la hora de inicio.',
     leida: leida,
     fecha: fecha ?? DateTime.now(),
+    accionRuta: accionRuta,
   );
+}
+
+/// Reemplaza [UrlLauncherPlatform.instance] en el test - mismo doble que ya
+/// usa `valoracion_encuesta_test.dart` para "Revise los detalles".
+class _UrlLauncherFalso extends UrlLauncherPlatform {
+  String? urlLanzada;
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    urlLanzada = url;
+    return true;
+  }
 }
 
 /// Doble de [NotificacionesRepository] en memoria - sin red real. `lanzarAl`
@@ -150,5 +169,41 @@ void main() {
 
     expect(repo.llamadasBorrarUna, ['1']);
     expect(find.byType(NotificationItem), findsNothing);
+  });
+
+  testWidgets('"Revise los detalles" abre el enlace de la notificación', (
+    tester,
+  ) async {
+    final urlLauncherFalso = _UrlLauncherFalso();
+    final original = UrlLauncherPlatform.instance;
+    UrlLauncherPlatform.instance = urlLauncherFalso;
+    addTearDown(() => UrlLauncherPlatform.instance = original);
+
+    final repo = _FakeNotificacionesRepository(
+      iniciales: [_item('1', accionRuta: 'https://esri.co/evento-x')],
+    );
+    await _montar(tester, repo);
+
+    await tester.tap(find.text('Revise los detalles'));
+    await tester.pumpAndSettle();
+
+    expect(urlLauncherFalso.urlLanzada, 'https://esri.co/evento-x');
+  });
+
+  testWidgets('sin enlace propio, "Revise los detalles" queda deshabilitado', (
+    tester,
+  ) async {
+    final urlLauncherFalso = _UrlLauncherFalso();
+    final original = UrlLauncherPlatform.instance;
+    UrlLauncherPlatform.instance = urlLauncherFalso;
+    addTearDown(() => UrlLauncherPlatform.instance = original);
+
+    final repo = _FakeNotificacionesRepository(iniciales: [_item('1')]);
+    await _montar(tester, repo);
+
+    await tester.tap(find.text('Revise los detalles'));
+    await tester.pumpAndSettle();
+
+    expect(urlLauncherFalso.urlLanzada, isNull);
   });
 }

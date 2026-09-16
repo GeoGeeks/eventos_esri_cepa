@@ -281,6 +281,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                                   description: item.cuerpo,
                                                   date: item.fechaFormateada,
                                                   isNew: !item.leida,
+                                                  enlace: item.accionRuta,
                                                 ),
                                               ),
                                             ),
