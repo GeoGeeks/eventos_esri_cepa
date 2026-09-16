@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -93,7 +94,20 @@ class _AgendaScreenState extends State<AgendaScreen> {
         _gruposFiltro = _gruposFiltroReales(charlas, catalogos);
         _cargando = false;
       });
-    } catch (_) {
+    } catch (e) {
+      // Diagnóstico temporal (ver hilo del 2026-09-18: la agenda de CUE
+      // Colombia falla de forma reproducible, no es un problema de estado -
+      // esto imprime la causa real en `flutter logs`/logcat para poder
+      // identificarla sin acceso al dispositivo).
+      if (e is DioException) {
+        debugPrint(
+          '[AgendaScreen] listarCharlas($idEvento) falló: '
+          'status=${e.response?.statusCode} data=${e.response?.data} '
+          '(${e.message})',
+        );
+      } else {
+        debugPrint('[AgendaScreen] listarCharlas($idEvento) falló: $e');
+      }
       if (!mounted) return;
       setState(() {
         _errorCarga =
