@@ -443,12 +443,41 @@ class _HorizontalCarousel extends StatelessWidget {
             children: [
               for (var i = 0; i < itemCount; i++) ...[
                 if (i > 0) const SizedBox(width: 24),
-                SizedBox(width: itemWidth, child: itemBuilder(context, i)),
+                _CarouselItem(
+                  width: itemWidth,
+                  child: itemBuilder(context, i),
+                ),
               ],
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Envuelve cada tarjeta del carrusel: si queda parcialmente cortada (como la
+/// que asoma a la derecha), tocarla la desplaza al centro de la pantalla —
+/// sin navegar a ningún lado, eso lo siguen haciendo solo sus propios
+/// botones («Ver más»/«Mi credencial»), que ganan el toque cuando caen
+/// dentro de ellos.
+class _CarouselItem extends StatelessWidget {
+  final double width;
+  final Widget child;
+
+  const _CarouselItem({required this.width, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => Scrollable.ensureVisible(
+        context,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      ),
+      child: SizedBox(width: width, child: child),
     );
   }
 }
