@@ -163,17 +163,28 @@ class _AgendaScreenState extends State<AgendaScreen> {
       GrupoFiltro(
         etiqueta: 'Temática',
         titulo: 'Temática',
-        opciones: [for (final t in catalogos.tematicas) t.valor],
+        // `.valor` vacío se descarta - se veía como una casilla sin texto
+        // al lado, misma causa que los chips vacíos de `ActividadCard`.
+        opciones: [
+          for (final t in catalogos.tematicas)
+            if (t.valor.trim().isNotEmpty) t.valor,
+        ],
       ),
       GrupoFiltro(
         etiqueta: 'Nivel',
         titulo: 'Nivel',
-        opciones: [for (final n in catalogos.nivelesSesion) n.valor],
+        opciones: [
+          for (final n in catalogos.nivelesSesion)
+            if (n.valor.trim().isNotEmpty) n.valor,
+        ],
       ),
       GrupoFiltro(
         etiqueta: 'Producto',
         titulo: 'Producto',
-        opciones: [for (final p in catalogos.productosEsri) p.valor],
+        opciones: [
+          for (final p in catalogos.productosEsri)
+            if (p.valor.trim().isNotEmpty) p.valor,
+        ],
       ),
     ];
   }
@@ -330,6 +341,26 @@ class _AgendaScreenState extends State<AgendaScreen> {
           child: Center(
             child: Text(
               'Contenido disponible próximamente',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: Fonts.regular,
+                fontSize: 14,
+                color: AppColors.textSubtle,
+              ),
+            ),
+          ),
+        ),
+      ];
+    }
+    // Hay actividades, pero la búsqueda/el filtro no dejó ninguna visible -
+    // antes la lista quedaba en blanco, sin ningún mensaje.
+    if (visibles.isEmpty) {
+      return const [
+        Padding(
+          padding: EdgeInsets.only(top: 40),
+          child: Center(
+            child: Text(
+              'No hay actividades para el filtro seleccionado',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: Fonts.regular,

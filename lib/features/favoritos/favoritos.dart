@@ -224,6 +224,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
             _coincideFiltro(actividades[i]))
           i,
     ];
+    if (visibles.isEmpty) return _sinResultados();
     return [
       for (final indice in visibles) ...[
         ActividadCard(
@@ -239,6 +240,25 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
       ],
     ];
   }
+
+  /// Hay favoritos, pero la búsqueda/el filtro no dejó ninguno visible -
+  /// antes la lista quedaba en blanco, sin ningún mensaje.
+  List<Widget> _sinResultados() => const [
+    Padding(
+      padding: EdgeInsets.only(top: 40),
+      child: Center(
+        child: Text(
+          'No hay actividades para el filtro seleccionado',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: Fonts.regular,
+            fontSize: 14,
+            color: AppColors.textSubtle,
+          ),
+        ),
+      ),
+    ),
+  ];
 
   Widget _lista(List<Widget> contenido) {
     return ListView(
@@ -284,17 +304,22 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                       builder: (context, estado, _) =>
                           _lista(_contenidoReal(estado)),
                     )
-                  : _lista([
-                      for (final indice in visibles) ...[
-                        ActividadCard(
-                          actividad: _actividades[indice],
-                          expandida: _expandidas.contains(indice),
-                          onExpandir: () => _alternarExpandida(indice),
-                          onValorar: () => _abrirValoracion(indice),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
-                    ]),
+                  : _lista(
+                      visibles.isEmpty
+                          ? _sinResultados()
+                          : [
+                              for (final indice in visibles) ...[
+                                ActividadCard(
+                                  actividad: _actividades[indice],
+                                  expandida: _expandidas.contains(indice),
+                                  onExpandir: () =>
+                                      _alternarExpandida(indice),
+                                  onValorar: () => _abrirValoracion(indice),
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ],
+                    ),
             ),
           ],
       ),
