@@ -18,7 +18,15 @@ import 'fuentes_de_prueba.dart';
 /// sin nada dentro. Corregido 2026-09-18 a pedido del usuario, con
 /// screenshots de la app real.
 Future<void> _montar(WidgetTester tester, Widget hijo) async {
-  await tester.pumpWidget(MaterialApp(home: Scaffold(body: hijo)));
+  // `SingleChildScrollView` (no `body: hijo` a secas) para que el widget
+  // reciba altura SIN LÍMITE y se mida por su propio contenido - `Column`
+  // usa `mainAxisSize.max` por defecto, así que con la altura acotada que
+  // da `Scaffold` (los 600 del viewport de prueba) se estiraba a llenarla
+  // sin importar el contenido, y las dos tarjetas del test de abajo
+  // medían lo mismo.
+  await tester.pumpWidget(
+    MaterialApp(home: Scaffold(body: SingleChildScrollView(child: hijo))),
+  );
   await tester.pump();
 }
 
@@ -79,6 +87,64 @@ void main() {
       expect(_icono(SvgIcon.lugar), findsOneWidget);
       expect(_icono(SvgIcon.aforo), findsOneWidget);
     });
+
+    testWidgets(
+      'con datos incompletos, el hueco antes de las etiquetas se achica',
+      (tester) async {
+        // Mismo título/horario/lugar en las dos para que la única
+        // diferencia de alto sea el hueco fijo antes de las etiquetas, no
+        // el número de líneas de texto.
+        const completa = Actividad(
+          titulo: 'Plenaria',
+          horario: '08:00 - 10:00',
+          ponente: 'Julian Gutiérrez',
+          lugar: 'Piso 5',
+          aforo: 'Aforo 30 personas',
+          etiquetas: ['Basico'],
+          descripcion: '',
+        );
+        const incompleta = Actividad(
+          titulo: 'Plenaria',
+          horario: '08:00 - 10:00',
+          ponente: '',
+          lugar: 'Piso 5',
+          aforo: '',
+          etiquetas: ['Basico'],
+          descripcion: '',
+        );
+
+        await _montar(
+          tester,
+          ActividadCard(
+            actividad: completa,
+            expandida: false,
+            onExpandir: () {},
+            onValorar: () {},
+          ),
+        );
+        final altoCompleta = tester
+            .getRect(find.byType(ActividadCard))
+            .height;
+
+        await _montar(
+          tester,
+          ActividadCard(
+            actividad: incompleta,
+            expandida: false,
+            onExpandir: () {},
+            onValorar: () {},
+          ),
+        );
+        final altoIncompleta = tester
+            .getRect(find.byType(ActividadCard))
+            .height;
+
+        // Sin aforo desaparece esa fila entera (16 + 2 de separación) y el
+        // hueco fijo baja de 10 a 6 - la tarjeta incompleta debe quedar
+        // notablemente más baja, no solo unos décimos de píxel.
+        expect(altoIncompleta, lessThan(altoCompleta - 15));
+      },
+    );
   });
 
   group('Charla/Laboratorio.etiquetas descarta valores vacíos', () {

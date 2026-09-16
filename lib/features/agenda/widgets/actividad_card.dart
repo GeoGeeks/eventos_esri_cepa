@@ -27,6 +27,11 @@ class ActividadCard extends StatelessWidget {
     required this.onValorar,
   });
 
+  bool get _datosCompletos =>
+      actividad.ponente.isNotEmpty &&
+      actividad.lugar.isNotEmpty &&
+      actividad.aforo.isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -176,7 +181,12 @@ class ActividadCard extends StatelessWidget {
             FilaMeta(icono: SvgIcon.aforo, texto: actividad.aforo),
           ],
 
-          const SizedBox(height: 10),
+          // Con ponente/lugar/aforo completos (el mock de siempre) este
+          // hueco se queda en 10, igual que el diseño original. Cuando a
+          // la Charla real le falta alguno, se achica - si no, la tarjeta
+          // se veía con demasiado aire entre el último dato y las
+          // etiquetas.
+          SizedBox(height: _datosCompletos ? 10 : 6),
 
           Row(
             children: [
