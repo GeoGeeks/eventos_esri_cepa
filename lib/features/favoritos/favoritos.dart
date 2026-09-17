@@ -203,12 +203,16 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
     }
     final favoritos = (estado as FavoritosCargados).favoritos;
     if (favoritos.isEmpty) {
+      // Distinto del "Contenido disponible próximamente" que usan Agenda/
+      // Laboratorios cuando el evento todavía no tiene datos - acá sí hay
+      // contenido, solo que el asistente no ha marcado ninguno como favorito.
       return const [
         Padding(
           padding: EdgeInsets.only(top: 40),
           child: Center(
             child: Text(
-              'Contenido disponible próximamente',
+              'Aún no ha seleccionado alguna actividad como favorita, lo '
+              'invitamos a seleccionar su primer Favorito',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: Fonts.regular,
