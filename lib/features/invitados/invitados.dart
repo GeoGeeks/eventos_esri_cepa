@@ -642,7 +642,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
               child: AlertaGuardado(
                 key: const Key('alerta-guardado'),
                 mensaje: '¡Ha guardado una actividad!',
-                enlace: 'Ir a guardados',
+                enlace: 'Ir a favoritos',
                 onEnlace: _irAFavoritos,
                 onCerrar: () => setState(() => _alertaVisible = false),
               ),

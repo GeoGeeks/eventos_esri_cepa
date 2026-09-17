@@ -349,7 +349,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
     );
   }
 
-  void _irAGuardados() {
+  void _irAFavoritos() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const FavoritosScreen()),
@@ -496,8 +496,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
               child: AlertaGuardado(
                 key: const Key('alerta-guardado'),
                 mensaje: '¡Ha guardado una actividad!',
-                enlace: 'Ir a guardados',
-                onEnlace: _irAGuardados,
+                enlace: 'Ir a favoritos',
+                onEnlace: _irAFavoritos,
                 onCerrar: () => setState(() => _alertaVisible = false),
               ),
             ),
