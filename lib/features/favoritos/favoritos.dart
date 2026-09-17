@@ -212,7 +212,8 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
           child: Center(
             child: Text(
               'Aún no ha seleccionado alguna actividad como favorita, lo '
-              'invitamos a seleccionar su primer Favorito',
+              'invitamos a seleccionar su primer Favorito desde la agenda '
+              'o laboratorios',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: Fonts.regular,
