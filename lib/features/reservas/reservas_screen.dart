@@ -560,7 +560,8 @@ class _ListadoReservados extends StatelessWidget {
                 viewMoreWidth: 75,
                 secondaryWidth: 110,
                 onViewMore: () => onVerMas(eventos[i]),
-                onRegister: () => CredencialModal.mostrar(context),
+                onRegister: () =>
+                    CredencialModal.mostrar(context, evento: eventos[i]),
               ),
             ),
           ),
