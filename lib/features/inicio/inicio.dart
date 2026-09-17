@@ -145,7 +145,8 @@ class _SeccionEventos extends StatelessWidget {
                         );
                       },
                       // "Mi credencial" → el modal de la credencial.
-                      onCredential: () => CredencialModal.mostrar(context),
+                      onCredential: () =>
+                          CredencialModal.mostrar(context, evento: e),
                     );
                   },
                 ),

@@ -589,8 +589,10 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                         children: [
                           _InfoEvento(
                             evento: _eventoDetalle,
-                            onCredencial: () =>
-                                CredencialModal.mostrar(context),
+                            onCredencial: () => CredencialModal.mostrar(
+                              context,
+                              evento: widget.eventoReal,
+                            ),
                             onAgenda: () => Navigator.push(
                               context,
                               MaterialPageRoute(
