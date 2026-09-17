@@ -48,22 +48,28 @@ class RegistroLaboratorioRepository {
         .toList();
   }
 
-  /// [franjaHorariaId] - cuál de las franjas que ofrece ese laboratorio
-  /// (`Laboratorio.franjasHorarias`) elige el asistente.
+  /// [fecha] ("2026-10-01") y [franjaHorariaId] - cuál día + franja de las
+  /// que ofrece ese laboratorio (`Laboratorio.disponibilidad`) elige el
+  /// asistente.
   ///
   /// @throws [RegistroLaboratorioRechazadoException] si el backend rechaza
   ///          el registro por alguna regla de negocio (ver el doc-comment
-  ///          de la clase), o si la franja no está habilitada para ese
-  ///          laboratorio (`400`).
+  ///          de la clase), o si esa combinación de día+franja no está
+  ///          habilitada para ese laboratorio (`400`).
   Future<RegistroLaboratorio> registrar(
     String laboratorioId,
+    String fecha,
     String franjaHorariaId,
   ) async {
     final accessToken = await _tokenStorage.leerAccessToken();
     try {
       final respuesta = await _dio.post<Map<String, dynamic>>(
         '/registros-laboratorio',
-        data: {'laboratorioId': laboratorioId, 'franjaHorariaId': franjaHorariaId},
+        data: {
+          'laboratorioId': laboratorioId,
+          'fecha': fecha,
+          'franjaHorariaId': franjaHorariaId,
+        },
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
       return RegistroLaboratorio.fromJson(respuesta.data!);

@@ -45,14 +45,12 @@ void main() {
             {
               'id': 'reg-1',
               'laboratorioId': 'lab-1',
+              'fecha': '2026-10-02',
               'franjaHorariaId': 'franja-1',
               'laboratorio': {
                 'id': 'lab-1',
                 'idEvento': 'evt-1',
                 'nombre': 'Taller de ArcGIS',
-                'fecha': '2026-10-02T00:00:00.000Z',
-                'horaInicio': '2026-10-02T14:00:00.000Z',
-                'horaFin': '2026-10-02T15:00:00.000Z',
               },
               'asistencia': 'pendiente',
               'createdAt': '2026-09-01T00:00:00.000Z',
@@ -84,6 +82,7 @@ void main() {
           data: {
             'id': 'reg-1',
             'laboratorioId': 'lab-1',
+            'fecha': '2026-10-01',
             'franjaHorariaId': 'franja-1',
             'asistencia': 'pendiente',
             'createdAt': '2026-09-01T00:00:00.000Z',
@@ -91,7 +90,11 @@ void main() {
         ),
       );
 
-      final registro = await repositorio.registrar('lab-1', 'franja-1');
+      final registro = await repositorio.registrar(
+        'lab-1',
+        '2026-10-01',
+        'franja-1',
+      );
 
       expect(registro.id, 'reg-1');
       final llamada = verify(
@@ -103,6 +106,7 @@ void main() {
       )..called(1);
       expect(llamada.captured.single, {
         'laboratorioId': 'lab-1',
+        'fecha': '2026-10-01',
         'franjaHorariaId': 'franja-1',
       });
     });
@@ -126,7 +130,7 @@ void main() {
       );
 
       await expectLater(
-        repositorio.registrar('lab-1', 'franja-1'),
+        repositorio.registrar('lab-1', '2026-10-01', 'franja-1'),
         throwsA(
           isA<RegistroLaboratorioRechazadoException>().having(
             (e) => e.mensaje,
@@ -155,7 +159,7 @@ void main() {
       );
 
       await expectLater(
-        repositorio.registrar('lab-1', 'franja-1'),
+        repositorio.registrar('lab-1', '2026-10-01', 'franja-1'),
         throwsA(isA<DioException>()),
       );
     });

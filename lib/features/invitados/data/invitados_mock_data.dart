@@ -1,5 +1,5 @@
 import '../../../core/constants/images.dart';
-import '../../agenda/data/franja_horaria.dart';
+import '../../agenda/data/disponibilidad_dia.dart';
 import '../../laboratorios/data/laboratorio_data.dart';
 
 class EventoDetalle {
@@ -76,10 +76,15 @@ class SesionEvento {
   final String ponente;
   final String aforo;
 
-  /// Franjas reservables de este laboratorio (solo real, ver
-  /// `Laboratorio.franjasHorarias`) - el modal "Reservar cupo" las usa en
-  /// vez de `LaboratorioData.horarios`. Vacío en modo mock.
-  final List<FranjaHoraria> franjasHorarias;
+  /// Días + franjas reservables de este laboratorio (solo real, ver
+  /// `Laboratorio.disponibilidad`) - el modal "Reservar cupo" los usa en
+  /// vez de `LaboratorioData.dias`/`horarios`. Vacío en modo mock.
+  final List<DisponibilidadDia> disponibilidad;
+
+  /// Texto de la franja YA reservada (ej. "Oct 01 - 2:00 p.m."), cuando se
+  /// conoce - `null` si `estadoCupo` no es `reservado` o si la reserva es
+  /// mock (mostrar `fecha` alcanza). Ver `InvitadosScreen._reservarCupo`.
+  final String? reservaFormateada;
 
   final List<String> etiquetas;
   final String descripcion;
@@ -98,7 +103,8 @@ class SesionEvento {
     required this.lugar,
     this.ponente = '',
     this.aforo = '',
-    this.franjasHorarias = const [],
+    this.disponibilidad = const [],
+    this.reservaFormateada,
     this.etiquetas = const [],
     this.descripcion = '',
     this.tituloObjetivos = 'Objetivos',

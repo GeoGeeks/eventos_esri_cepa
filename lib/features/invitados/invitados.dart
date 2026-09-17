@@ -25,11 +25,13 @@ import '../../core/widgets/info_card.dart';
 import '../../navigation/menu.dart';
 import '../agenda/agenda.dart';
 import '../agenda/data/agenda_repository.dart';
+import '../agenda/data/franja_horaria.dart';
 import '../agenda/data/laboratorio.dart';
 import '../credencial/presentation/credencial_modal.dart';
 import '../eventos/data/evento.dart';
 import '../favoritos/favoritos.dart';
 import '../favoritos/favoritos_store.dart';
+import '../laboratorios/data/registro_laboratorio.dart';
 import '../laboratorios/data/registro_laboratorio_repository.dart';
 import '../laboratorios/presentation/laboratorios_info_modal.dart';
 import 'data/invitados_mock_data.dart';
@@ -100,6 +102,11 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   /// reserva sobrevive a que la tarjeta se pliegue y se despliegue.
   final Map<int, EstadoCupo> _cupos = {};
 
+  /// Texto formateado ("Oct 01 - 2:00 p.m.") de la franja YA reservada, por
+  /// índice - un laboratorio puede tener varios días/franjas disponibles,
+  /// pero solo UNA fue la que el asistente eligió. Ver `SesionEvento.reservaFormateada`.
+  final Map<int, String> _reservaTexto = {};
+
   /// Override local de la estrella, por índice - ver el doc-comment de
   /// `_alternarFavorito`.
   final Map<int, bool> _favoritasOverride = {};
@@ -132,11 +139,24 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       setState(() {
         _laboratoriosReales = laboratorios;
         _cupos.clear();
+        _reservaTexto.clear();
         for (var i = 0; i < laboratorios.length; i++) {
-          final yaRegistrado = registros.any(
-            (r) => r.laboratorioId == laboratorios[i].id,
-          );
-          if (yaRegistrado) _cupos[i] = EstadoCupo.reservado;
+          RegistroLaboratorio? registro;
+          for (final r in registros) {
+            if (r.laboratorioId == laboratorios[i].id) {
+              registro = r;
+              break;
+            }
+          }
+          if (registro != null) {
+            _cupos[i] = EstadoCupo.reservado;
+            // `misRegistros()` siempre carga `franjaHoraria` (a diferencia
+            // de la respuesta de `registrar()`, que no la trae).
+            final franja = registro.franjaHoraria;
+            if (franja != null) {
+              _reservaTexto[i] = _formatoReserva(registro.fecha, franja);
+            }
+          }
         }
         _cargandoLaboratorios = false;
       });
@@ -204,17 +224,30 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     return '$h1 - $h2';
   }
 
-  SesionEvento _sesionDesdeLaboratorio(Laboratorio laboratorio) =>
+  /// [indice] solo se conoce para laboratorios reales (para leer
+  /// `_reservaTexto`) - en modo mock no hace falta.
+  SesionEvento _sesionDesdeLaboratorio(Laboratorio laboratorio, [int? indice]) =>
       SesionEvento(
         id: laboratorio.id,
         titulo: laboratorio.nombre,
-        fecha: laboratorio.fechaYHoraFormateada,
+        fecha: laboratorio.resumenDias,
         lugar: laboratorio.lugar ?? '',
-        franjasHorarias: laboratorio.franjasHorarias,
+        disponibilidad: laboratorio.disponibilidad,
+        reservaFormateada: indice != null ? _reservaTexto[indice] : null,
         etiquetas: laboratorio.etiquetas,
         descripcion: laboratorio.descripcion ?? '',
         objetivos: laboratorio.objetivos,
       );
+
+  /// "Oct 01 - 2:00 p.m." - mismo formato que usaba `Laboratorio.fechaYHoraFormateada`.
+  static String _formatoReserva(DateTime fecha, FranjaHoraria franja) {
+    const meses = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    return '${meses[fecha.month - 1]} ${fecha.day.toString().padLeft(2, '0')} - '
+        '${franja.horaInicioFormateada}';
+  }
 
   /// Recorrido de la reserva, tal como lo encadenan los SVG:
   /// reserva → gracias → (cancelar → cancelada) y de vuelta a la tarjeta.
@@ -223,21 +256,25 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   /// llama a `/registros-laboratorio`; sin él (modo mock) el recorrido
   /// visual queda igual que siempre, sin red.
   Future<void> _reservarCupo(int indice, SesionEvento sesion) async {
-    // Modo mock (sin `sesion.id`): `franjas: null` deja el picker de
-    // día/horario original, sin franjas reales que elegir.
-    final franjaId = await ReservaCupoModal.mostrar(
+    // Modo mock (sin `sesion.id`): `disponibilidad: null` deja el picker de
+    // día/horario original, sin datos reales que elegir.
+    final seleccion = await ReservaCupoModal.mostrar(
       context,
-      franjas: sesion.id == null ? null : sesion.franjasHorarias,
+      disponibilidad: sesion.id == null ? null : sesion.disponibilidad,
     );
     if (!mounted) return;
 
-    // Cerrar con el aspa (o no haber franjas para elegir) deja la tarjeta
-    // como estaba, desplegada.
-    if (franjaId == null) return;
+    // Cerrar con el aspa (o no haber disponibilidad para elegir) deja la
+    // tarjeta como estaba, desplegada.
+    if (seleccion == null) return;
 
     if (sesion.id != null) {
       try {
-        await _registroRepository.registrar(sesion.id!, franjaId);
+        await _registroRepository.registrar(
+          sesion.id!,
+          seleccion.fecha,
+          seleccion.franjaHorariaId,
+        );
       } on RegistroLaboratorioRechazadoException catch (e) {
         if (!mounted) return;
         mostrarSnackBar(context, e.mensaje);
@@ -262,6 +299,10 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
         );
         return;
       }
+      _reservaTexto[indice] = _formatoReserva(
+        seleccion.fechaComoDateTime,
+        seleccion.franja,
+      );
     }
     if (!mounted) return;
 
@@ -429,7 +470,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       );
     }
     return _listaLaboratorios([
-      for (final l in _laboratoriosReales) _sesionDesdeLaboratorio(l),
+      for (var i = 0; i < _laboratoriosReales.length; i++)
+        _sesionDesdeLaboratorio(_laboratoriosReales[i], i),
     ]);
   }
 
@@ -1213,7 +1255,7 @@ class SesionCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            sesion.fecha,
+                            sesion.reservaFormateada ?? sesion.fecha,
                             style: const TextStyle(
                               fontFamily: Fonts.regular,
                               fontSize: Fonts.textSm,

@@ -1,9 +1,14 @@
 import 'catalogo_item.dart';
+import 'disponibilidad_dia.dart';
 import 'franja_horaria.dart';
 
 /// Laboratorio (taller práctico) de un evento, tal como lo devuelve
 /// `eventos_esri_cepa_api` (`GET /eventos/:idEvento/laboratorios`) - ver la
 /// entidad `Laboratorio` de ese repo.
+///
+/// Es solo CONTENIDO - no tiene fecha/hora propia (a diferencia de
+/// `Charla`): un mismo laboratorio puede ofrecerse en varios días
+/// distintos, cada uno con sus propias franjas (ver `disponibilidad`).
 ///
 /// ⚠️ Sin `ponente`: igual que `Charla`, el backend no trae ese campo - ver
 /// el comentario de esa clase.
@@ -14,9 +19,6 @@ class Laboratorio {
     required this.nombre,
     this.descripcion,
     this.dia,
-    required this.fecha,
-    required this.horaInicio,
-    required this.horaFin,
     this.tipoActividad,
     this.lugar,
     this.cupo,
@@ -25,7 +27,7 @@ class Laboratorio {
     this.productosEsri = const [],
     this.publicosObjetivo = const [],
     this.nivelesSesion = const [],
-    this.franjasHorarias = const [],
+    this.disponibilidad = const [],
   });
 
   final String id;
@@ -33,9 +35,6 @@ class Laboratorio {
   final String nombre;
   final String? descripcion;
   final String? dia;
-  final DateTime fecha;
-  final DateTime horaInicio;
-  final DateTime horaFin;
   final String? tipoActividad;
   final String? lugar;
 
@@ -49,25 +48,23 @@ class Laboratorio {
   final List<CatalogoItem> publicosObjetivo;
   final List<CatalogoItem> nivelesSesion;
 
-  /// Bloques reservables dentro de la ventana `horaInicio`-`horaFin` de ese
-  /// `dia` - un mismo laboratorio puede tener varios (ver
-  /// `Laboratorio.horaInicio` en el backend). Vacío = todavía sin franjas
-  /// configuradas en Admin.
-  final List<FranjaHoraria> franjasHorarias;
+  /// Los días en los que se puede tomar este laboratorio, cada uno con sus
+  /// franjas reales - vacío = todavía sin disponibilidad configurada en
+  /// Admin. El asistente elige UN día + UNA franja al reservar.
+  final List<DisponibilidadDia> disponibilidad;
 
-  /// "Oct 02 - 11:00 a.m." - mismo formato que ya usaban las tarjetas de
-  /// sesión (`SesionEvento.fecha`, con hora incluida).
-  String get fechaYHoraFormateada {
+  /// "Oct 01" (un solo día) u "Oct 01 y Oct 02" (varios) - resumen para la
+  /// cabecera de la tarjeta. La franja concreta reservada (si aplica) se
+  /// muestra aparte, ver `SesionEvento.reservaFormateada`.
+  String get resumenDias {
+    if (disponibilidad.isEmpty) return '';
     const meses = [
       'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
       'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
     ];
-    final h = horaInicio.hour;
-    final esPm = h >= 12;
-    final h12 = h % 12 == 0 ? 12 : h % 12;
-    final m = horaInicio.minute.toString().padLeft(2, '0');
-    return '${meses[fecha.month - 1]} ${fecha.day.toString().padLeft(2, '0')} - '
-        '$h12:$m ${esPm ? 'p.m.' : 'a.m.'}';
+    String formato(DateTime f) =>
+        '${meses[f.month - 1]} ${f.day.toString().padLeft(2, '0')}';
+    return disponibilidad.map((d) => formato(d.fecha)).join(' y ');
   }
 
   /// Ver el doc-comment equivalente en `Charla.etiquetas` (mismo criterio,
@@ -90,9 +87,6 @@ class Laboratorio {
       nombre: json['nombre'] as String,
       descripcion: json['descripcion'] as String?,
       dia: json['dia'] as String?,
-      fecha: DateTime.parse(json['fecha'] as String),
-      horaInicio: DateTime.parse(json['horaInicio'] as String),
-      horaFin: DateTime.parse(json['horaFin'] as String),
       tipoActividad: json['tipoActividad'] as String?,
       lugar: json['lugar'] as String?,
       cupo: json['cupo'] as int?,
@@ -104,10 +98,27 @@ class Laboratorio {
       productosEsri: catalogo('productosEsri'),
       publicosObjetivo: catalogo('publicosObjetivo'),
       nivelesSesion: catalogo('nivelesSesion'),
-      franjasHorarias: (json['franjasHorarias'] as List<dynamic>?)
-              ?.map((e) => FranjaHoraria.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      disponibilidad: _disponibilidadDesdeJson(json['disponibilidad']),
     );
+  }
+
+  /// El backend manda una lista PLANA de filas `{fecha, franjaHoraria}` (una
+  /// por combinación día+franja) - se agrupan aquí por día, en el orden en
+  /// que aparecen.
+  static List<DisponibilidadDia> _disponibilidadDesdeJson(dynamic json) {
+    final items = (json as List<dynamic>?) ?? const [];
+    final porFecha = <String, List<FranjaHoraria>>{};
+    for (final item in items) {
+      final mapa = item as Map<String, dynamic>;
+      final fecha = (mapa['fecha'] as String).substring(0, 10);
+      final franja =
+          FranjaHoraria.fromJson(mapa['franjaHoraria'] as Map<String, dynamic>);
+      (porFecha[fecha] ??= []).add(franja);
+    }
+    final dias = porFecha.entries
+        .map((e) => DisponibilidadDia(fecha: DateTime.parse(e.key), franjas: e.value))
+        .toList()
+      ..sort((a, b) => a.fecha.compareTo(b.fecha));
+    return dias;
   }
 }

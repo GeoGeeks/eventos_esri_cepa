@@ -151,9 +151,6 @@ void main() {
         id: 'l1',
         idEvento: 'evt-1',
         nombre: 'Taller',
-        fecha: DateTime(2026, 10, 2),
-        horaInicio: DateTime(2026, 10, 2, 14),
-        horaFin: DateTime(2026, 10, 2, 15),
         tematicas: const [CatalogoItem(id: 1, valor: '', valorNormalizado: '')],
       );
 

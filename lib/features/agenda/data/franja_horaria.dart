@@ -19,6 +19,9 @@ class FranjaHoraria {
   /// "2:00 p.m. a 3:00 p.m." - formato de 12 horas para mostrar en el selector.
   String get formateada => '${_a12Horas(horaInicio)} a ${_a12Horas(horaFin)}';
 
+  /// Solo la hora de inicio, ej. "2:00 p.m." - para el resumen "Oct 01 - 2:00 p.m." de una reserva ya hecha.
+  String get horaInicioFormateada => _a12Horas(horaInicio);
+
   static String _a12Horas(String hhmm) {
     final partes = hhmm.split(':');
     final hora = int.parse(partes[0]);

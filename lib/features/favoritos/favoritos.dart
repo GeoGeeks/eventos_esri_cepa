@@ -78,7 +78,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
     return Actividad(
       id: laboratorio.id,
       titulo: laboratorio.nombre,
-      horario: laboratorio.fechaYHoraFormateada,
+      horario: laboratorio.resumenDias,
       ponente: '',
       lugar: laboratorio.lugar ?? '',
       aforo: '',
