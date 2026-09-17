@@ -121,4 +121,35 @@ void main() {
 
     verify(() => repo.listarActivos()).called(2);
   });
+
+  group('EventosStore.cargar - refresh silencioso (forzar: true con datos previos)', () {
+    test('no pasa por EventosCargando - no hay parpadeo de loader', () async {
+      when(() => repo.listarActivos()).thenAnswer((_) async => []);
+      when(() => repo.listarIdsInscritos()).thenAnswer((_) async => {});
+      await EventosStore.cargar(repository: repo);
+
+      final estadosVistos = <EventosEstado>[];
+      void escuchar() => estadosVistos.add(EventosStore.estado.value);
+      EventosStore.estado.addListener(escuchar);
+      addTearDown(() => EventosStore.estado.removeListener(escuchar));
+
+      await EventosStore.cargar(repository: repo, forzar: true);
+
+      expect(estadosVistos.any((e) => e is EventosCargando), isFalse);
+      expect(estadosVistos.last, isA<EventosCargados>());
+    });
+
+    test('si falla, conserva los datos anteriores en vez de mostrar error', () async {
+      final vigente = _evento('vigente', fechaFinalizacion: manana);
+      when(() => repo.listarActivos()).thenAnswer((_) async => [vigente]);
+      when(() => repo.listarIdsInscritos()).thenAnswer((_) async => {});
+      await EventosStore.cargar(repository: repo);
+      final estadoPrevio = EventosStore.estado.value as EventosCargados;
+
+      when(() => repo.listarActivos()).thenThrow(Exception('sin red'));
+      await EventosStore.cargar(repository: repo, forzar: true);
+
+      expect(EventosStore.estado.value, same(estadoPrevio));
+    });
+  });
 }

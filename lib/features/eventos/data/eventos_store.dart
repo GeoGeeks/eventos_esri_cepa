@@ -59,17 +59,29 @@ class EventosStore {
   /// "elige"), ninguno queda en "próximos". Con `esColaborador: true` ni
   /// siquiera se llama `listarIdsInscritos()` - sería una llamada de red
   /// para un resultado que ya se sabe vacío.
+  ///
+  /// Con `forzar: true` y datos ya cargados, el refresh es "silencioso":
+  /// no pasa por `EventosCargando` (se seguiría viendo la lista anterior
+  /// en pantalla, sin parpadeo de loader) ni reemplaza los datos por un
+  /// error si la llamada falla - solo actualiza `estado` cuando la
+  /// respuesta nueva efectivamente llega. Es lo que dispara `Menu` cada vez
+  /// que se vuelve a la pestaña Inicio (ver `Menu._onNavTap`): sin esto, un
+  /// cambio hecho desde el panel de administración (ej. subir la portada de
+  /// un evento) no se reflejaba hasta cerrar sesión o reiniciar la app,
+  /// porque `cargar()` solo pedía los datos una vez por sesión.
   static Future<void> cargar({
     EventosRepository? repository,
     bool esColaborador = false,
     bool forzar = false,
   }) async {
-    if (!forzar &&
-        (estado.value is EventosCargando || estado.value is EventosCargados)) {
+    final yaHabiaDatos = estado.value is EventosCargados;
+    if (!forzar && (estado.value is EventosCargando || yaHabiaDatos)) {
       return;
     }
 
-    estado.value = const EventosCargando();
+    if (!yaHabiaDatos) {
+      estado.value = const EventosCargando();
+    }
     final repo = repository ?? EventosRepository();
     try {
       final activos = await repo.listarActivos();
@@ -97,9 +109,14 @@ class EventosStore {
               ],
       );
     } catch (_) {
-      estado.value = const EventosError(
-        'No se pudieron cargar los eventos. Verifica tu conexión e intenta de nuevo.',
-      );
+      // Un refresh silencioso que falla no debe borrar lo que ya se veía
+      // bien - solo se muestra el estado de error si no había datos
+      // previos en pantalla.
+      if (!yaHabiaDatos) {
+        estado.value = const EventosError(
+          'No se pudieron cargar los eventos. Verifica tu conexión e intenta de nuevo.',
+        );
+      }
     }
   }
 }
