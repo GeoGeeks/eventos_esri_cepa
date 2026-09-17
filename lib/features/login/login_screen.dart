@@ -6,14 +6,20 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/fonts.dart';
 import '../../../core/constants/icons.dart';
 
+import '../onboarding/data/onboarding_storage.dart';
 import '../onboarding/presentation/screens/onboarding_screen.dart';
+import '../../navigation/menu.dart';
 import 'presentation/bloc/auth_cubit.dart';
 import 'presentation/bloc/auth_state.dart';
 import 'verificacion_screen.dart';
 import 'widgets/fondo_inicio.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  /// Seam para tests (inyectar un doble sin tocar el storage real) - mismo
+  /// patrón que `EsriEventosApp({AuthCubit? authCubit})`.
+  final OnboardingStorage? onboardingStorage;
+
+  const LoginScreen({super.key, this.onboardingStorage});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -21,6 +27,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController documentoController = TextEditingController();
+  late final OnboardingStorage _onboardingStorage =
+      widget.onboardingStorage ?? OnboardingStorage();
 
   String? _mensajeError;
 
@@ -44,13 +52,40 @@ class _LoginScreenState extends State<LoginScreen> {
     context.read<AuthCubit>().iniciarSesion(documento);
   }
 
+  /// El onboarding es "de una sola vez", independiente de la sesión (ver
+  /// `OnboardingStorage`) - un login exitoso solo lo muestra si nunca se
+  /// vio/omitió antes en este dispositivo, sin importar si esta sesión es
+  /// nueva o volvió después de "Cerrar Sesión".
+  Future<void> _irTrasAutenticar(BuildContext context) async {
+    bool yaVisto;
+    try {
+      // `.timeout(...)`: en un entorno sin el canal de plataforma real (ej.
+      // widget tests que no inyectan un `OnboardingStorage` de prueba) la
+      // llamada al plugin se queda pendiente para siempre en vez de
+      // lanzar - sin este límite, este `await` nunca resuelve y la
+      // navegación posterior no ocurre.
+      yaVisto = await _onboardingStorage.yaVisto().timeout(
+        const Duration(seconds: 3),
+      );
+    } catch (_) {
+      // Storage no disponible o tardó demasiado - por defecto se muestra el
+      // onboarding, mismo comportamiento que tenía la app antes de este
+      // cambio.
+      yaVisto = false;
+    }
+    if (!context.mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => yaVisto ? const Menu() : const OnboardingScreen(),
+      ),
+    );
+  }
+
   void _escucharCambiosDeAuth(BuildContext context, AuthState state) {
     switch (state) {
       case AuthAutenticado():
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-        );
+        _irTrasAutenticar(context);
       case AuthNoEncontrado():
         Navigator.push(
           context,

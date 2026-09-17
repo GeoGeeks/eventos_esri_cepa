@@ -2,11 +2,12 @@ import 'package:dio/dio.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../login/data/token_storage.dart';
+import 'notificacion_recibida.dart';
 
 /// Comunicación con los endpoints de `eventos_esri_cepa_api` que le tocan al
-/// propio dispositivo del asistente (no a un admin): registrar el device
-/// token FCM y confirmar que abrió una notificación. Ver ese repo, módulo
-/// `notificaciones`.
+/// propio dispositivo/bandeja del asistente (no a un admin): registrar el
+/// device token FCM, listar/borrar su historial de push y confirmar que
+/// abrió una notificación. Ver ese repo, módulo `notificaciones`.
 ///
 /// Mismo patrón que [AuthRepository]: envuelve [Dio] para poder mockearlo en
 /// tests sin tocar la red real.
@@ -51,5 +52,45 @@ class NotificacionesRepository {
     } catch (_) {
       // Ver comentario del método.
     }
+  }
+
+  /// Historial de push del asistente logueado, más reciente primero - lo
+  /// consume `NotificationsScreen`. A diferencia de `marcarLeido`, esta SÍ
+  /// deja propagar el error (la pantalla necesita saber si falló para
+  /// mostrar el estado de error, no callar y dejar la lista vacía sin
+  /// avisar).
+  Future<List<NotificacionRecibida>> listarMisNotificaciones() async {
+    final accessToken = await _tokenStorage.leerAccessToken();
+    if (accessToken == null) return const [];
+
+    final respuesta = await _dio.get<List<dynamic>>(
+      '/notificaciones/mis-notificaciones',
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+    return (respuesta.data ?? [])
+        .map((json) => NotificacionRecibida.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// "Borrar todo" en la pantalla de Notificaciones.
+  Future<void> borrarTodas() async {
+    final accessToken = await _tokenStorage.leerAccessToken();
+    if (accessToken == null) return;
+
+    await _dio.delete<void>(
+      '/notificaciones/mis-notificaciones',
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+  }
+
+  /// Swipe-to-dismiss de un envío puntual.
+  Future<void> borrarUna(String idEnvio) async {
+    final accessToken = await _tokenStorage.leerAccessToken();
+    if (accessToken == null) return;
+
+    await _dio.delete<void>(
+      '/notificaciones/mis-notificaciones/$idEnvio',
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
   }
 }

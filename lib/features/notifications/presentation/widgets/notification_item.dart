@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
@@ -10,12 +11,21 @@ class NotificationItem extends StatelessWidget {
   final String date;
   final bool isNew;
 
+  /// El link que trae la propia notificación (`Notificacion.accionRuta` en
+  /// el backend) - si viene, "Revise los detalles" lo abre en el navegador
+  /// externo del dispositivo (mismo patrón que
+  /// `PoliticaPrivacidadModal`/`url_launcher`); si no viene (la mayoría de
+  /// campañas hoy, porque nadie lo llena todavía al crearlas), el enlace
+  /// queda deshabilitado en vez de no hacer nada al tocarlo.
+  final String? enlace;
+
   const NotificationItem({
     super.key,
     required this.title,
     required this.description,
     required this.date,
     this.isNew = false,
+    this.enlace,
   });
 
   static const String _dateTimeIcon = 'assets/icons/date-time.svg';
@@ -173,31 +183,47 @@ class NotificationItem extends StatelessWidget {
                   ),
                 ],
 
-                // Enlace "Revise los detalles" (igual en ambas variantes)
+                // Enlace "Revise los detalles" (igual en ambas variantes) -
+                // deshabilitado (gris, sin tocar nada) si la notificación no
+                // trae un enlace propio, ver el doc-comment de [enlace].
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: IntrinsicWidth(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Revise los detalles',
-                          style: TextStyle(
-                            fontFamily: Fonts.medium,
-                            fontWeight: Fonts.wMedium,
-                            fontSize: 14,
-                            height: 16 / 14,
-                            color: AppColors.primary, // #007AC2
+                  child: GestureDetector(
+                    onTap: enlace == null
+                        ? null
+                        : () => launchUrl(
+                              Uri.parse(enlace!),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                    child: IntrinsicWidth(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Revise los detalles',
+                            style: TextStyle(
+                              fontFamily: Fonts.medium,
+                              fontWeight: Fonts.wMedium,
+                              fontSize: 14,
+                              height: 16 / 14,
+                              color: enlace == null
+                                  ? AppColors.textMuted
+                                  : AppColors.primary, // #007AC2
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Container(
-                          height: 1,
-                          // indicator: azul con opacity 0.4 (0.8 en variante "swipe abierto",
-                          // que no aplica aquí porque ese estilo pertenece al Dismissible)
-                          color: AppColors.primary.withOpacity(0.4),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Container(
+                            height: 1,
+                            // indicator: azul con opacity 0.4 (0.8 en variante "swipe abierto",
+                            // que no aplica aquí porque ese estilo pertenece al Dismissible) -
+                            // gris cuando está deshabilitado.
+                            color: (enlace == null
+                                    ? AppColors.textMuted
+                                    : AppColors.primary)
+                                .withOpacity(0.4),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

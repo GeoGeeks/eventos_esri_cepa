@@ -5,6 +5,7 @@ import 'package:esri_eventos/navigation/menu.dart';
 
 import '../../../../core/constants/fonts.dart';
 import '../../data/onboarding_data.dart';
+import '../../data/onboarding_storage.dart';
 import '../bloc/onboarding_bloc.dart';
 import '../bloc/onboarding_event.dart';
 import '../bloc/onboarding_state.dart';
@@ -13,7 +14,10 @@ import '../widgets/onboarding_button.dart';
 import '../widgets/onboarding_content.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  /// Seam para tests (inyectar un doble sin tocar el storage real).
+  final OnboardingStorage? onboardingStorage;
+
+  const OnboardingScreen({super.key, this.onboardingStorage});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -21,6 +25,8 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   late final PageController _pageController;
+  late final OnboardingStorage _onboardingStorage =
+      widget.onboardingStorage ?? OnboardingStorage();
 
   @override
   void initState() {
@@ -45,7 +51,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  /// Se llama tanto al terminar el recorrido ("Continuar" en la última
+  /// página) como al tocar "Omitir" - en ambos casos queda "visto" para
+  /// siempre en este dispositivo (ver `OnboardingStorage`), no solo cuando
+  /// se completa entero.
   void _navigateToMenu() {
+    // Best-effort, sin bloquear la navegación: si falla (storage no
+    // disponible), la próxima vez simplemente se vuelve a mostrar el
+    // onboarding en vez de trabar esta pantalla.
+    _onboardingStorage.marcarVisto().catchError((_) {});
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
