@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:esri_eventos/features/agenda/agenda.dart';
@@ -135,7 +134,7 @@ void main() {
     ) async {
       await _montar(tester, const LoginScreen());
 
-      final logo = tester.getRect(find.byType(SvgPicture).first);
+      final logo = tester.getRect(find.byKey(const Key('logoApp')));
       expect(logo.top, moreOrLessEquals(kBarraEstado + 160, epsilon: 0.5));
       expect(logo.top, greaterThan(kBarraEstado));
     });
@@ -160,7 +159,7 @@ void main() {
     testWidgets('Soporte deja el logo por debajo de la barra', (tester) async {
       await _montar(tester, const SoporteScreen());
 
-      final logo = tester.getRect(find.byType(SvgPicture).first);
+      final logo = tester.getRect(find.byKey(const Key('logoApp')));
       expect(logo.top, moreOrLessEquals(kBarraEstado + 62, epsilon: 0.5));
       expect(logo.top, greaterThan(kBarraEstado));
     });

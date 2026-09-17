@@ -5,7 +5,7 @@ class Images {
     'assets/images/login/background_inicio.png';
 
 static const String logoApp =
-    'assets/images/login/logo_app.svg';
+    'assets/images/login/logo_app.png';
 
 static const String esriBlanco =
     'assets/images/login/esri_blanco.png';

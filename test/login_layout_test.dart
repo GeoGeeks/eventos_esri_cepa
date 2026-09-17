@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:esri_eventos/features/login/data/auth_repository.dart';
@@ -47,9 +46,9 @@ void main() {
   testWidgets('logo, título y panel caen donde los pone Figma', (tester) async {
     await _montarLogin(tester);
 
-    final logo = tester.getRect(find.byType(SvgPicture).first);
+    final logo = tester.getRect(find.byKey(const Key('logoApp')));
     expect(logo.top, moreOrLessEquals(160, epsilon: 0.5));
-    expect(logo.width, moreOrLessEquals(65, epsilon: 0.5));
+    expect(logo.width, moreOrLessEquals(74 * 386 / 350, epsilon: 0.5));
     expect(logo.height, moreOrLessEquals(74, epsilon: 0.5));
     expect(logo.center.dx, moreOrLessEquals(206, epsilon: 0.5));
 

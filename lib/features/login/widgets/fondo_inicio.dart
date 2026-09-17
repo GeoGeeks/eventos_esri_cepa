@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
@@ -77,7 +76,17 @@ class FondoInicio extends StatelessWidget {
                   children: [
                     SizedBox(height: espacioSuperior),
 
-                    SvgPicture.asset(Images.logoApp, width: 65, height: 74),
+                    // Ícono de marca nuevo (calendario + capas, sin las 5
+                    // estrellas que Play Store rechazó - ver assets/icon/icon.png).
+                    // Su recorte fuente mide 386×350, más ancho que el logo
+                    // anterior (65×74): se conserva el mismo alto y se calcula
+                    // el ancho a partir de esa proporción real.
+                    Image.asset(
+                      Images.logoApp,
+                      key: const Key('logoApp'),
+                      width: 74 * 386 / 350,
+                      height: 74,
+                    ),
 
                     const SizedBox(height: 20),
 
