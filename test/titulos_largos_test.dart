@@ -130,7 +130,7 @@ void main() {
               width: 360,
               child: AlertaGuardado(
                 mensaje: '¡Ha guardado la actividad $_tituloLargo!',
-                enlace: 'Ir a guardados',
+                enlace: 'Ir a favoritos',
                 onEnlace: () {},
                 onCerrar: () {},
               ),

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -9,7 +10,9 @@ import '../../core/constants/images.dart';
 import '../../core/utils/area_segura.dart';
 import '../../core/widgets/alerta_guardado.dart';
 import '../../core/widgets/app_icons.dart';
+import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/boton_cupo.dart';
+import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/tarjeta_experiencia.dart';
 import '../laboratorios/data/laboratorio_data.dart';
 import '../laboratorios/presentation/alertas_laboratorio.dart';
@@ -21,9 +24,16 @@ import '../../core/widgets/fila_meta.dart';
 import '../../core/widgets/info_card.dart';
 import '../../navigation/menu.dart';
 import '../agenda/agenda.dart';
+import '../agenda/data/agenda_repository.dart';
+import '../agenda/data/franja_horaria.dart';
+import '../agenda/data/laboratorio.dart';
 import '../credencial/presentation/credencial_modal.dart';
+import '../eventos/data/evento.dart';
 import '../favoritos/favoritos.dart';
 import '../favoritos/favoritos_store.dart';
+import '../laboratorios/data/registro_laboratorio.dart';
+import '../laboratorios/data/registro_laboratorio_repository.dart';
+import '../laboratorios/presentation/laboratorios_info_modal.dart';
 import 'data/invitados_mock_data.dart';
 
 class InvitadosScreen extends StatefulWidget {
@@ -33,6 +43,18 @@ class InvitadosScreen extends StatefulWidget {
   final List<ExperienciaEvento> stands;
   final List<SesionEvento> laboratorios;
 
+  /// Evento real, cuando se navega aquí desde un evento real (Inicio/
+  /// Reservas, ver `EventosStore`) - `null` (default) deja el
+  /// comportamiento mock de siempre, que es lo que usan los tests de
+  /// layout/pixel-fidelity. Con él, la pestaña Laboratorios y los botones
+  /// Agenda/Mis Favoritos traen datos reales de este evento en vez de
+  /// [evento]/[laboratorios].
+  final Evento? eventoReal;
+
+  /// Seams para tests (inyectar dobles sin red real).
+  final AgendaRepository? agendaRepository;
+  final RegistroLaboratorioRepository? registroRepository;
+
   const InvitadosScreen({
     super.key,
     this.evento = InvitadosMockData.evento,
@@ -40,6 +62,9 @@ class InvitadosScreen extends StatefulWidget {
     this.experiencias = InvitadosMockData.experiencias,
     this.stands = InvitadosMockData.stands,
     this.laboratorios = InvitadosMockData.laboratorios,
+    this.eventoReal,
+    this.agendaRepository,
+    this.registroRepository,
   });
 
   @override
@@ -66,35 +91,242 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   int _tabIndex = 0;
   final Set<int> _expandidas = {};
   bool _alertaVisible = false;
+  bool _mostroInfoLaboratorios = false;
+
+  late final AgendaRepository _agendaRepository =
+      widget.agendaRepository ?? AgendaRepository();
+  late final RegistroLaboratorioRepository _registroRepository =
+      widget.registroRepository ?? RegistroLaboratorioRepository();
 
   /// Estado del cupo de cada laboratorio, por índice. Vive aquí porque la
   /// reserva sobrevive a que la tarjeta se pliegue y se despliegue.
   final Map<int, EstadoCupo> _cupos = {};
 
-  EstadoCupo _cupo(int i) =>
-      _cupos[i] ?? widget.laboratorios[i].estadoCupo;
+  /// Texto formateado ("Oct 01 - 2:00 p.m.") de la franja YA reservada, por
+  /// índice - un laboratorio puede tener varios días/franjas disponibles,
+  /// pero solo UNA fue la que el asistente eligió. Ver `SesionEvento.reservaFormateada`.
+  final Map<int, String> _reservaTexto = {};
+
+  /// Override local de la estrella, por índice - ver el doc-comment de
+  /// `_alternarFavorito`.
+  final Map<int, bool> _favoritasOverride = {};
+
+  /// `null` mientras no se ha resuelto (modo mock, o real sin terminar de
+  /// cargar) - mismo criterio que `AgendaScreen._cargando`.
+  bool? _cargandoLaboratorios;
+  String? _errorLaboratorios;
+  List<Laboratorio> _laboratoriosReales = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    final eventoReal = widget.eventoReal;
+    if (eventoReal != null) _cargarLaboratoriosReales(eventoReal.id);
+  }
+
+  Future<void> _cargarLaboratoriosReales(String idEvento) async {
+    setState(() {
+      _cargandoLaboratorios = true;
+      _errorLaboratorios = null;
+    });
+    try {
+      final laboratorios = await _agendaRepository.listarLaboratorios(
+        idEvento,
+      );
+      final registros = await _registroRepository.misRegistros();
+      await FavoritosStore.cargar();
+      if (!mounted) return;
+      setState(() {
+        _laboratoriosReales = laboratorios;
+        _cupos.clear();
+        _reservaTexto.clear();
+        for (var i = 0; i < laboratorios.length; i++) {
+          RegistroLaboratorio? registro;
+          for (final r in registros) {
+            if (r.laboratorioId == laboratorios[i].id) {
+              registro = r;
+              break;
+            }
+          }
+          if (registro != null) {
+            _cupos[i] = EstadoCupo.reservado;
+            // `misRegistros()` siempre carga `franjaHoraria` (a diferencia
+            // de la respuesta de `registrar()`, que no la trae).
+            final franja = registro.franjaHoraria;
+            if (franja != null) {
+              _reservaTexto[i] = _formatoReserva(registro.fecha, franja);
+            }
+          }
+        }
+        _cargandoLaboratorios = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorLaboratorios =
+            'No se pudieron cargar los laboratorios. Verifica tu conexión '
+            'e intenta de nuevo.';
+        _cargandoLaboratorios = false;
+      });
+    }
+  }
+
+  /// `widget.evento` en modo mock, o [widget.eventoReal] mapeado a
+  /// `EventoDetalle` cuando viene un evento real - ver el doc-comment de
+  /// `eventoReal`.
+  EventoDetalle get _eventoDetalle {
+    final eventoReal = widget.eventoReal;
+    if (eventoReal == null) return widget.evento;
+    return EventoDetalle(
+      fecha: _rangoFechas(eventoReal),
+      hora: _rangoHoras(eventoReal),
+      lugar: eventoReal.lugar ?? '',
+      descripcion: eventoReal.descripcion ?? '',
+      aviso: 'Información sujeta a cambios sin aviso.',
+    );
+  }
+
+  static const List<String> _meses = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  ];
+
+  /// "Octubre 01, 2026" para un solo día, o "Octubre 01 y 02, 2026" /
+  /// "Octubre 01 - Noviembre 02, 2026" cuando `fechaFinalizacion` es
+  /// distinta - mismo formato que ya usaba `InvitadosMockData.evento`.
+  static String _rangoFechas(Evento evento) {
+    final inicio = evento.fechaInicio;
+    final fin = evento.fechaFinalizacion;
+    final mesInicio = _meses[inicio.month - 1];
+    final d1 = inicio.day.toString().padLeft(2, '0');
+    if (inicio.year == fin.year &&
+        inicio.month == fin.month &&
+        inicio.day == fin.day) {
+      return '$mesInicio $d1, ${inicio.year}';
+    }
+    final d2 = fin.day.toString().padLeft(2, '0');
+    if (inicio.year == fin.year && inicio.month == fin.month) {
+      return '$mesInicio $d1 y $d2, ${inicio.year}';
+    }
+    final mesFin = _meses[fin.month - 1];
+    return '$mesInicio $d1 - $mesFin $d2, ${fin.year}';
+  }
+
+  /// "8:00 - 17:00", o vacío si el evento todavía no tiene hora asignada
+  /// (ver el doc-comment de `Evento.horaInicio`).
+  static String _rangoHoras(Evento evento) {
+    final inicio = evento.horaInicio;
+    if (inicio == null) return '';
+    final h1 = '${inicio.hour}:${inicio.minute.toString().padLeft(2, '0')}';
+    final fin = evento.horaFin;
+    if (fin == null) return h1;
+    final h2 = '${fin.hour}:${fin.minute.toString().padLeft(2, '0')}';
+    return '$h1 - $h2';
+  }
+
+  /// [indice] solo se conoce para laboratorios reales (para leer
+  /// `_reservaTexto`) - en modo mock no hace falta.
+  SesionEvento _sesionDesdeLaboratorio(Laboratorio laboratorio, [int? indice]) =>
+      SesionEvento(
+        id: laboratorio.id,
+        titulo: laboratorio.nombre,
+        fecha: laboratorio.resumenDias,
+        lugar: laboratorio.lugar ?? '',
+        disponibilidad: laboratorio.disponibilidad,
+        reservaFormateada: indice != null ? _reservaTexto[indice] : null,
+        etiquetas: laboratorio.etiquetas,
+        descripcion: laboratorio.descripcion ?? '',
+        objetivos: laboratorio.objetivos,
+      );
+
+  /// "Oct 01 - 2:00 p.m." - mismo formato que usaba `Laboratorio.fechaYHoraFormateada`.
+  static String _formatoReserva(DateTime fecha, FranjaHoraria franja) {
+    const meses = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    return '${meses[fecha.month - 1]} ${fecha.day.toString().padLeft(2, '0')} - '
+        '${franja.horaInicioFormateada}';
+  }
 
   /// Recorrido de la reserva, tal como lo encadenan los SVG:
   /// reserva → gracias → (cancelar → cancelada) y de vuelta a la tarjeta.
-  Future<void> _reservarCupo(int indice) async {
-    final reservado = await ReservaCupoModal.mostrar(context);
+  ///
+  /// [sesion] viene de la propia tarjeta - con `id` real (modo backend) se
+  /// llama a `/registros-laboratorio`; sin él (modo mock) el recorrido
+  /// visual queda igual que siempre, sin red.
+  Future<void> _reservarCupo(int indice, SesionEvento sesion) async {
+    // Modo mock (sin `sesion.id`): `disponibilidad: null` deja el picker de
+    // día/horario original, sin datos reales que elegir.
+    final seleccion = await ReservaCupoModal.mostrar(
+      context,
+      disponibilidad: sesion.id == null ? null : sesion.disponibilidad,
+    );
     if (!mounted) return;
 
-    // Cerrar con el aspa deja la tarjeta como estaba, desplegada.
-    if (reservado != true) return;
+    // Cerrar con el aspa (o no haber disponibilidad para elegir) deja la
+    // tarjeta como estaba, desplegada.
+    if (seleccion == null) return;
+
+    if (sesion.id != null) {
+      try {
+        await _registroRepository.registrar(
+          sesion.id!,
+          seleccion.fecha,
+          seleccion.franjaHorariaId,
+        );
+      } on RegistroLaboratorioRechazadoException catch (e) {
+        if (!mounted) return;
+        mostrarSnackBar(context, e.mensaje);
+        return;
+      } catch (e) {
+        // Diagnóstico temporal (mismo criterio que AgendaScreen): imprime
+        // la causa real en `flutter logs`/logcat en vez de solo mostrar el
+        // mensaje genérico al usuario.
+        if (e is DioException) {
+          debugPrint(
+            '[InvitadosScreen] registrar(${sesion.id}) falló: '
+            'status=${e.response?.statusCode} data=${e.response?.data} '
+            '(${e.message})',
+          );
+        } else {
+          debugPrint('[InvitadosScreen] registrar(${sesion.id}) falló: $e');
+        }
+        if (!mounted) return;
+        mostrarSnackBar(
+          context,
+          'No se pudo completar el registro. Intenta de nuevo.',
+        );
+        return;
+      }
+      _reservaTexto[indice] = _formatoReserva(
+        seleccion.fechaComoDateTime,
+        seleccion.franja,
+      );
+    }
+    if (!mounted) return;
 
     setState(() => _cupos[indice] = EstadoCupo.reservado);
 
     final resultado = await AlertasLaboratorio.gracias(context);
     if (!mounted) return;
     if (resultado == ResultadoGracias.cancelar) {
-      await _cancelarCupo(indice);
+      await _cancelarCupo(indice, sesion);
     }
   }
 
-  Future<void> _cancelarCupo(int indice) async {
+  Future<void> _cancelarCupo(int indice, SesionEvento sesion) async {
     final resultado = await AlertasLaboratorio.cancelada(context);
     if (!mounted) return;
+
+    if (sesion.id != null) {
+      try {
+        await _registroRepository.cancelar(sesion.id!);
+      } catch (_) {
+        // Silencioso, igual que `FavoritosStore.alternar`: la alerta ya se
+        // cerró, no hay dónde mostrar el error sin romper ese recorrido.
+      }
+    }
 
     setState(() {
       _cupos[indice] = EstadoCupo.disponible;
@@ -111,6 +343,14 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       _expandidas.clear();
       _alertaVisible = false;
     });
+    // Explica el pre-registro la primera vez que se entra a Laboratorios en
+    // esta visita a la pantalla - solo en modo real: los tests de
+    // layout/pixel-fidelity montan la pantalla en modo mock y no esperan
+    // este modal encima de la lista.
+    if (i == 3 && !_mostroInfoLaboratorios && widget.eventoReal != null) {
+      _mostroInfoLaboratorios = true;
+      LaboratoriosInfoModal.mostrar(context);
+    }
   }
 
   void _alternarExpansion(int i) {
@@ -124,15 +364,31 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   ///
   /// Al marcarla sale la misma alerta que en Agenda, superpuesta a 96 —el
   /// borde superior del panel blanco—, sin mover nada de la lista.
-  void _alternarFavorito(SesionEvento sesion) {
-    final marcada = FavoritosStore.alternar(sesion);
-    setState(() => _alertaVisible = marcada);
+  ///
+  /// Con `sesion.id` real (modo backend) se refleja en `/favoritos`; sin él
+  /// (modo mock) queda como una marca puramente local (ver
+  /// `FavoritosStore.alternarLocal`), igual de rápido que antes.
+  void _alternarFavorito(int indice, SesionEvento sesion) {
+    final clave = sesion.id ?? sesion.titulo;
+    final marcada = !FavoritosStore.contiene(clave);
+    setState(() {
+      _favoritasOverride[indice] = marcada;
+      _alertaVisible = marcada;
+    });
+    if (sesion.id != null) {
+      FavoritosStore.alternar(itemId: sesion.id!, tipo: 'laboratorio');
+    } else {
+      FavoritosStore.alternarLocal(sesion.titulo);
+    }
   }
 
   void _irAFavoritos() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const FavoritosScreen()),
+      MaterialPageRoute(
+        builder: (_) =>
+            FavoritosScreen(cargarDesdeBackend: widget.eventoReal != null),
+      ),
     );
   }
 
@@ -152,10 +408,71 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       case 2:
         return _listaExperiencias(widget.stands);
       case 3:
-        return _listaLaboratorios(widget.laboratorios);
+        return _tabLaboratorios();
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  /// Carga/error/vacío del listado real de laboratorios - mismo criterio
+  /// visual que `AgendaScreen._contenido`. En modo mock (`eventoReal` nulo)
+  /// se queda exactamente como antes: la lista de [InvitadosScreen.laboratorios]
+  /// sin pasar por ningún estado de carga.
+  Widget _tabLaboratorios() {
+    if (widget.eventoReal == null) {
+      return _listaLaboratorios(widget.laboratorios);
+    }
+    if (_cargandoLaboratorios == true) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_errorLaboratorios != null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                _errorLaboratorios!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: Fonts.regular,
+                  fontSize: 14,
+                  color: AppColors.textSubtle,
+                ),
+              ),
+              const SizedBox(height: 12),
+              BotonReintentar(
+                onPressed: () =>
+                    _cargarLaboratoriosReales(widget.eventoReal!.id),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (_laboratoriosReales.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(
+          child: Text(
+            'Contenido disponible próximamente',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: Fonts.regular,
+              fontSize: 14,
+              color: AppColors.textSubtle,
+            ),
+          ),
+        ),
+      );
+    }
+    return _listaLaboratorios([
+      for (var i = 0; i < _laboratoriosReales.length; i++)
+        _sesionDesdeLaboratorio(_laboratoriosReales[i], i),
+    ]);
   }
 
   Widget _listaPersonas(List<PersonaEvento> items) {
@@ -209,12 +526,14 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       itemBuilder: (_, i) => SesionCard(
         sesion: items[i],
         expandida: _expandidas.contains(i),
-        esFavorita: FavoritosStore.contiene(items[i].titulo),
-        onFavorito: () => _alternarFavorito(items[i]),
+        esFavorita:
+            _favoritasOverride[i] ??
+            FavoritosStore.contiene(items[i].id ?? items[i].titulo),
+        onFavorito: () => _alternarFavorito(i, items[i]),
         onExpandir: () => _alternarExpansion(i),
-        estadoCupo: _cupo(i),
-        onReservar: () => _reservarCupo(i),
-        onCancelar: () => _cancelarCupo(i),
+        estadoCupo: _cupos[i] ?? items[i].estadoCupo,
+        onReservar: () => _reservarCupo(i, items[i]),
+        onCancelar: () => _cancelarCupo(i, items[i]),
       ),
     );
   }
@@ -269,19 +588,22 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _InfoEvento(
-                            evento: widget.evento,
+                            evento: _eventoDetalle,
                             onCredencial: () =>
                                 CredencialModal.mostrar(context),
                             onAgenda: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const AgendaScreen(),
+                                builder: (_) =>
+                                    AgendaScreen(idEvento: widget.eventoReal?.id),
                               ),
                             ),
                             onFavoritos: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const FavoritosScreen(),
+                                builder: (_) => FavoritosScreen(
+                                  cargarDesdeBackend: widget.eventoReal != null,
+                                ),
                               ),
                             ),
                           ),
@@ -320,7 +642,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
               child: AlertaGuardado(
                 key: const Key('alerta-guardado'),
                 mensaje: '¡Ha guardado una actividad!',
-                enlace: 'Ir a guardados',
+                enlace: 'Ir a favoritos',
                 onEnlace: _irAFavoritos,
                 onCerrar: () => setState(() => _alertaVisible = false),
               ),
@@ -843,8 +1165,12 @@ class SesionCard extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           FilaMeta(icono: SvgIcon.date, texto: sesion.fecha),
-          const SizedBox(height: 4),
-          FilaMeta(icono: SvgIcon.lugar, texto: sesion.lugar),
+          // Sin lugar (el Laboratorio real no siempre lo trae) no se pinta
+          // ni el ícono ni la fila - mismo criterio que `ActividadCard`.
+          if (sesion.lugar.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            FilaMeta(icono: SvgIcon.lugar, texto: sesion.lugar),
+          ],
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
@@ -868,12 +1194,15 @@ class SesionCard extends StatelessWidget {
           ),
           if (expandida) ...[
             const SizedBox(height: 10),
-            Row(
+            // `Wrap` (no `Row`) - con varias etiquetas reales (temática +
+            // producto + nivel juntos) un `Row` desbordaba en vez de pasar
+            // a la siguiente línea.
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                for (final etiqueta in sesion.etiquetas) ...[
+                for (final etiqueta in sesion.etiquetas)
                   EtiquetaChip(texto: etiqueta),
-                  const SizedBox(width: 8),
-                ],
               ],
             ),
             const SizedBox(height: 10),
@@ -900,14 +1229,61 @@ class SesionCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: BotonCupo(
-                  estado: estadoCupo!,
-                  onReservar: onReservar,
-                  onCancelar: onCancelar,
+              // Ya reservado: el botón «Cancelar reserva» pasa a la
+              // derecha y a la izquierda se deja visible la franja
+              // reservada (día - hora), que si no queda oculta al no
+              // haber otra forma de verla sin cancelar primero.
+              if (estadoCupo == EstadoCupo.reservado)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Reserva:',
+                            style: TextStyle(
+                              fontFamily: Fonts.regular,
+                              fontSize: Fonts.textXs,
+                              fontWeight: Fonts.wRegular,
+                              height: 14 / 12,
+                              letterSpacing: 0,
+                              color: AppColors.textSubtle,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            sesion.reservaFormateada ?? sesion.fecha,
+                            style: const TextStyle(
+                              fontFamily: Fonts.regular,
+                              fontSize: Fonts.textSm,
+                              fontWeight: Fonts.wRegular,
+                              height: 16 / 14,
+                              letterSpacing: 0,
+                              color: AppColors.textSubtle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    BotonCupo(
+                      estado: estadoCupo!,
+                      onReservar: onReservar,
+                      onCancelar: onCancelar,
+                    ),
+                  ],
+                )
+              else
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: BotonCupo(
+                    estado: estadoCupo!,
+                    onReservar: onReservar,
+                    onCancelar: onCancelar,
+                  ),
                 ),
-              ),
             ],
           ],
         ],

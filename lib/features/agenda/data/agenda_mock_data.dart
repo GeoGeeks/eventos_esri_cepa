@@ -1,4 +1,9 @@
 class Actividad {
+  /// Id real de la Charla que esto representa - `null` cuando la actividad
+  /// es mock/de prueba. `AgendaScreen`/`FavoritosScreen` lo usan para
+  /// llamar al backend real (favoritos); sin él, la pantalla se queda en el
+  /// comportamiento local de siempre (ver `AgendaScreen._alternarFavorita`).
+  final String? id;
   final String titulo;
   final String horario;
   final String ponente;
@@ -13,7 +18,13 @@ class Actividad {
   /// Si ya se envió la valoración. Deja de ofrecerse «Valorar».
   final bool valorada;
 
+  /// Hora real de fin de la Charla - `null` en modo mock/de prueba (esas
+  /// actividades no tienen un concepto de tiempo real). Junto con [id]
+  /// decide si se pinta «Valorar»: ver [mostrarValorar].
+  final DateTime? horaFin;
+
   const Actividad({
+    this.id,
     required this.titulo,
     required this.horario,
     required this.ponente,
@@ -25,9 +36,20 @@ class Actividad {
     this.objetivos = const [],
     this.favorita = false,
     this.valorada = false,
+    this.horaFin,
   });
 
+  /// En modo mock (`id == null`) siempre `true` - comportamiento de
+  /// siempre, no depende de ninguna hora real. En modo real, «Valorar»
+  /// solo se pinta una vez terminada la charla (`horaFin` ya pasó); si la
+  /// Charla real no trae `horaFin`, tampoco se pinta - pedido explícito
+  /// del usuario, 2026-09-18.
+  bool get mostrarValorar =>
+      id == null ||
+      (horaFin != null && !DateTime.now().isBefore(horaFin!));
+
   Actividad copyWith({bool? favorita, bool? valorada}) => Actividad(
+    id: id,
     titulo: titulo,
     horario: horario,
     ponente: ponente,
@@ -39,6 +61,7 @@ class Actividad {
     objetivos: objetivos,
     favorita: favorita ?? this.favorita,
     valorada: valorada ?? this.valorada,
+    horaFin: horaFin,
   );
 }
 

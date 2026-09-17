@@ -102,76 +102,105 @@ class ActividadCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 4),
-
-          SizedBox(
-            height: 16,
-            child: Row(
-              children: [
-                const AppIcon(
-                  SvgIcon.perfil,
-                  width: 16,
-                  height: 16,
-                  color: AppColors.textSubtle,
-                ),
-                const SizedBox(width: 2),
-                Expanded(
-                  child: Text(
-                    actividad.ponente,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FilaMeta.estiloTexto,
-                  ),
-                ),
-                // Una vez valorada, la palabra **sigue viéndose** y tanto ella
-                // como la línea de debajo pasan de azul a #949494.
-                GestureDetector(
-                  key: const Key('actividad-valorar'),
-                  onTap: actividad.valorada ? null : onValorar,
-                  child: Container(
-                    height: 16,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: actividad.valorada
-                              ? AppColors.textSubtle
-                              : const Color(0x66007AC2),
+          // Sin ponente NI «Valorar» (charla real que todavía no terminó,
+          // o sin `horaFin` - ver `Actividad.mostrarValorar`) no queda
+          // nada que pintar en esta fila: se oculta entera, igual que
+          // lugar/aforo más abajo.
+          if (actividad.ponente.isNotEmpty || actividad.mostrarValorar) ...[
+            const SizedBox(height: 4),
+            SizedBox(
+              height: 16,
+              child: Row(
+                children: [
+                  // Sin ponente (la Charla real no siempre lo trae, ver el
+                  // doc-comment de esa clase) no se pinta ni el ícono ni el
+                  // texto - «Valorar» se corre a la derecha igual.
+                  if (actividad.ponente.isNotEmpty) ...[
+                    const AppIcon(
+                      SvgIcon.perfil,
+                      width: 16,
+                      height: 16,
+                      color: AppColors.textSubtle,
+                    ),
+                    const SizedBox(width: 2),
+                    Expanded(
+                      child: Text(
+                        actividad.ponente,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: FilaMeta.estiloTexto,
+                      ),
+                    ),
+                  ] else if (actividad.mostrarValorar)
+                    const Spacer(),
+                  // Una vez valorada, la palabra **sigue viéndose** y tanto
+                  // ella como la línea de debajo pasan de azul a #949494.
+                  if (actividad.mostrarValorar)
+                    GestureDetector(
+                      key: const Key('actividad-valorar'),
+                      onTap: actividad.valorada ? null : onValorar,
+                      child: Container(
+                        height: 16,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: actividad.valorada
+                                  ? AppColors.textSubtle
+                                  : const Color(0x66007AC2),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Valorar',
+                          style: TextStyle(
+                            fontFamily: Fonts.regular,
+                            fontSize: Fonts.textSm,
+                            fontWeight: Fonts.wRegular,
+                            height: 16 / 14,
+                            letterSpacing: 0,
+                            color: actividad.valorada
+                                ? AppColors.textSubtle
+                                : AppColors.primary,
+                          ),
                         ),
                       ),
                     ),
-                    child: Text(
-                      'Valorar',
-                      style: TextStyle(
-                        fontFamily: Fonts.regular,
-                        fontSize: Fonts.textSm,
-                        fontWeight: Fonts.wRegular,
-                        height: 16 / 14,
-                        letterSpacing: 0,
-                        color: actividad.valorada
-                            ? AppColors.textSubtle
-                            : AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
 
-          const SizedBox(height: 2),
-          FilaMeta(icono: SvgIcon.lugar, texto: actividad.lugar),
-          const SizedBox(height: 2),
-          FilaMeta(icono: SvgIcon.aforo, texto: actividad.aforo),
+          // Sin lugar/aforo (la Charla real no siempre los trae) no se
+          // pinta ni el ícono ni la fila entera - antes quedaba el ícono
+          // solo, sin texto al lado.
+          if (actividad.lugar.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            FilaMeta(icono: SvgIcon.lugar, texto: actividad.lugar),
+          ],
+          if (actividad.aforo.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            FilaMeta(icono: SvgIcon.aforo, texto: actividad.aforo),
+          ],
 
           const SizedBox(height: 10),
 
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final etiqueta in actividad.etiquetas) ...[
-                EtiquetaChip(texto: etiqueta),
-                const SizedBox(width: 8),
-              ],
-              const Spacer(),
+              // `Wrap` dentro del `Expanded` (no un `Row` a secas) - con
+              // varias etiquetas reales (temática + producto + nivel
+              // juntos) desbordaba en vez de pasar a la siguiente línea.
+              // La estrella se queda fija a la derecha igual que antes.
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final etiqueta in actividad.etiquetas)
+                      EtiquetaChip(texto: etiqueta),
+                  ],
+                ),
+              ),
               GestureDetector(
                 key: const Key('actividad-favorito'),
                 onTap: onFavorito,

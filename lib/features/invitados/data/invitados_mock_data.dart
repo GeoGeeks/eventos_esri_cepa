@@ -1,4 +1,5 @@
 import '../../../core/constants/images.dart';
+import '../../agenda/data/disponibilidad_dia.dart';
 import '../../laboratorios/data/laboratorio_data.dart';
 
 class EventoDetalle {
@@ -62,6 +63,10 @@ class ExperienciaEvento {
 
 /// Sesión de **Laboratorios**.
 class SesionEvento {
+  /// Id real del Laboratorio que esto representa - `null` cuando la sesión
+  /// es mock/de prueba. Ver el doc-comment equivalente en `Actividad`
+  /// (`agenda/data/agenda_mock_data.dart`).
+  final String? id;
   final String titulo;
   final String fecha;
   final String lugar;
@@ -70,6 +75,16 @@ class SesionEvento {
   /// Favoritos cuando la sesión se marca con la estrella.
   final String ponente;
   final String aforo;
+
+  /// Días + franjas reservables de este laboratorio (solo real, ver
+  /// `Laboratorio.disponibilidad`) - el modal "Reservar cupo" los usa en
+  /// vez de `LaboratorioData.dias`/`horarios`. Vacío en modo mock.
+  final List<DisponibilidadDia> disponibilidad;
+
+  /// Texto de la franja YA reservada (ej. "Oct 01 - 2:00 p.m."), cuando se
+  /// conoce - `null` si `estadoCupo` no es `reservado` o si la reserva es
+  /// mock (mostrar `fecha` alcanza). Ver `InvitadosScreen._reservarCupo`.
+  final String? reservaFormateada;
 
   final List<String> etiquetas;
   final String descripcion;
@@ -82,11 +97,14 @@ class SesionEvento {
   final EstadoCupo estadoCupo;
 
   const SesionEvento({
+    this.id,
     required this.titulo,
     required this.fecha,
     required this.lugar,
     this.ponente = '',
     this.aforo = '',
+    this.disponibilidad = const [],
+    this.reservaFormateada,
     this.etiquetas = const [],
     this.descripcion = '',
     this.tituloObjetivos = 'Objetivos',

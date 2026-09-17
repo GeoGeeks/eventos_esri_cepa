@@ -118,7 +118,7 @@ void main() {
     final tarjetaDespues = tester.getRect(find.byType(ActividadCard).first);
     expect(tarjetaDespues.top, moreOrLessEquals(tarjetaAntes.top, epsilon: 0.5));
 
-    await tester.tap(find.text('Ir a guardados'));
+    await tester.tap(find.text('Ir a favoritos'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pumpAndSettle();

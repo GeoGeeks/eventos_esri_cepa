@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/constants/icons.dart';
 import '../../core/utils/area_segura.dart';
+import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/casilla_verificacion.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../credencial/presentation/credencial_modal.dart';
@@ -58,10 +59,10 @@ class _ReservasScreenState extends State<ReservasScreen> {
     }).toList();
   }
 
-  void _abrirInvitados() {
+  void _abrirInvitados(Evento evento) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const InvitadosScreen()),
+      MaterialPageRoute(builder: (_) => InvitadosScreen(eventoReal: evento)),
     );
   }
 
@@ -477,7 +478,7 @@ class _SplitFilterButton extends StatelessWidget {
 /// en `eventos_screen.dart`.
 class _ListadoReservados extends StatelessWidget {
   final List<Evento> Function(List<Evento>) filtrar;
-  final VoidCallback onVerMas;
+  final void Function(Evento) onVerMas;
 
   const _ListadoReservados({required this.filtrar, required this.onVerMas});
 
@@ -506,9 +507,8 @@ class _ListadoReservados extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextButton(
+                  BotonReintentar(
                     onPressed: () => EventosStore.cargar(forzar: true),
-                    child: const Text('Reintentar'),
                   ),
                 ],
               ),
@@ -559,7 +559,7 @@ class _ListadoReservados extends StatelessWidget {
                 actionsGap: 11,
                 viewMoreWidth: 75,
                 secondaryWidth: 110,
-                onViewMore: onVerMas,
+                onViewMore: () => onVerMas(eventos[i]),
                 onRegister: () => CredencialModal.mostrar(context),
               ),
             ),

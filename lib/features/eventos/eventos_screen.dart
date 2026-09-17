@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/fonts.dart';
 import '../../core/utils/area_segura.dart';
+import '../../core/widgets/boton_reintentar.dart';
 import '../../core/widgets/casilla_verificacion.dart';
 import '../../core/widgets/upcoming_event_card.dart';
 import '../registro/presentation/registro_modal.dart';
@@ -527,9 +528,8 @@ class _ListadoEventos extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextButton(
+                  BotonReintentar(
                     onPressed: () => EventosStore.cargar(forzar: true),
-                    child: const Text('Reintentar'),
                   ),
                 ],
               ),
