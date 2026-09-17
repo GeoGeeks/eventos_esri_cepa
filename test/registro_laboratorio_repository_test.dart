@@ -45,6 +45,7 @@ void main() {
             {
               'id': 'reg-1',
               'laboratorioId': 'lab-1',
+              'franjaHorariaId': 'franja-1',
               'laboratorio': {
                 'id': 'lab-1',
                 'idEvento': 'evt-1',
@@ -83,13 +84,14 @@ void main() {
           data: {
             'id': 'reg-1',
             'laboratorioId': 'lab-1',
+            'franjaHorariaId': 'franja-1',
             'asistencia': 'pendiente',
             'createdAt': '2026-09-01T00:00:00.000Z',
           },
         ),
       );
 
-      final registro = await repositorio.registrar('lab-1');
+      final registro = await repositorio.registrar('lab-1', 'franja-1');
 
       expect(registro.id, 'reg-1');
       final llamada = verify(
@@ -99,7 +101,10 @@ void main() {
           options: any(named: 'options'),
         ),
       )..called(1);
-      expect(llamada.captured.single, {'laboratorioId': 'lab-1'});
+      expect(llamada.captured.single, {
+        'laboratorioId': 'lab-1',
+        'franjaHorariaId': 'franja-1',
+      });
     });
 
     test('409 con mensaje del backend lanza RegistroLaboratorioRechazadoException', () async {
@@ -121,7 +126,7 @@ void main() {
       );
 
       await expectLater(
-        repositorio.registrar('lab-1'),
+        repositorio.registrar('lab-1', 'franja-1'),
         throwsA(
           isA<RegistroLaboratorioRechazadoException>().having(
             (e) => e.mensaje,
@@ -150,7 +155,7 @@ void main() {
       );
 
       await expectLater(
-        repositorio.registrar('lab-1'),
+        repositorio.registrar('lab-1', 'franja-1'),
         throwsA(isA<DioException>()),
       );
     });

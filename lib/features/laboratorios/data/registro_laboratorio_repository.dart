@@ -48,20 +48,28 @@ class RegistroLaboratorioRepository {
         .toList();
   }
 
+  /// [franjaHorariaId] - cuál de las franjas que ofrece ese laboratorio
+  /// (`Laboratorio.franjasHorarias`) elige el asistente.
+  ///
   /// @throws [RegistroLaboratorioRechazadoException] si el backend rechaza
   ///          el registro por alguna regla de negocio (ver el doc-comment
-  ///          de la clase).
-  Future<RegistroLaboratorio> registrar(String laboratorioId) async {
+  ///          de la clase), o si la franja no está habilitada para ese
+  ///          laboratorio (`400`).
+  Future<RegistroLaboratorio> registrar(
+    String laboratorioId,
+    String franjaHorariaId,
+  ) async {
     final accessToken = await _tokenStorage.leerAccessToken();
     try {
       final respuesta = await _dio.post<Map<String, dynamic>>(
         '/registros-laboratorio',
-        data: {'laboratorioId': laboratorioId},
+        data: {'laboratorioId': laboratorioId, 'franjaHorariaId': franjaHorariaId},
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
       return RegistroLaboratorio.fromJson(respuesta.data!);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 409) {
+      final status = e.response?.statusCode;
+      if (status == 409 || status == 400) {
         throw RegistroLaboratorioRechazadoException(_mensajeDelBackend(e));
       }
       rethrow;

@@ -1,4 +1,5 @@
 import '../../../core/constants/images.dart';
+import '../../agenda/data/franja_horaria.dart';
 import '../../laboratorios/data/laboratorio_data.dart';
 
 class EventoDetalle {
@@ -75,6 +76,11 @@ class SesionEvento {
   final String ponente;
   final String aforo;
 
+  /// Franjas reservables de este laboratorio (solo real, ver
+  /// `Laboratorio.franjasHorarias`) - el modal "Reservar cupo" las usa en
+  /// vez de `LaboratorioData.horarios`. Vacío en modo mock.
+  final List<FranjaHoraria> franjasHorarias;
+
   final List<String> etiquetas;
   final String descripcion;
   final String tituloObjetivos;
@@ -92,6 +98,7 @@ class SesionEvento {
     required this.lugar,
     this.ponente = '',
     this.aforo = '',
+    this.franjasHorarias = const [],
     this.etiquetas = const [],
     this.descripcion = '',
     this.tituloObjetivos = 'Objetivos',

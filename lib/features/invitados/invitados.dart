@@ -210,6 +210,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
         titulo: laboratorio.nombre,
         fecha: laboratorio.fechaYHoraFormateada,
         lugar: laboratorio.lugar ?? '',
+        franjasHorarias: laboratorio.franjasHorarias,
         etiquetas: laboratorio.etiquetas,
         descripcion: laboratorio.descripcion ?? '',
         objetivos: laboratorio.objetivos,
@@ -222,15 +223,21 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   /// llama a `/registros-laboratorio`; sin él (modo mock) el recorrido
   /// visual queda igual que siempre, sin red.
   Future<void> _reservarCupo(int indice, SesionEvento sesion) async {
-    final reservado = await ReservaCupoModal.mostrar(context);
+    // Modo mock (sin `sesion.id`): `franjas: null` deja el picker de
+    // día/horario original, sin franjas reales que elegir.
+    final franjaId = await ReservaCupoModal.mostrar(
+      context,
+      franjas: sesion.id == null ? null : sesion.franjasHorarias,
+    );
     if (!mounted) return;
 
-    // Cerrar con el aspa deja la tarjeta como estaba, desplegada.
-    if (reservado != true) return;
+    // Cerrar con el aspa (o no haber franjas para elegir) deja la tarjeta
+    // como estaba, desplegada.
+    if (franjaId == null) return;
 
     if (sesion.id != null) {
       try {
-        await _registroRepository.registrar(sesion.id!);
+        await _registroRepository.registrar(sesion.id!, franjaId);
       } on RegistroLaboratorioRechazadoException catch (e) {
         if (!mounted) return;
         mostrarSnackBar(context, e.mensaje);

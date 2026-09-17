@@ -8,17 +8,28 @@ import '../../../core/constants/fonts.dart';
 import '../../../core/constants/icons.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/casilla_verificacion.dart';
+import '../../agenda/data/franja_horaria.dart';
 import '../data/laboratorio_data.dart';
 
 /// Ventana **Reservar cupo** — `assets/views/Laboratorios_reserva.svg`.
 ///
 /// Panel de 358 × 373 en `top: 272`, `left: 27`, radio 4, sobre el velo de
-/// siempre. Pide el día y el horario; el desplegable de horarios es
-/// `assets/views/filtro-horarios.svg`.
+/// siempre. El desplegable de horarios es `assets/views/filtro-horarios.svg`.
 ///
-/// Devuelve `true` si se reservó y `null` si se cerró con el aspa.
+/// Dos modos, según [franjas]:
+/// - `null` (mock/test, comportamiento original): pide día + horario de
+///   `LaboratorioData`, y `mostrar()` devuelve un valor no nulo cualquiera
+///   al confirmar (no hay `franjaHorariaId` real que devolver).
+/// - No nulo (modo real): un laboratorio ya tiene su `fecha` fija, así que
+///   no se pide día - solo se elige UNA franja real de la lista, y
+///   `mostrar()` devuelve su `id` (`FranjaHoraria.id`) para mandarlo a
+///   `POST /registros-laboratorio`.
+///
+/// Devuelve `null` si se cerró con el aspa (o si no hay franjas que elegir).
 class ReservaCupoModal extends StatefulWidget {
-  const ReservaCupoModal({super.key});
+  const ReservaCupoModal({super.key, this.franjas});
+
+  final List<FranjaHoraria>? franjas;
 
   // ── Medidas del SVG ──
   static const double ancho = 358;
@@ -29,13 +40,16 @@ class ReservaCupoModal extends StatefulWidget {
   static const double padding = 20;
   static const double altoPie = 76;
 
-  static Future<bool?> mostrar(BuildContext context) {
-    return showDialog<bool>(
+  static Future<String?> mostrar(
+    BuildContext context, {
+    List<FranjaHoraria>? franjas,
+  }) {
+    return showDialog<String>(
       context: context,
       barrierColor: AppColors.modalOverlay,
       // La `y` del panel es absoluta, como en Figma.
       useSafeArea: false,
-      builder: (_) => const ReservaCupoModal(),
+      builder: (_) => ReservaCupoModal(franjas: franjas),
     );
   }
 
@@ -44,14 +58,20 @@ class ReservaCupoModal extends StatefulWidget {
 }
 
 class _ReservaCupoModalState extends State<ReservaCupoModal> {
+  bool get _esReal => widget.franjas != null;
+
   /// Selección única: un laboratorio ocurre en un solo día, no tendría
   /// sentido reservarlo para los dos a la vez - antes eran casillas
-  /// independientes y se podían marcar ambas.
+  /// independientes y se podían marcar ambas. Solo aplica en modo mock.
   int? _dia;
   String? _horario;
+
+  /// Franja real elegida (modo real) - su `id` es lo que devuelve `mostrar()`.
+  FranjaHoraria? _franjaSeleccionada;
   bool _desplegado = false;
 
-  bool get _puedeReservar => _dia != null && _horario != null;
+  bool get _puedeReservar =>
+      _esReal ? _franjaSeleccionada != null : (_dia != null && _horario != null);
 
   @override
   Widget build(BuildContext context) {
@@ -160,42 +180,62 @@ class _ReservaCupoModalState extends State<ReservaCupoModal> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _Etiqueta('Seleccionar el día para tomar el laboratorio'),
-          const SizedBox(height: 12),
-          for (var i = 0; i < LaboratorioData.dias.length; i++)
-            SizedBox(
-              height: 32,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                // Vuelve a tocar el mismo día ya marcado para desmarcarlo;
-                // tocar el otro lo reemplaza - nunca los dos a la vez.
-                onTap: () => setState(() {
-                  _dia = _dia == i ? null : i;
-                }),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    CasillaVerificacion(marcada: _dia == i),
-                    const SizedBox(width: 10),
-                    Text(
-                      LaboratorioData.dias[i],
-                      style: const TextStyle(
-                        fontFamily: Fonts.regular,
-                        fontSize: Fonts.text0h,
-                        fontWeight: Fonts.wRegular,
-                        height: 20 / 16,
-                        letterSpacing: 0,
-                        color: AppColors.textTitle,
+          // El día no se elige en modo real: el laboratorio ya tiene una
+          // fecha fija (ver el doc-comment de la clase) - solo aplica al
+          // modo mock, que sigue pidiéndolo como en el diseño original.
+          if (!_esReal) ...[
+            const _Etiqueta('Seleccionar el día para tomar el laboratorio'),
+            const SizedBox(height: 12),
+            for (var i = 0; i < LaboratorioData.dias.length; i++)
+              SizedBox(
+                height: 32,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  // Vuelve a tocar el mismo día ya marcado para desmarcarlo;
+                  // tocar el otro lo reemplaza - nunca los dos a la vez.
+                  onTap: () => setState(() {
+                    _dia = _dia == i ? null : i;
+                  }),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 10),
+                      CasillaVerificacion(marcada: _dia == i),
+                      const SizedBox(width: 10),
+                      Text(
+                        LaboratorioData.dias[i],
+                        style: const TextStyle(
+                          fontFamily: Fonts.regular,
+                          fontSize: Fonts.text0h,
+                          fontWeight: Fonts.wRegular,
+                          height: 20 / 16,
+                          letterSpacing: 0,
+                          color: AppColors.textTitle,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          const SizedBox(height: 4),
+            const SizedBox(height: 4),
+          ],
           const _Etiqueta('Seleccionar el horario'),
           const SizedBox(height: 10),
-          _selectorHorario(),
+          if (_esReal && widget.franjas!.isEmpty)
+            const Text(
+              'Este laboratorio todavía no tiene franjas horarias '
+              'disponibles para reservar.',
+              style: TextStyle(
+                fontFamily: Fonts.regular,
+                fontSize: Fonts.textSm,
+                fontWeight: Fonts.wRegular,
+                fontStyle: FontStyle.italic,
+                height: 16 / 14,
+                letterSpacing: 0,
+                color: AppColors.textSubtle,
+              ),
+            )
+          else
+            _selectorHorario(),
           const SizedBox(height: 10),
           const Text(
             LaboratorioData.avisoHorario,
@@ -214,6 +254,21 @@ class _ReservaCupoModalState extends State<ReservaCupoModal> {
   }
 
   Widget _selectorHorario() {
+    final int cantidad =
+        _esReal ? widget.franjas!.length : LaboratorioData.horarios.length;
+    final String? textoElegido =
+        _esReal ? _franjaSeleccionada?.formateada : _horario;
+    String textoOpcion(int i) =>
+        _esReal ? widget.franjas![i].formateada : LaboratorioData.horarios[i];
+    void elegir(int i) => setState(() {
+          if (_esReal) {
+            _franjaSeleccionada = widget.franjas![i];
+          } else {
+            _horario = LaboratorioData.horarios[i];
+          }
+          _desplegado = false;
+        });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -232,14 +287,14 @@ class _ReservaCupoModalState extends State<ReservaCupoModal> {
               children: [
                 Expanded(
                   child: Text(
-                    _horario ?? 'Horario',
+                    textoElegido ?? 'Horario',
                     style: TextStyle(
                       fontFamily: Fonts.regular,
                       fontSize: Fonts.text0h,
                       fontWeight: Fonts.wRegular,
                       height: 20 / 16,
                       letterSpacing: 0,
-                      color: _horario == null
+                      color: textoElegido == null
                           ? AppColors.textSubtle
                           : AppColors.textTitle,
                     ),
@@ -272,21 +327,18 @@ class _ReservaCupoModalState extends State<ReservaCupoModal> {
             child: ListView.separated(
               shrinkWrap: true,
               padding: EdgeInsets.zero,
-              itemCount: LaboratorioData.horarios.length,
+              itemCount: cantidad,
               separatorBuilder: (_, _) =>
                   const Divider(height: 1, color: AppColors.lightGray),
               itemBuilder: (_, i) => GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () => setState(() {
-                  _horario = LaboratorioData.horarios[i];
-                  _desplegado = false;
-                }),
+                onTap: () => elegir(i),
                 child: Container(
                   height: 44,
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 19),
                   child: Text(
-                    LaboratorioData.horarios[i],
+                    textoOpcion(i),
                     style: const TextStyle(
                       fontFamily: Fonts.regular,
                       fontSize: Fonts.text0h,
@@ -314,7 +366,11 @@ class _ReservaCupoModalState extends State<ReservaCupoModal> {
       ),
       child: GestureDetector(
         key: const Key('reserva-confirmar'),
-        onTap: _puedeReservar ? () => Navigator.of(context).pop(true) : null,
+        onTap: _puedeReservar
+            ? () => Navigator.of(context).pop(
+                  _esReal ? _franjaSeleccionada!.id : 'mock-reservado',
+                )
+            : null,
         child: Container(
           height: 44,
           width: double.infinity,

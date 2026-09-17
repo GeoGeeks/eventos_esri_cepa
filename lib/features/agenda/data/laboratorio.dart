@@ -1,4 +1,5 @@
 import 'catalogo_item.dart';
+import 'franja_horaria.dart';
 
 /// Laboratorio (taller práctico) de un evento, tal como lo devuelve
 /// `eventos_esri_cepa_api` (`GET /eventos/:idEvento/laboratorios`) - ver la
@@ -24,6 +25,7 @@ class Laboratorio {
     this.productosEsri = const [],
     this.publicosObjetivo = const [],
     this.nivelesSesion = const [],
+    this.franjasHorarias = const [],
   });
 
   final String id;
@@ -46,6 +48,12 @@ class Laboratorio {
   final List<CatalogoItem> productosEsri;
   final List<CatalogoItem> publicosObjetivo;
   final List<CatalogoItem> nivelesSesion;
+
+  /// Bloques reservables dentro de la ventana `horaInicio`-`horaFin` de ese
+  /// `dia` - un mismo laboratorio puede tener varios (ver
+  /// `Laboratorio.horaInicio` en el backend). Vacío = todavía sin franjas
+  /// configuradas en Admin.
+  final List<FranjaHoraria> franjasHorarias;
 
   /// "Oct 02 - 11:00 a.m." - mismo formato que ya usaban las tarjetas de
   /// sesión (`SesionEvento.fecha`, con hora incluida).
@@ -96,6 +104,10 @@ class Laboratorio {
       productosEsri: catalogo('productosEsri'),
       publicosObjetivo: catalogo('publicosObjetivo'),
       nivelesSesion: catalogo('nivelesSesion'),
+      franjasHorarias: (json['franjasHorarias'] as List<dynamic>?)
+              ?.map((e) => FranjaHoraria.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 }

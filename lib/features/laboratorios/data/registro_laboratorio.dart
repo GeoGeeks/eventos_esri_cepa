@@ -7,6 +7,7 @@ class RegistroLaboratorio {
   const RegistroLaboratorio({
     required this.id,
     required this.laboratorioId,
+    required this.franjaHorariaId,
     this.laboratorio,
     required this.asistencia,
     required this.createdAt,
@@ -14,6 +15,9 @@ class RegistroLaboratorio {
 
   final String id;
   final String laboratorioId;
+
+  /// Cuál de las franjas de ese laboratorio eligió el asistente al registrarse.
+  final String franjaHorariaId;
 
   /// El backend carga el laboratorio completo en `misRegistros()`, pero no
   /// en la respuesta de `POST /registros-laboratorio` - nullable por eso.
@@ -26,6 +30,7 @@ class RegistroLaboratorio {
     return RegistroLaboratorio(
       id: json['id'] as String,
       laboratorioId: json['laboratorioId'] as String,
+      franjaHorariaId: json['franjaHorariaId'] as String,
       laboratorio: laboratorioJson == null
           ? null
           : Laboratorio.fromJson(laboratorioJson),
