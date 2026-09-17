@@ -235,6 +235,13 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
           actividad: actividades[indice],
           expandida: _expandidas.contains(indice),
           onExpandir: () => _alternarExpandida(indice),
+          // Desmarcar acá quita la actividad de esta misma lista: `alternar`
+          // recarga `FavoritosStore.estado`, que es lo que pinta esta
+          // pantalla - no hace falta quitarla a mano.
+          onFavorito: () => FavoritosStore.alternar(
+            itemId: favoritos[indice].itemId,
+            tipo: favoritos[indice].tipo,
+          ),
           // La valoración post-charla es un flujo aparte (ver
           // `AgendaScreen._abrirValoracion`), fuera del alcance de esta
           // pantalla real todavía - sin acción por ahora.
