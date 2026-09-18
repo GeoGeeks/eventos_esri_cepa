@@ -1,5 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../eventos/data/eventos_store.dart';
+import '../../../favoritos/favoritos_store.dart';
+import '../../../post_evento/data/valoracion_store.dart';
 import '../../data/auth_exceptions.dart';
 import '../../data/auth_repository.dart';
 import 'auth_state.dart';
@@ -36,18 +39,37 @@ class AuthCubit extends Cubit<AuthState> {
   /// inicial: si hay una sesión guardada (y válida, o refrescable), pasa
   /// directo a autenticado; si no, deja el estado inicial para que se
   /// muestre `LoginScreen` como siempre.
+  ///
+  /// Un [ErrorConexionException] (ver `AuthRepository.restaurarSesion`) NO
+  /// es "no hay sesión" - es "hay una sesión guardada pero no se pudo
+  /// verificar todavía" (sin señal, backend caído). Emite [AuthError] para
+  /// que `_Arranque` (`main.dart`) ofrezca reintentar en vez de mandar a
+  /// `LoginScreen` a pedir el número de documento otra vez.
   Future<void> verificarSesionExistente() async {
     emit(const AuthCargando());
-    final perfil = await _repository.restaurarSesion();
-    if (perfil != null) {
-      emit(AuthAutenticado(perfil));
-    } else {
-      emit(const AuthInicial());
+    try {
+      final perfil = await _repository.restaurarSesion();
+      if (perfil != null) {
+        emit(AuthAutenticado(perfil));
+      } else {
+        emit(const AuthInicial());
+      }
+    } on ErrorConexionException catch (e) {
+      emit(AuthError(e.mensaje));
+    } catch (_) {
+      emit(const AuthError('Ocurrió un error inesperado. Intenta de nuevo.'));
     }
   }
 
   Future<void> cerrarSesion() async {
     await _repository.cerrarSesion();
+    // Los tres son singletons estáticos que sobreviven al cierre de sesión
+    // por diseño (ver el doc-comment de cada `reiniciar()`) - sin esto, la
+    // siguiente cuenta que inicie sesión en la misma corrida de la app
+    // heredaría eventos/favoritos/valoración de la sesión anterior.
+    EventosStore.reiniciar();
+    FavoritosStore.reiniciar();
+    ValoracionStore.reiniciar();
     emit(const AuthInicial());
   }
 }

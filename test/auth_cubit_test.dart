@@ -2,10 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:esri_eventos/features/eventos/data/eventos_store.dart';
+import 'package:esri_eventos/features/favoritos/favoritos_store.dart';
 import 'package:esri_eventos/features/login/data/auth_repository.dart';
 import 'package:esri_eventos/features/login/data/token_storage.dart';
 import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 import 'package:esri_eventos/features/login/presentation/bloc/auth_state.dart';
+import 'package:esri_eventos/features/post_evento/data/valoracion_store.dart';
 
 class _MockDio extends Mock implements Dio {}
 
@@ -227,5 +230,157 @@ void main() {
         ),
       );
     });
+
+    test(
+      'perfil falla por error de red (no 401): emite AuthError sin '
+      'intentar refrescar ni borrar tokens',
+      () async {
+        when(
+          () => tokenStorage.leerAccessToken(),
+        ).thenAnswer((_) async => 'access-guardado');
+        when(
+          () => tokenStorage.leerRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-guardado');
+        when(
+          () => dio.get<Map<String, dynamic>>(
+            '/usuarios/mi-perfil',
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(
+          _dioException(
+            '/usuarios/mi-perfil',
+            type: DioExceptionType.connectionError,
+          ),
+        );
+
+        final expectacion = expectLater(
+          cubit.stream,
+          emitsInOrder([isA<AuthCargando>(), isA<AuthError>()]),
+        );
+
+        await cubit.verificarSesionExistente();
+        await expectacion;
+
+        verifyNever(
+          () => dio.post<Map<String, dynamic>>(
+            '/auth/refresh',
+            data: any(named: 'data'),
+          ),
+        );
+        verifyNever(() => tokenStorage.borrarTokens());
+      },
+    );
+
+    test(
+      'access token vencido y error de red al refrescar: emite AuthError '
+      'sin borrar tokens (antes borraba la sesión por cualquier motivo)',
+      () async {
+        when(
+          () => tokenStorage.leerAccessToken(),
+        ).thenAnswer((_) async => 'access-vencido');
+        when(
+          () => tokenStorage.leerRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-guardado');
+        when(
+          () => dio.get<Map<String, dynamic>>(
+            '/usuarios/mi-perfil',
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(_dioException('/usuarios/mi-perfil', statusCode: 401));
+        when(
+          () => dio.post<Map<String, dynamic>>(
+            '/auth/refresh',
+            data: any(named: 'data'),
+          ),
+        ).thenThrow(
+          _dioException(
+            '/auth/refresh',
+            type: DioExceptionType.connectionError,
+          ),
+        );
+
+        final expectacion = expectLater(
+          cubit.stream,
+          emitsInOrder([isA<AuthCargando>(), isA<AuthError>()]),
+        );
+
+        await cubit.verificarSesionExistente();
+        await expectacion;
+
+        verifyNever(() => tokenStorage.borrarTokens());
+      },
+    );
+
+    test(
+      'refresh token realmente inválido (401): emite AuthInicial y sí borra tokens',
+      () async {
+        when(
+          () => tokenStorage.leerAccessToken(),
+        ).thenAnswer((_) async => 'access-vencido');
+        when(
+          () => tokenStorage.leerRefreshToken(),
+        ).thenAnswer((_) async => 'refresh-vencido');
+        when(
+          () => dio.get<Map<String, dynamic>>(
+            '/usuarios/mi-perfil',
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(_dioException('/usuarios/mi-perfil', statusCode: 401));
+        when(
+          () => dio.post<Map<String, dynamic>>(
+            '/auth/refresh',
+            data: any(named: 'data'),
+          ),
+        ).thenThrow(_dioException('/auth/refresh', statusCode: 401));
+
+        final expectacion = expectLater(
+          cubit.stream,
+          emitsInOrder([isA<AuthCargando>(), isA<AuthInicial>()]),
+        );
+
+        await cubit.verificarSesionExistente();
+        await expectacion;
+
+        verify(() => tokenStorage.borrarTokens()).called(1);
+      },
+    );
+  });
+
+  group('cerrarSesion', () {
+    test(
+      'reinicia EventosStore/FavoritosStore/ValoracionStore - sin esto, la '
+      'siguiente cuenta que inicie sesión heredaría datos de esta',
+      () async {
+        when(
+          () => tokenStorage.leerAccessToken(),
+        ).thenAnswer((_) async => 'access-1');
+        when(
+          () => dio.post<void>('/auth/logout', options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            requestOptions: RequestOptions(path: '/auth/logout'),
+            statusCode: 204,
+          ),
+        );
+
+        EventosStore.estado.value = const EventosCargados(
+          reservados: [],
+          proximos: [],
+        );
+        FavoritosStore.estado.value = const FavoritosCargados([]);
+        ValoracionStore.marcarValorado();
+        addTearDown(() {
+          EventosStore.reiniciar();
+          FavoritosStore.reiniciar();
+          ValoracionStore.reiniciar();
+        });
+
+        await cubit.cerrarSesion();
+
+        expect(EventosStore.estado.value, isA<EventosSinCargar>());
+        expect(FavoritosStore.estado.value, isA<FavoritosSinCargar>());
+        expect(ValoracionStore.eventoValorado.value, isFalse);
+      },
+    );
   });
 }

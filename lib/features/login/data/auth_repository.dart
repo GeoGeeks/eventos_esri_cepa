@@ -46,8 +46,19 @@ class AuthRepository {
 
   /// Para el arranque de la app: si hay tokens guardados y siguen (o se
   /// pueden refrescar) válidos, devuelve el perfil sin pedirle nada al
-  /// usuario. Devuelve `null` si no hay sesión o no se pudo restaurar - en
-  /// ese caso el llamador debe mostrar el login normal, nunca lanza.
+  /// usuario. Devuelve `null` solo cuando de verdad no hay sesión (sin
+  /// tokens guardados, o el backend rechazó el refresh token con 401 -en
+  /// ese caso sí se borra la sesión guardada-). Ante cualquier OTRO error
+  /// (sin conexión, timeout, 5xx del backend) lanza [ErrorConexionException]
+  /// sin tocar los tokens guardados - `AuthCubit` debe distinguir "no hay
+  /// sesión" de "no se pudo verificar la sesión" (ver esa clase).
+  ///
+  /// 🔴 Antes, cualquier falla al refrescar (incluida una simple caída de
+  /// señal) borraba los tokens y mandaba a la persona al login manual - con
+  /// el access token durando solo unos minutos, esto pasaba en casi
+  /// cualquier reapertura de la app con mala señal (ej. en el venue de un
+  /// evento). Corregido: solo un 401 real del backend es motivo para cerrar
+  /// la sesión.
   Future<PerfilUsuario?> restaurarSesion() async {
     final accessToken = await _tokenStorage.leerAccessToken();
     final refreshToken = await _tokenStorage.leerRefreshToken();
@@ -56,10 +67,13 @@ class AuthRepository {
     try {
       return await _obtenerPerfil(accessToken);
     } on DioException catch (e) {
-      if (e.response?.statusCode != 401) return null;
+      if (e.response?.statusCode != 401) {
+        throw ErrorConexionException(_mensajeDeError(e));
+      }
     }
 
-    // El access token expiró - intenta refrescar una vez antes de rendirse.
+    // El access token expiró (esperado, ver el comentario de la clase) -
+    // intenta refrescar una vez antes de rendirse.
     try {
       final respuesta = await _dio.post<Map<String, dynamic>>(
         '/auth/refresh',
@@ -73,9 +87,14 @@ class AuthRepository {
         refreshToken: nuevoRefreshToken,
       );
       return await _obtenerPerfil(nuevoAccessToken);
-    } catch (_) {
-      await _tokenStorage.borrarTokens();
-      return null;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        // Refresh token realmente inválido/vencido - ahí sí se cierra la
+        // sesión de verdad.
+        await _tokenStorage.borrarTokens();
+        return null;
+      }
+      throw ErrorConexionException(_mensajeDeError(e));
     }
   }
 

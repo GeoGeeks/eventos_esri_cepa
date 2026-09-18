@@ -94,6 +94,14 @@ class _Arranque extends StatefulWidget {
 }
 
 class _ArranqueState extends State<_Arranque> {
+  /// No nulo cuando `verificarSesionExistente()` termina en `AuthError` -
+  /// hay una sesión guardada pero no se pudo verificar (sin señal, backend
+  /// caído), distinto de "no hay sesión". En ese caso NO se navega a
+  /// `LoginScreen` (obligaría a teclear el número de documento de nuevo
+  /// aunque la sesión siga siendo válida) - se ofrece reintentar en el
+  /// propio `_Arranque`.
+  String? _errorConexion;
+
   @override
   void initState() {
     super.initState();
@@ -101,10 +109,16 @@ class _ArranqueState extends State<_Arranque> {
   }
 
   Future<void> _decidirPantallaInicial() async {
+    setState(() => _errorConexion = null);
     final cubit = context.read<AuthCubit>();
     await cubit.verificarSesionExistente();
     if (!mounted) return;
-    final autenticado = cubit.state is AuthAutenticado;
+    final estado = cubit.state;
+    if (estado is AuthError) {
+      setState(() => _errorConexion = estado.mensaje);
+      return;
+    }
+    final autenticado = estado is AuthAutenticado;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => autenticado
@@ -115,7 +129,16 @@ class _ArranqueState extends State<_Arranque> {
   }
 
   @override
-  Widget build(BuildContext context) => const _CargandoInicio();
+  Widget build(BuildContext context) {
+    final error = _errorConexion;
+    if (error != null) {
+      return _ErrorVerificandoSesion(
+        mensaje: error,
+        onReintentar: _decidirPantallaInicial,
+      );
+    }
+    return const _CargandoInicio();
+  }
 }
 
 class _CargandoInicio extends StatelessWidget {
@@ -124,5 +147,51 @@ class _CargandoInicio extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: CircularProgressIndicator()));
+  }
+}
+
+/// Pantalla de arranque cuando hay una sesión guardada pero no se pudo
+/// verificar contra el backend (sin señal, timeout, backend caído) - ver
+/// `_ArranqueState._errorConexion`. No existe en el Figma (es un estado de
+/// infraestructura, no de diseño), así que no sigue el sistema de estilos
+/// pixel-a-pixel del resto de la app - solo necesita ser clara y ofrecer
+/// reintentar sin perder la sesión guardada.
+class _ErrorVerificandoSesion extends StatelessWidget {
+  const _ErrorVerificandoSesion({
+    required this.mensaje,
+    required this.onReintentar,
+  });
+
+  final String mensaje;
+  final VoidCallback onReintentar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.wifi_off, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  mensaje,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontFamily: Fonts.regular),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: onReintentar,
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
