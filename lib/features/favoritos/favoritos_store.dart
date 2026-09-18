@@ -52,6 +52,16 @@ class FavoritosStore {
   /// que sí vino del backend.
   static final Set<String> _marcadosLocal = {};
 
+  /// Vuelve a [FavoritosSinCargar] y limpia las marcas locales - debe
+  /// llamarse al cerrar sesión (ver `AuthCubit.cerrarSesion`), mismo motivo
+  /// que `EventosStore.reiniciar`: es un singleton estático que si no se
+  /// resetea, filtra los favoritos de la sesión anterior a la siguiente
+  /// cuenta que inicie sesión en la misma corrida de la app.
+  static void reiniciar() {
+    estado.value = const FavoritosSinCargar();
+    _marcadosLocal.clear();
+  }
+
   static bool contiene(String itemId) {
     if (_marcadosLocal.contains(itemId)) return true;
     final actual = estado.value;

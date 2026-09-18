@@ -50,6 +50,17 @@ class EventosStore {
     const EventosSinCargar(),
   );
 
+  /// Vuelve a [EventosSinCargar] - debe llamarse al cerrar sesión (ver
+  /// `AuthCubit.cerrarSesion`). Sin esto, este singleton estático conserva
+  /// los datos del usuario anterior: si alguien cierra sesión e inicia con
+  /// OTRA cuenta en la misma corrida de la app, `cargar()` ve `estado.value`
+  /// ya en `EventosCargados` y no vuelve a pedir nada, heredando el reparto
+  /// reservados/próximos calculado para la sesión previa (ej. un colaborador
+  /// nuevo heredando el "vacío" de un asistente externo que probó antes).
+  static void reiniciar() {
+    estado.value = const EventosSinCargar();
+  }
+
   /// [esColaborador]: un colaborador interno nunca tiene
   /// `eventosdb.RegistroEvento` (ver CLAUDE.md de `eventos_esri_cepa_api`,
   /// "Colaboradores internos"), así que `GET /eventos/mis-inscripciones`

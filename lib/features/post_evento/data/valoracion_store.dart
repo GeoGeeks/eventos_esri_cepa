@@ -15,4 +15,10 @@ class ValoracionStore {
   static final ValueNotifier<bool> eventoValorado = ValueNotifier<bool>(false);
 
   static void marcarValorado() => eventoValorado.value = true;
+
+  /// Vuelve a `false` - debe llamarse al cerrar sesión (ver
+  /// `AuthCubit.cerrarSesion`), mismo motivo que `EventosStore.reiniciar`:
+  /// singleton estático que si no se resetea, filtra el estado de la sesión
+  /// anterior a la siguiente cuenta que inicie sesión en la misma corrida.
+  static void reiniciar() => eventoValorado.value = false;
 }
