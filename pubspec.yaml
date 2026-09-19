@@ -49,8 +49,10 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.3
 
   # Genera la pantalla de splash nativa (Android + iOS) a partir de una config
-  # declarativa, sin tocar Xcode a mano. Reutiliza el mismo ícono de marca
-  # (assets/icon/icon.png) centrado sobre el azul primario de la app. Correr:
+  # declarativa, sin tocar Xcode a mano. Usa la imagen propia de splash
+  # (assets/splash/SPLASH.png, 2026-09-18 - ya trae su propio fondo azul
+  # #007AC2, no es el ícono de la app) centrada sobre ese mismo color de
+  # fondo (para que combine en pantallas no cuadradas). Correr:
   # dart run flutter_native_splash:create
   flutter_native_splash: ^2.4.4
   mocktail: ^1.0.5
@@ -63,10 +65,10 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#007AC2"
-  image: assets/icon/icon.png
+  image: assets/splash/SPLASH.png
   android_12:
     color: "#007AC2"
-    image: assets/icon/icon.png
+    image: assets/splash/SPLASH.png
   # Ajustar si el splash real de Figma usa el fondo degradado azul oscuro de
   # LoginScreen (FondoInicio) en vez de un color plano - ver CLAUDE.md.
   # Cambiar `color` por el hex exacto, o `background_image` por un asset
