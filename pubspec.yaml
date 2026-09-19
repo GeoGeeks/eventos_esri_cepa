@@ -66,9 +66,17 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#007AC2"
   image: assets/splash/SPLASH.png
+  # Android 12+ (windowSplashScreenAnimatedIcon) fuerza CUALQUIER imagen a un
+  # icono pequeno con margen de seguridad - con SPLASH.png a full (contenido
+  # real medido: 64% ancho / 70% alto del lienzo) "esri Colombia" quedaba
+  # cortado. SPLASH_android12.png es LA MISMA imagen, generada a mano
+  # (assets/splash/generar_splash_android12.py) escalando el contenido a 50%
+  # y centrandolo sobre el mismo azul de fondo (muestreado del propio PNG,
+  # no el hex de arriba, para que la costura sea invisible) - mismo diseno,
+  # solo con margen real. NO es el icono generico de la app.
   android_12:
     color: "#007AC2"
-    image: assets/splash/SPLASH.png
+    image: assets/splash/SPLASH_android12.png
   # Ajustar si el splash real de Figma usa el fondo degradado azul oscuro de
   # LoginScreen (FondoInicio) en vez de un color plano - ver CLAUDE.md.
   # Cambiar `color` por el hex exacto, o `background_image` por un asset
