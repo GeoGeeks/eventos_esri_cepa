@@ -9,6 +9,7 @@ import '../../../core/constants/icons.dart';
 import '../onboarding/data/onboarding_storage.dart';
 import '../onboarding/presentation/screens/onboarding_screen.dart';
 import '../../navigation/menu.dart';
+import 'data/soporte_repository.dart';
 import 'presentation/bloc/auth_cubit.dart';
 import 'presentation/bloc/auth_state.dart';
 import 'verificacion_screen.dart';
@@ -19,7 +20,14 @@ class LoginScreen extends StatefulWidget {
   /// patrón que `EsriEventosApp({AuthCubit? authCubit})`.
   final OnboardingStorage? onboardingStorage;
 
-  const LoginScreen({super.key, this.onboardingStorage});
+  /// Seam para tests, pasado tal cual a `VerificacionScreen`/`SoporteScreen`.
+  final SoporteRepository? soporteRepository;
+
+  const LoginScreen({
+    super.key,
+    this.onboardingStorage,
+    this.soporteRepository,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -89,7 +97,10 @@ class _LoginScreenState extends State<LoginScreen> {
       case AuthNoEncontrado():
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const VerificacionScreen()),
+          MaterialPageRoute(
+            builder: (_) =>
+                VerificacionScreen(soporteRepository: widget.soporteRepository),
+          ),
         );
       case AuthError(:final mensaje):
         // Caso distinto de "no encontramos tu registro" (AuthNoEncontrado):

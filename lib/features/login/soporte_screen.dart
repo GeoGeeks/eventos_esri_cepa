@@ -5,10 +5,14 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/fonts.dart';
 import '../../../core/constants/icons.dart';
 
+import 'data/soporte_repository.dart';
 import 'widgets/fondo_inicio.dart';
 
 class SoporteScreen extends StatefulWidget {
-  const SoporteScreen({super.key});
+  const SoporteScreen({super.key, SoporteRepository? soporteRepository})
+    : _soporteRepository = soporteRepository;
+
+  final SoporteRepository? _soporteRepository;
 
   @override
   State<SoporteScreen> createState() => _SoporteScreenState();
@@ -19,6 +23,10 @@ class _SoporteScreenState extends State<SoporteScreen> {
   final documentoController = TextEditingController();
   final mensajeController = TextEditingController();
 
+  late final SoporteRepository _soporteRepository =
+      widget._soporteRepository ?? SoporteRepository();
+  bool _enviando = false;
+
   @override
   void dispose() {
     correoController.dispose();
@@ -27,12 +35,38 @@ class _SoporteScreenState extends State<SoporteScreen> {
     super.dispose();
   }
 
-  void enviarSolicitud() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Solicitud enviada correctamente')),
-    );
+  Future<void> enviarSolicitud() async {
+    if (_enviando) return;
+    setState(() => _enviando = true);
 
-    Navigator.popUntil(context, (route) => route.isFirst);
+    try {
+      await _soporteRepository.enviarSolicitud(
+        correo: correoController.text.trim(),
+        numeroDocumento: documentoController.text.trim(),
+        mensaje: mensajeController.text.trim(),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Solicitud enviada correctamente')),
+      );
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } on SolicitudSoporteInvalidaException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.mensaje)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No pudimos enviar tu solicitud. Verifica tu conexión e intenta de nuevo.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _enviando = false);
+    }
   }
 
   @override
@@ -276,7 +310,7 @@ class _SoporteScreenState extends State<SoporteScreen> {
               padding: EdgeInsets.zero,
               elevation: 0,
             ),
-            onPressed: enviarSolicitud,
+            onPressed: _enviando ? null : enviarSolicitud,
             child: Text(
               'Enviar',
               style: TextStyle(

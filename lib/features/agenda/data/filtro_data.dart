@@ -55,5 +55,10 @@ class FiltroData {
         'ArcGIS Field Maps',
       ],
     ),
+    // Al final de la lista (no al principio) a propósito: los 5 grupos de
+    // arriba tienen posición pixel-verificada contra Figma
+    // (`agenda_layout_test.dart`) - "Día" es un filtro nuevo sin diseño de
+    // Figma propio, así que se agrega sin correr los que sí lo tienen.
+    GrupoFiltro(etiqueta: 'Día', titulo: 'Día', opciones: ['Jueves', 'Viernes']),
   ];
 }

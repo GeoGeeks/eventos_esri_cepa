@@ -170,6 +170,15 @@ class ActividadCard extends StatelessWidget {
             ),
           ],
 
+          // Sin día (la Charla real no siempre lo trae, y el mock nunca lo
+          // define) no se pinta ni el ícono ni la fila - mismo criterio que
+          // lugar/aforo. Pedido explícito de la PO: el día no aparecía en
+          // ningún lado de la tarjeta.
+          if (actividad.dia.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            FilaMeta(icono: SvgIcon.date, texto: actividad.dia),
+          ],
+
           // Sin lugar/aforo (la Charla real no siempre los trae) no se
           // pinta ni el ícono ni la fila entera - antes quedaba el ícono
           // solo, sin texto al lado.

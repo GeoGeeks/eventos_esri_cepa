@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/constants/fonts.dart';
+import 'features/login/data/soporte_repository.dart';
 import 'features/login/login_screen.dart';
 import 'features/login/presentation/bloc/auth_cubit.dart';
 import 'features/login/presentation/bloc/auth_state.dart';
@@ -33,15 +34,20 @@ class EsriEventosApp extends StatelessWidget {
   /// tipo de seam para `OnboardingStorage` (ver `LoginScreen`) - sin
   /// inyectar un doble, el canal de `flutter_secure_storage` no existe bajo
   /// `flutter_test` y la llamada real se queda pendiente para siempre.
+  /// [soporteRepository] es el mismo tipo de seam para `SoporteRepository`
+  /// (ver `LoginScreen`/`VerificacionScreen`/`SoporteScreen`).
   const EsriEventosApp({
     super.key,
     AuthCubit? authCubit,
     OnboardingStorage? onboardingStorage,
+    SoporteRepository? soporteRepository,
   })  : _authCubit = authCubit,
-        _onboardingStorage = onboardingStorage;
+        _onboardingStorage = onboardingStorage,
+        _soporteRepository = soporteRepository;
 
   final AuthCubit? _authCubit;
   final OnboardingStorage? _onboardingStorage;
+  final SoporteRepository? _soporteRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +66,10 @@ class EsriEventosApp extends StatelessWidget {
         // El arranque verifica si hay una sesión guardada antes de decidir
         // entre LoginScreen (sin sesión) o Menu (sesión guardada y válida)
         // - ver _Arranque.
-        home: _Arranque(onboardingStorage: _onboardingStorage),
+        home: _Arranque(
+          onboardingStorage: _onboardingStorage,
+          soporteRepository: _soporteRepository,
+        ),
       ),
     );
   }
@@ -84,10 +93,14 @@ class EsriEventosApp extends StatelessWidget {
 /// puede volver a interceptar nada de lo que pase después dentro de
 /// `LoginScreen`.
 class _Arranque extends StatefulWidget {
-  const _Arranque({OnboardingStorage? onboardingStorage})
-      : _onboardingStorage = onboardingStorage;
+  const _Arranque({
+    OnboardingStorage? onboardingStorage,
+    SoporteRepository? soporteRepository,
+  })  : _onboardingStorage = onboardingStorage,
+        _soporteRepository = soporteRepository;
 
   final OnboardingStorage? _onboardingStorage;
+  final SoporteRepository? _soporteRepository;
 
   @override
   State<_Arranque> createState() => _ArranqueState();
@@ -123,7 +136,10 @@ class _ArranqueState extends State<_Arranque> {
       MaterialPageRoute(
         builder: (_) => autenticado
             ? const Menu()
-            : LoginScreen(onboardingStorage: widget._onboardingStorage),
+            : LoginScreen(
+                onboardingStorage: widget._onboardingStorage,
+                soporteRepository: widget._soporteRepository,
+              ),
       ),
     );
   }

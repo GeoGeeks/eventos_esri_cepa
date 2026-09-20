@@ -7,6 +7,7 @@ import '../constants/fonts.dart';
 import '../constants/icons.dart';
 import 'app_icons.dart';
 import 'fila_meta.dart';
+import 'imagen_evento.dart';
 
 /// Tarjeta de una persona del evento — Speakers e Invitados y Experiencias.
 ///
@@ -135,11 +136,10 @@ class InfoCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(tamanoFoto),
-            child: Image.asset(
-              imagenAsset,
+            child: ImagenEvento(
+              url: imagenAsset,
               width: tamanoFoto,
               height: tamanoFoto,
-              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: separacionFoto),

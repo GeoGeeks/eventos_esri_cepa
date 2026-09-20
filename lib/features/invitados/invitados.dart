@@ -29,11 +29,15 @@ import '../agenda/data/franja_horaria.dart';
 import '../agenda/data/laboratorio.dart';
 import '../credencial/presentation/credencial_modal.dart';
 import '../eventos/data/evento.dart';
+import '../expositores/data/expositor.dart';
+import '../expositores/data/expositor_repository.dart';
 import '../favoritos/favoritos.dart';
 import '../favoritos/favoritos_store.dart';
 import '../laboratorios/data/registro_laboratorio.dart';
 import '../laboratorios/data/registro_laboratorio_repository.dart';
 import '../laboratorios/presentation/laboratorios_info_modal.dart';
+import '../speakers/data/speaker.dart';
+import '../speakers/data/speaker_repository.dart';
 import 'data/invitados_mock_data.dart';
 
 class InvitadosScreen extends StatefulWidget {
@@ -54,6 +58,8 @@ class InvitadosScreen extends StatefulWidget {
   /// Seams para tests (inyectar dobles sin red real).
   final AgendaRepository? agendaRepository;
   final RegistroLaboratorioRepository? registroRepository;
+  final SpeakerRepository? speakerRepository;
+  final ExpositorRepository? expositorRepository;
 
   const InvitadosScreen({
     super.key,
@@ -65,6 +71,8 @@ class InvitadosScreen extends StatefulWidget {
     this.eventoReal,
     this.agendaRepository,
     this.registroRepository,
+    this.speakerRepository,
+    this.expositorRepository,
   });
 
   @override
@@ -85,6 +93,24 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     'Laboratorios',
   ];
 
+  /// En modo mock (`eventoReal` nulo) siempre las 4 de siempre - lo que
+  /// usan los tests de layout. En modo real: solo los módulos dinámicos que
+  /// el evento tenga encendidos (`Evento.modulosHabilitados`), en el mismo
+  /// orden; si NINGUNO está encendido, una sola pestaña "Agenda" (embebida,
+  /// ver `_tabAgendaEmbebida`) en vez de dejar la barra de pestañas vacía -
+  /// pedido explícito del usuario, ver `Evento.tieneAlgunModuloConPestana`.
+  List<String> get _tabsActivas {
+    final eventoReal = widget.eventoReal;
+    if (eventoReal == null) return _tabs;
+    if (!eventoReal.tieneAlgunModuloConPestana) return const ['Agenda'];
+    return [
+      if (eventoReal.tieneSpeakers) 'Speakers e Invitados',
+      if (eventoReal.tieneExperiencias) 'Experiencias',
+      if (eventoReal.tieneStands) 'Stands',
+      if (eventoReal.tieneLaboratorios) 'Laboratorios',
+    ];
+  }
+
   /// `y` de la alerta de guardado: el borde superior del panel blanco.
   static const double _topAlerta = 96;
 
@@ -97,6 +123,10 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       widget.agendaRepository ?? AgendaRepository();
   late final RegistroLaboratorioRepository _registroRepository =
       widget.registroRepository ?? RegistroLaboratorioRepository();
+  late final SpeakerRepository _speakerRepository =
+      widget.speakerRepository ?? SpeakerRepository();
+  late final ExpositorRepository _expositorRepository =
+      widget.expositorRepository ?? ExpositorRepository();
 
   /// Estado del cupo de cada laboratorio, por índice. Vive aquí porque la
   /// reserva sobrevive a que la tarjeta se pliegue y se despliegue.
@@ -117,11 +147,57 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   String? _errorLaboratorios;
   List<Laboratorio> _laboratoriosReales = const [];
 
+  /// Mismo criterio que `_cargandoLaboratorios` - un solo estado para las
+  /// tres pestañas de Speakers/Experiencias/Stands, que se cargan juntas.
+  bool? _cargandoInvitados;
+  String? _errorInvitados;
+  List<Speaker> _speakersReales = const [];
+  List<Expositor> _expositoresReales = const [];
+
   @override
   void initState() {
     super.initState();
     final eventoReal = widget.eventoReal;
-    if (eventoReal != null) _cargarLaboratoriosReales(eventoReal.id);
+    if (eventoReal != null) {
+      _cargarLaboratoriosReales(eventoReal.id);
+      _cargarInvitadosReales(eventoReal.id);
+    }
+  }
+
+  Future<void> _cargarInvitadosReales(String idEvento) async {
+    setState(() {
+      _cargandoInvitados = true;
+      _errorInvitados = null;
+    });
+    try {
+      final speakers = await _speakerRepository.listar(idEvento);
+      final expositores = await _expositorRepository.listar(idEvento);
+      if (!mounted) return;
+      setState(() {
+        _speakersReales = speakers;
+        _expositoresReales = expositores;
+        _cargandoInvitados = false;
+      });
+    } catch (e) {
+      if (e is DioException) {
+        debugPrint(
+          '[InvitadosScreen] cargar speakers/expositores($idEvento) falló: '
+          'status=${e.response?.statusCode} data=${e.response?.data} '
+          '(${e.message})',
+        );
+      } else {
+        debugPrint(
+          '[InvitadosScreen] cargar speakers/expositores($idEvento) falló: $e',
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _errorInvitados =
+            'No se pudo cargar la información. Verifica tu conexión '
+            'e intenta de nuevo.';
+        _cargandoInvitados = false;
+      });
+    }
   }
 
   Future<void> _cargarLaboratoriosReales(String idEvento) async {
@@ -337,7 +413,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   }
 
   void _cambiarTab(int i) {
-    if (i < 0 || i >= _tabs.length) return;
+    final tabs = _tabsActivas;
+    if (i < 0 || i >= tabs.length) return;
     setState(() {
       _tabIndex = i;
       _expandidas.clear();
@@ -347,7 +424,9 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     // esta visita a la pantalla - solo en modo real: los tests de
     // layout/pixel-fidelity montan la pantalla en modo mock y no esperan
     // este modal encima de la lista.
-    if (i == 3 && !_mostroInfoLaboratorios && widget.eventoReal != null) {
+    if (tabs[i] == 'Laboratorios' &&
+        !_mostroInfoLaboratorios &&
+        widget.eventoReal != null) {
       _mostroInfoLaboratorios = true;
       LaboratoriosInfoModal.mostrar(context);
     }
@@ -400,42 +479,49 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   }
 
   Widget _contenidoTab() {
-    switch (_tabIndex) {
-      case 0:
-        return _listaPersonas(widget.speakers);
-      case 1:
-        return _listaExperiencias(widget.experiencias);
-      case 2:
-        return _listaExperiencias(widget.stands);
-      case 3:
+    final tabs = _tabsActivas;
+    if (_tabIndex >= tabs.length) return const SizedBox.shrink();
+    switch (tabs[_tabIndex]) {
+      case 'Speakers e Invitados':
+        return _tabSpeakers();
+      case 'Experiencias':
+        return _tabExpositores('experiencia', widget.experiencias);
+      case 'Stands':
+        return _tabExpositores('stand', widget.stands);
+      case 'Laboratorios':
         return _tabLaboratorios();
+      case 'Agenda':
+        return _tabAgendaEmbebida();
       default:
         return const SizedBox.shrink();
     }
   }
 
-  /// Carga/error/vacío del listado real de laboratorios - mismo criterio
-  /// visual que `AgendaScreen._contenido`. En modo mock (`eventoReal` nulo)
-  /// se queda exactamente como antes: la lista de [InvitadosScreen.laboratorios]
-  /// sin pasar por ningún estado de carga.
-  Widget _tabLaboratorios() {
-    if (widget.eventoReal == null) {
-      return _listaLaboratorios(widget.laboratorios);
-    }
-    if (_cargandoLaboratorios == true) {
+  /// Carga/error/vacío genérico para una pestaña que depende de datos
+  /// reales - mismo criterio visual que `AgendaScreen._contenido`, factor
+  /// común de lo que antes tenía solo `_tabLaboratorios` y ahora comparten
+  /// también Speakers/Experiencias/Stands.
+  Widget _estadoCarga({
+    required bool? cargando,
+    required String? error,
+    required bool vacio,
+    required VoidCallback onReintentar,
+    required Widget Function() contenido,
+  }) {
+    if (cargando == true) {
       return const Padding(
         padding: EdgeInsets.only(top: 40),
         child: Center(child: CircularProgressIndicator()),
       );
     }
-    if (_errorLaboratorios != null) {
+    if (error != null) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
         child: Center(
           child: Column(
             children: [
               Text(
-                _errorLaboratorios!,
+                error,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontFamily: Fonts.regular,
@@ -444,16 +530,13 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              BotonReintentar(
-                onPressed: () =>
-                    _cargarLaboratoriosReales(widget.eventoReal!.id),
-              ),
+              BotonReintentar(onPressed: onReintentar),
             ],
           ),
         ),
       );
     }
-    if (_laboratoriosReales.isEmpty) {
+    if (vacio) {
       return const Padding(
         padding: EdgeInsets.only(top: 40),
         child: Center(
@@ -469,10 +552,111 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
         ),
       );
     }
-    return _listaLaboratorios([
-      for (var i = 0; i < _laboratoriosReales.length; i++)
-        _sesionDesdeLaboratorio(_laboratoriosReales[i], i),
-    ]);
+    return contenido();
+  }
+
+  /// En modo mock (`eventoReal` nulo) se queda exactamente como antes: la
+  /// lista de [InvitadosScreen.laboratorios] sin pasar por ningún estado de
+  /// carga.
+  Widget _tabLaboratorios() {
+    if (widget.eventoReal == null) {
+      return _listaLaboratorios(widget.laboratorios);
+    }
+    return _estadoCarga(
+      cargando: _cargandoLaboratorios,
+      error: _errorLaboratorios,
+      vacio: _laboratoriosReales.isEmpty,
+      onReintentar: () => _cargarLaboratoriosReales(widget.eventoReal!.id),
+      contenido: () => _listaLaboratorios([
+        for (var i = 0; i < _laboratoriosReales.length; i++)
+          _sesionDesdeLaboratorio(_laboratoriosReales[i], i),
+      ]),
+    );
+  }
+
+  /// `Speaker.actividades` reutiliza `Charla` (ver el doc-comment de esa
+  /// clase) - se usa solo la primera para "dónde/cuándo", igual que hacía
+  /// el mock (`PersonaEvento.fecha`/`.lugar`). `null` (no una cadena vacía)
+  /// cuando no hay actividad asignada, para que `InfoCard` oculte la fila
+  /// en vez de mostrarla en blanco.
+  PersonaEvento _personaDesdeSpeaker(Speaker speaker) {
+    final actividad =
+        speaker.actividades.isNotEmpty ? speaker.actividades.first : null;
+    String? fecha;
+    if (actividad != null) {
+      final dia = actividad.dia;
+      fecha = dia != null && dia.isNotEmpty
+          ? '$dia · ${actividad.horarioFormateado}'
+          : actividad.horarioFormateado;
+    }
+    return PersonaEvento(
+      imagenAsset: speaker.imagenUrl ?? Images.esriEventos,
+      titulo: speaker.nombre,
+      subtitulo: speaker.cargo,
+      descripcion: actividad?.nombre,
+      fecha: fecha,
+      lugar: actividad?.lugar,
+    );
+  }
+
+  ExperienciaEvento _experienciaDesdeExpositor(Expositor expositor) {
+    return ExperienciaEvento(
+      imagenAsset: expositor.imagenUrl ?? Images.esriEventos,
+      titulo: expositor.nombre,
+      // Solo Stands lleva subtítulo (categoría) - mismo criterio que ya
+      // tenía el mock (ver el doc-comment de `ExperienciaEvento`).
+      subtitulo: expositor.tipo == 'stand' ? expositor.categoria : null,
+      fecha: expositor.fechaFormateada,
+      lugar: expositor.ubicacion ?? '',
+      descripcion: expositor.descripcion,
+      enlace: expositor.emailContacto,
+    );
+  }
+
+  Widget _tabSpeakers() {
+    if (widget.eventoReal == null) return _listaPersonas(widget.speakers);
+    return _estadoCarga(
+      cargando: _cargandoInvitados,
+      error: _errorInvitados,
+      vacio: _speakersReales.isEmpty,
+      onReintentar: () => _cargarInvitadosReales(widget.eventoReal!.id),
+      contenido: () => _listaPersonas([
+        for (final s in _speakersReales) _personaDesdeSpeaker(s),
+      ]),
+    );
+  }
+
+  /// [tipo] es 'experiencia' o 'stand' (`Expositor.tipo`) - [mock] es la
+  /// lista fija que se usa mientras no haya `eventoReal`.
+  Widget _tabExpositores(String tipo, List<ExperienciaEvento> mock) {
+    if (widget.eventoReal == null) return _listaExperiencias(mock);
+    final filtrados = [
+      for (final e in _expositoresReales)
+        if (e.tipo == tipo) e,
+    ];
+    return _estadoCarga(
+      cargando: _cargandoInvitados,
+      error: _errorInvitados,
+      vacio: filtrados.isEmpty,
+      onReintentar: () => _cargarInvitadosReales(widget.eventoReal!.id),
+      contenido: () => _listaExperiencias([
+        for (final e in filtrados) _experienciaDesdeExpositor(e),
+      ]),
+    );
+  }
+
+  /// Solo se llega aquí cuando `eventoReal` no tiene NINGÚN módulo dinámico
+  /// con pestaña encendido (`_tabsActivas` devuelve `['Agenda']` en ese
+  /// caso) - Agenda embebida como una pestaña más, en vez de exigir el
+  /// botón "Agenda" que en ese escenario ya está oculto (ver `_InfoEvento`
+  /// más abajo). Reusa `_agendaRepository` y el mismo `_alertaVisible`/
+  /// `AlertaGuardado` que ya usa Laboratorios para "guardado en favoritos".
+  Widget _tabAgendaEmbebida() {
+    return AgendaContenido(
+      idEvento: widget.eventoReal!.id,
+      repository: _agendaRepository,
+      onFavoritoMarcado: (marcada) => setState(() => _alertaVisible = marcada),
+    );
   }
 
   Widget _listaPersonas(List<PersonaEvento> items) {
@@ -593,13 +777,22 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                               context,
                               evento: widget.eventoReal,
                             ),
-                            onAgenda: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    AgendaScreen(idEvento: widget.eventoReal?.id),
-                              ),
-                            ),
+                            // `null` oculta el botón - ver el doc-comment de
+                            // `_tabsActivas`/`Evento.tieneAlgunModuloConPestana`:
+                            // sin ningún dinámico con pestaña habilitado, Agenda
+                            // se muestra embebida en vez de por este botón.
+                            onAgenda:
+                                widget.eventoReal != null &&
+                                    !widget.eventoReal!.tieneAlgunModuloConPestana
+                                ? null
+                                : () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => AgendaScreen(
+                                        idEvento: widget.eventoReal?.id,
+                                      ),
+                                    ),
+                                  ),
                             onFavoritos: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -612,7 +805,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
                           const SizedBox(height: 14),
                           BarraPestanas(
                             key: const Key('invitados-tabs'),
-                            pestanas: _tabs,
+                            pestanas: _tabsActivas,
                             indice: _tabIndex,
                             onPestana: _cambiarTab,
                           ),
@@ -690,7 +883,10 @@ class BotonVolver extends StatelessWidget {
 class _InfoEvento extends StatelessWidget {
   final EventoDetalle evento;
   final VoidCallback onCredencial;
-  final VoidCallback onAgenda;
+
+  /// `null` oculta el botón "Agenda" - ver el doc-comment de
+  /// `_InvitadosScreenState._tabsActivas`.
+  final VoidCallback? onAgenda;
   final VoidCallback onFavoritos;
 
   const _InfoEvento({
@@ -771,14 +967,16 @@ class _InfoEvento extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              _BotonAccion(
-                width: 125,
-                label: 'Agenda',
-                icono: SvgIcon.agenda,
-                relleno: true,
-                onTap: onAgenda,
-              ),
-              const SizedBox(width: 16),
+              if (onAgenda != null) ...[
+                _BotonAccion(
+                  width: 125,
+                  label: 'Agenda',
+                  icono: SvgIcon.agenda,
+                  relleno: true,
+                  onTap: onAgenda!,
+                ),
+                const SizedBox(width: 16),
+              ],
               _BotonAccion(
                 width: 160,
                 label: 'Mis Favoritos',

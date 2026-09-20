@@ -5,9 +5,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/utils/area_segura.dart';
+import '../../../../core/widgets/boton_reintentar.dart';
 import '../../../../core/widgets/casilla_verificacion.dart';
 import '../../../../core/widgets/upcoming_event_card.dart';
-import '../../data/eventos_data.dart';
+import '../../../eventos/data/evento.dart';
+import '../../../eventos/data/eventos_store.dart';
 
 class HistorialScreen extends StatefulWidget {
   final VoidCallback? onOpenPostEvento;
@@ -24,10 +26,10 @@ class _HistorialScreenState extends State<HistorialScreen> {
   bool virtualSelected = false;
   bool presencialSelected = false;
 
-  List<Evento> get filteredEvents {
-    return eventosMock.where((evento) {
+  List<Evento> _filtrar(List<Evento> asistidos) {
+    return asistidos.where((evento) {
       final matchesSearch =
-          evento.titulo.toLowerCase().contains(query.toLowerCase());
+          evento.nombre.toLowerCase().contains(query.toLowerCase());
 
       bool matchesFilter = true;
       if (virtualSelected && !presencialSelected) {
@@ -42,7 +44,6 @@ class _HistorialScreenState extends State<HistorialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final eventos = filteredEvents;
     final screenWidth = MediaQuery.of(context).size.width;
     final rightPadding = math.max(0.0, (screenWidth - 360) / 2);
 
@@ -187,46 +188,11 @@ class _HistorialScreenState extends State<HistorialScreen> {
                           const SizedBox(height: 24),
 
                           // --- LISTA DE EVENTOS (dentro del mismo scroll) ---
-                          if (eventos.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Center(
-                                child: Text(
-                                  'No hay eventos pasados',
-                                  style: TextStyle(
-                                    fontFamily: Fonts.regular,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFF6B6B6B),
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            for (var i = 0; i < eventos.length; i++)
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: i == eventos.length - 1 ? 0 : 12,
-                                ),
-                                child: UpcomingEventCard(
-                                  title: eventos[i].titulo,
-                                  date:
-                                      '${eventos[i].fecha} - ${eventos[i].hora}',
-                                  location: eventos[i].direccion,
-                                  image: eventos[i].image,
-                                  mode: eventos[i].presencial
-                                      ? 'Presencial'
-                                      : 'Virtual',
-                                  isHistorial: true,
-                                  estado: eventos[i].estado,
-                                  onViewMore: () {
-                                    if (widget.onOpenPostEvento != null) {
-                                      widget.onOpenPostEvento!();
-                                    }
-                                  },
-                                  onRegister: () {},
-                                ),
-                              ),
+                          ValueListenableBuilder<EventosEstado>(
+                            valueListenable: EventosStore.estado,
+                            builder: (context, estado, _) =>
+                                _listaAsistidos(estado),
+                          ),
                         ],
                       ),
                     ),
@@ -254,6 +220,84 @@ class _HistorialScreenState extends State<HistorialScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Estado de carga/error/vacío de `EventosStore` (mismo criterio que
+  /// `_ListadoReservados` en `reservas_screen.dart`) aplicado a los eventos
+  /// ya asistidos (`EventosCargados.asistidos`).
+  Widget _listaAsistidos(EventosEstado estado) {
+    return switch (estado) {
+      EventosSinCargar() || EventosCargando() => const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      EventosError(:final mensaje) => Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: Center(
+          child: Column(
+            children: [
+              Text(
+                mensaje,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: Fonts.regular,
+                  fontSize: 14,
+                  color: Color(0xFF6B6B6B),
+                ),
+              ),
+              const SizedBox(height: 12),
+              BotonReintentar(onPressed: () => EventosStore.cargar(forzar: true)),
+            ],
+          ),
+        ),
+      ),
+      EventosCargados(:final asistidos) => _construirLista(_filtrar(asistidos)),
+    };
+  }
+
+  Widget _construirLista(List<Evento> eventos) {
+    if (eventos.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(
+          child: Text(
+            'No hay eventos pasados',
+            style: TextStyle(
+              fontFamily: Fonts.regular,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF6B6B6B),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (var i = 0; i < eventos.length; i++)
+          Padding(
+            padding: EdgeInsets.only(bottom: i == eventos.length - 1 ? 0 : 12),
+            child: UpcomingEventCard(
+              title: eventos[i].nombre,
+              date: eventos[i].fechaYHoraFormateada,
+              location: eventos[i].lugar ?? '',
+              image: eventos[i].imagenParaCarta,
+              mode: eventos[i].presencial ? 'Presencial' : 'Virtual',
+              isHistorial: true,
+              // Siempre "Finalizado": esta lista solo trae eventos con
+              // `Evento.yaPaso == true` (ver `EventosStore.cargar`).
+              estado: 'Finalizado',
+              onViewMore: () {
+                if (widget.onOpenPostEvento != null) {
+                  widget.onOpenPostEvento!();
+                }
+              },
+              onRegister: () {},
+            ),
+          ),
+      ],
     );
   }
 }

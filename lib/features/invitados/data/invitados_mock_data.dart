@@ -23,9 +23,14 @@ class PersonaEvento {
   final String imagenAsset;
   final String titulo;
   final String subtitulo;
-  final String descripcion;
-  final String fecha;
-  final String lugar;
+
+  /// Título de la charla que dicta - `null` cuando el Speaker real no tiene
+  /// ninguna actividad asignada todavía (`Speaker.actividades` vacío). El
+  /// mock siempre trae los tres, `InfoCard` ya sabe ocultar la fila cuando
+  /// vienen en `null` en vez de inventar un valor.
+  final String? descripcion;
+  final String? fecha;
+  final String? lugar;
 
   const PersonaEvento({
     required this.imagenAsset,

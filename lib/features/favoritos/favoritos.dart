@@ -63,6 +63,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
         titulo: charla.nombre,
         horario: charla.horarioFormateado,
         ponente: '',
+        dia: charla.dia ?? '',
         lugar: charla.lugar ?? '',
         aforo: '',
         etiquetas: charla.etiquetas,
@@ -111,7 +112,9 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
       if (valores.isEmpty) continue;
       final coincide = valores.any(
         (valor) =>
-            valor == actividad.lugar || actividad.etiquetas.contains(valor),
+            valor == actividad.dia ||
+            valor == actividad.lugar ||
+            actividad.etiquetas.contains(valor),
       );
       if (!coincide) return false;
     }

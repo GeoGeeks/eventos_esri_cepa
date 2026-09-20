@@ -4,35 +4,56 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
+import '../../../login/data/perfil_usuario.dart';
 import '../../data/ecard_mock_data.dart';
 import '../../data/ecard_visibility_config.dart';
 
 class ECardWidget extends StatelessWidget {
   final ECardVisibilityConfig visibilityConfig;
 
+  /// Perfil autenticado real - `null` deja el comportamiento mock de
+  /// siempre (`EcardMockData`), que es lo que usan los tests de layout que
+  /// montan este widget sin `AuthCubit` autenticado. Ver
+  /// `ECardScreen._ECardScreenState.build`.
+  final PerfilUsuario? perfil;
+
   const ECardWidget({
     super.key,
     required this.visibilityConfig,
+    this.perfil,
   });
+
+  String get _nombre => perfil?.nombreCompleto ?? EcardMockData.nombre;
+  String get _iniciales => perfil?.iniciales ?? 'ML';
+
+  /// `cargo`/`organizacion` del perfil real son opcionales (no toda
+  /// inscripción los trae) - a diferencia de `EcardMockData`, que siempre
+  /// tiene un valor fijo, en modo real se dejan en `null` en vez de rellenar
+  /// con el mock, para no mezclar un dato real con uno inventado.
+  String? get _cargo => perfil != null ? perfil!.cargo : EcardMockData.cargo;
+  String? get _empresa =>
+      perfil != null ? perfil!.organizacion : EcardMockData.empresa;
+  String get _correo => perfil?.email ?? EcardMockData.correo;
+  String get _telefono => perfil?.celular ?? EcardMockData.telefono;
 
   String _buildVCard() {
     final buffer = StringBuffer()
       ..writeln('BEGIN:VCARD')
       ..writeln('VERSION:3.0')
-      ..writeln('N:;${EcardMockData.nombre};;;')
-      ..writeln('FN:${EcardMockData.nombre}');
+      ..writeln('N:;$_nombre;;;')
+      ..writeln('FN:$_nombre');
 
-    if (visibilityConfig.cargo) {
-      buffer.writeln('TITLE:${EcardMockData.cargo}');
+    if (visibilityConfig.cargo && _cargo != null && _cargo!.isNotEmpty) {
+      buffer.writeln('TITLE:$_cargo');
     }
-    if (visibilityConfig.empresa) {
-      buffer.writeln('ORG:${EcardMockData.empresa}');
+    if (visibilityConfig.empresa && _empresa != null && _empresa!.isNotEmpty) {
+      buffer.writeln('ORG:$_empresa');
     }
     if (visibilityConfig.correo) {
-      buffer.writeln('EMAIL;TYPE=INTERNET:${EcardMockData.correo}');
+      buffer.writeln('EMAIL;TYPE=INTERNET:$_correo');
     }
     if (visibilityConfig.telefono) {
-      buffer.writeln('TEL;TYPE=CELL:${EcardMockData.telefono}');
+      buffer.writeln('TEL;TYPE=CELL:$_telefono');
     }
 
     buffer.writeln('END:VCARD');
@@ -42,8 +63,12 @@ class ECardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> subtitleParts = [];
-    if (visibilityConfig.cargo) subtitleParts.add(EcardMockData.cargo);
-    if (visibilityConfig.empresa) subtitleParts.add(EcardMockData.empresa);
+    if (visibilityConfig.cargo && _cargo != null && _cargo!.isNotEmpty) {
+      subtitleParts.add(_cargo!);
+    }
+    if (visibilityConfig.empresa && _empresa != null && _empresa!.isNotEmpty) {
+      subtitleParts.add(_empresa!);
+    }
     final String subtitleText = subtitleParts.join(' - ');
 
     return SizedBox(
@@ -72,11 +97,11 @@ class ECardWidget extends StatelessWidget {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      /// María López (24px Bold #007AC2, line-height 20/24)
-                      const Text(
-                        EcardMockData.nombre,
+                      /// Nombre real del asistente (24px Bold #007AC2, line-height 20/24)
+                      Text(
+                        _nombre,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: Fonts.medium,
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
@@ -142,9 +167,9 @@ class ECardWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'ML',
-                style: TextStyle(
+              child: Text(
+                _iniciales,
+                style: const TextStyle(
                   fontFamily: Fonts.medium,
                   fontSize: 32,
                   fontWeight: FontWeight.w700,

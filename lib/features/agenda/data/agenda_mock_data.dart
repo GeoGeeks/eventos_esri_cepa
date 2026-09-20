@@ -7,6 +7,10 @@ class Actividad {
   final String titulo;
   final String horario;
   final String ponente;
+
+  /// Día textual (ej. "Jueves") - vacío en modo mock/de prueba, igual que
+  /// `ponente`/`lugar` cuando la Charla real no lo trae. Ver `Charla.dia`.
+  final String dia;
   final String lugar;
   final String aforo;
   final List<String> etiquetas;
@@ -28,6 +32,7 @@ class Actividad {
     required this.titulo,
     required this.horario,
     required this.ponente,
+    this.dia = '',
     required this.lugar,
     required this.aforo,
     required this.etiquetas,
@@ -53,6 +58,7 @@ class Actividad {
     titulo: titulo,
     horario: horario,
     ponente: ponente,
+    dia: dia,
     lugar: lugar,
     aforo: aforo,
     etiquetas: etiquetas,

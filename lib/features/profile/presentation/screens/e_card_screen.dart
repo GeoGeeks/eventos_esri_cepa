@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
+import '../../../login/presentation/bloc/auth_cubit.dart';
+import '../../../login/presentation/bloc/auth_state.dart';
 import '../../data/ecard_visibility_config.dart';
 import '../widgets/e_card_action_button.dart';
 import '../widgets/e_card_config_modal.dart';
@@ -53,6 +56,12 @@ class _ECardScreenState extends State<ECardScreen> {
     // Figma: los dos botones arrancan en y=36 y el título «E-card» en y=96.
     // Solo bajan si la barra de estado llegara a taparlos.
     final double topBotones = AreaSegura.top(context, _topBotones);
+
+    // Perfil real del asistente autenticado - `null` deja `ECardWidget` en
+    // su comportamiento mock de siempre (`EcardMockData`), ver el
+    // doc-comment de `ECardWidget.perfil`.
+    final estadoAuth = context.watch<AuthCubit>().state;
+    final perfil = estadoAuth is AuthAutenticado ? estadoAuth.perfil : null;
 
     return Container(
       color: AppColors.lightGray,
@@ -157,6 +166,7 @@ class _ECardScreenState extends State<ECardScreen> {
                         /// Tarjeta E-Card Widget
                         ECardWidget(
                           visibilityConfig: _visibilityConfig,
+                          perfil: perfil,
                         ),
 
                         const SizedBox(height: 24),

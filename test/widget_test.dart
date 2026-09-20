@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:esri_eventos/features/login/data/auth_exceptions.dart';
 import 'package:esri_eventos/features/login/data/auth_repository.dart';
 import 'package:esri_eventos/features/login/data/perfil_usuario.dart';
+import 'package:esri_eventos/features/login/data/soporte_repository.dart';
 import 'package:esri_eventos/features/login/login_screen.dart';
 import 'package:esri_eventos/features/login/presentation/bloc/auth_cubit.dart';
 import 'package:esri_eventos/features/login/soporte_screen.dart';
@@ -50,6 +51,16 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> cerrarSesion() async {}
 }
 
+/// Doble de [SoporteRepository] sin red real - siempre "envía" con éxito.
+class _FakeSoporteRepository implements SoporteRepository {
+  @override
+  Future<void> enviarSolicitud({
+    required String correo,
+    required String numeroDocumento,
+    required String mensaje,
+  }) async {}
+}
+
 /// Doble de [OnboardingStorage] en memoria (sin canal de plataforma real,
 /// que bajo `flutter_test` se queda pendiente para siempre en vez de
 /// lanzar - ver `LoginScreen._irTrasAutenticar`).
@@ -78,6 +89,7 @@ Future<void> _arrancarApp(
     EsriEventosApp(
       authCubit: AuthCubit(repository: _FakeAuthRepository()),
       onboardingStorage: _FakeOnboardingStorage(yaVisto: onboardingYaVisto),
+      soporteRepository: _FakeSoporteRepository(),
     ),
   );
   await tester.pumpAndSettle();

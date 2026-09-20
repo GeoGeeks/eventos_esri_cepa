@@ -7,13 +7,18 @@ import '../../../core/constants/fonts.dart';
 import '../../../core/constants/icons.dart';
 
 import '../onboarding/presentation/screens/onboarding_screen.dart';
+import 'data/soporte_repository.dart';
 import 'presentation/bloc/auth_cubit.dart';
 import 'presentation/bloc/auth_state.dart';
 import 'soporte_screen.dart';
 import 'widgets/fondo_inicio.dart';
 
 class VerificacionScreen extends StatefulWidget {
-  const VerificacionScreen({super.key});
+  /// Seam para tests - mismo patrón que `LoginScreen({onboardingStorage})`,
+  /// pasado tal cual a `SoporteScreen`.
+  final SoporteRepository? soporteRepository;
+
+  const VerificacionScreen({super.key, this.soporteRepository});
 
   @override
   State<VerificacionScreen> createState() => _VerificacionScreenState();
@@ -33,7 +38,10 @@ class _VerificacionScreenState extends State<VerificacionScreen> {
   void irASoporte() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const SoporteScreen()),
+      MaterialPageRoute(
+        builder: (_) =>
+            SoporteScreen(soporteRepository: widget.soporteRepository),
+      ),
     );
   }
 

@@ -24,6 +24,11 @@ import 'valoracion_modal.dart';
 import 'widgets/actividad_card.dart';
 import 'widgets/cabecera_actividades.dart';
 
+/// Pantalla standalone de Agenda - cabecera, bottom nav y la alerta de
+/// "guardado" propias; el contenido real (buscador/filtro/lista) vive en
+/// [AgendaContenido], reusado embebido dentro de `InvitadosScreen` cuando
+/// un evento no tiene ningún módulo dinámico con pestaña habilitado (ver
+/// `Evento.tieneAlgunModuloConPestana`).
 class AgendaScreen extends StatefulWidget {
   final List<Actividad> actividades;
 
@@ -55,6 +60,124 @@ class _AgendaScreenState extends State<AgendaScreen> {
   /// en Laboratorios.
   static const double _topAlerta = 60;
 
+  bool _alertaVisible = false;
+
+  void _irAMenu(int index) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => Menu(initialIndex: index)),
+      (route) => false,
+    );
+  }
+
+  void _irAFavoritos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FavoritosScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          Column(
+              children: [
+                Padding(
+                  // La cabecera va a 36 de Figma; solo baja si la barra de
+                  // estado llegara a taparla.
+                  padding: EdgeInsets.fromLTRB(
+                    26,
+                    AreaSegura.top(context, 36),
+                    26,
+                    0,
+                  ),
+                  child: CabeceraActividades(
+                    titulo: 'Agenda',
+                    onVolver: () => Navigator.pop(context),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                    child: AgendaContenido(
+                      actividades: widget.actividades,
+                      idEvento: widget.idEvento,
+                      repository: widget.repository,
+                      valoracionesRepository: widget.valoracionesRepository,
+                      onFavoritoMarcado: (marcada) =>
+                          setState(() => _alertaVisible = marcada),
+                    ),
+                  ),
+                ),
+              ],
+        ),
+
+          // La alerta **no ocupa sitio en la columna**: se superpone sobre el
+          // contenido justo debajo del botón de volver y del título, así que
+          // ninguna tarjeta se mueve al aparecer ni al desaparecer.
+          if (_alertaVisible)
+            Positioned(
+              top: AreaSegura.top(context, 36) + _topAlerta,
+              left: 26,
+              right: 26,
+              child: AlertaGuardado(
+                key: const Key('alerta-guardado'),
+                mensaje: '¡Ha guardado una actividad!',
+                enlace: 'Ir a favoritos',
+                onEnlace: _irAFavoritos,
+                onCerrar: () => setState(() => _alertaVisible = false),
+              ),
+            ),
+        ],
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: CustomBottomNav(currentIndex: -1, onTap: _irAMenu),
+      ),
+    );
+  }
+}
+
+/// Buscador + filtro + lista de charlas de un evento - separado de
+/// `AgendaScreen` (2026-09-19) para poder embeberlo dentro de
+/// `InvitadosScreen` (ver el doc-comment de esa clase). No incluye
+/// cabecera, bottom nav ni la alerta de "guardado" - cada quien lo use la
+/// posiciona distinto, por eso [onFavoritoMarcado] es el único enganche
+/// hacia afuera en vez de que este widget muestre su propia alerta.
+class AgendaContenido extends StatefulWidget {
+  final List<Actividad> actividades;
+
+  /// Cuando viene, ignora [actividades] y trae la agenda real de este
+  /// evento (`GET /eventos/:idEvento/charlas`) - `null` (default) deja el
+  /// comportamiento mock de siempre.
+  final String? idEvento;
+
+  /// Seams para tests (inyectar dobles sin red real).
+  final AgendaRepository? repository;
+  final ValoracionesRepository? valoracionesRepository;
+
+  /// Se llama con `true`/`false` al marcar/desmarcar el favorito de una
+  /// charla - quien use este widget decide qué hacer (ej. mostrar su
+  /// propia `AlertaGuardado`).
+  final ValueChanged<bool>? onFavoritoMarcado;
+
+  const AgendaContenido({
+    super.key,
+    this.actividades = AgendaMockData.actividades,
+    this.idEvento,
+    this.repository,
+    this.valoracionesRepository,
+    this.onFavoritoMarcado,
+  });
+
+  @override
+  State<AgendaContenido> createState() => _AgendaContenidoState();
+}
+
+class _AgendaContenidoState extends State<AgendaContenido> {
   late final AgendaRepository _repository =
       widget.repository ?? AgendaRepository();
   late final ValoracionesRepository _valoracionesRepository =
@@ -63,7 +186,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
   late List<Actividad> _actividades = List.of(widget.actividades);
   final Set<int> _expandidas = {};
   String _busqueda = '';
-  bool _alertaVisible = false;
   Map<String, Set<String>> _filtros = const {};
 
   /// `null` mientras no se ha resuelto (modo mock, o real sin terminar de
@@ -118,12 +240,12 @@ class _AgendaScreenState extends State<AgendaScreen> {
       // identificarla sin acceso al dispositivo).
       if (e is DioException) {
         debugPrint(
-          '[AgendaScreen] listarCharlas($idEvento) falló: '
+          '[AgendaContenido] listarCharlas($idEvento) falló: '
           'status=${e.response?.statusCode} data=${e.response?.data} '
           '(${e.message})',
         );
       } else {
-        debugPrint('[AgendaScreen] listarCharlas($idEvento) falló: $e');
+        debugPrint('[AgendaContenido] listarCharlas($idEvento) falló: $e');
       }
       if (!mounted) return;
       setState(() {
@@ -142,6 +264,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
         titulo: charla.nombre,
         horario: charla.horarioFormateado,
         ponente: '',
+        dia: charla.dia ?? '',
         lugar: charla.lugar ?? '',
         aforo: '',
         etiquetas: charla.etiquetas,
@@ -152,15 +275,20 @@ class _AgendaScreenState extends State<AgendaScreen> {
         horaFin: charla.horaFin,
       );
 
-  /// "Lugar" y "Tipo de Actividad" no tienen catálogo real en el backend
-  /// (son columnas de texto libre en Charla, no tablas de catálogo como
-  /// Temática/Producto/Nivel) - se derivan de los valores que realmente
-  /// trae la agenda de ESTE evento, en vez de mostrar opciones fijas que
-  /// podrían no aplicar a nada.
+  /// "Día", "Lugar" y "Tipo de Actividad" no tienen catálogo real en el
+  /// backend (son columnas de texto libre en Charla, no tablas de catálogo
+  /// como Temática/Producto/Nivel) - se derivan de los valores que
+  /// realmente trae la agenda de ESTE evento, en vez de mostrar opciones
+  /// fijas que podrían no aplicar a nada.
   List<GrupoFiltro> _gruposFiltroReales(
     List<Charla> charlas,
     CatalogosAgenda catalogos,
   ) {
+    final dias = {
+      for (final c in charlas)
+        if (c.dia != null && c.dia!.isNotEmpty) c.dia!,
+    }.toList()
+      ..sort();
     final lugares = {
       for (final c in charlas)
         if (c.lugar != null && c.lugar!.isNotEmpty) c.lugar!,
@@ -206,6 +334,10 @@ class _AgendaScreenState extends State<AgendaScreen> {
             if (p.valor.trim().isNotEmpty) p.valor,
         ],
       ),
+      // Al final a propósito - ver el comentario equivalente en
+      // `FiltroData.grupos`: los 5 grupos de arriba tienen posición
+      // pixel-verificada contra Figma, "Día" no.
+      GrupoFiltro(etiqueta: 'Día', titulo: 'Día', opciones: dias),
     ];
   }
 
@@ -231,7 +363,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
       if (valores.isEmpty) continue;
       final coincide = valores.any(
         (valor) =>
-            valor == actividad.lugar || actividad.etiquetas.contains(valor),
+            valor == actividad.dia ||
+            valor == actividad.lugar ||
+            actividad.etiquetas.contains(valor),
       );
       if (!coincide) return false;
     }
@@ -258,10 +392,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   void _alternarFavorita(int indice) {
     final actividad = _actividades[indice];
+    final marcada = !actividad.favorita;
     setState(() {
-      _actividades[indice] = actividad.copyWith(favorita: !actividad.favorita);
-      _alertaVisible = !actividad.favorita;
+      _actividades[indice] = actividad.copyWith(favorita: marcada);
     });
+    widget.onFavoritoMarcado?.call(marcada);
     // Modo real (`actividad.id` viene de una Charla real): refleja el
     // cambio en el backend. Sin `await` a propósito - la tarjeta ya se
     // actualizó arriba de forma optimista, y `FavoritosStore` es quien
@@ -340,20 +475,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     if (!mounted || !_actividades[indice].valorada) return;
     await AlertaValoracion.mostrar(context, actividad.titulo);
-  }
-
-  void _irAMenu(int index) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => Menu(initialIndex: index)),
-      (route) => false,
-    );
-  }
-
-  void _irAFavoritos() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const FavoritosScreen()),
-    );
   }
 
   /// Widgets de la sección de actividades: carga/error/vacío (solo aplican
@@ -447,66 +568,17 @@ class _AgendaScreenState extends State<AgendaScreen> {
   @override
   Widget build(BuildContext context) {
     final visibles = _visibles;
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          Column(
-              children: [
-                Padding(
-                  // La cabecera va a 36 de Figma; solo baja si la barra de
-                  // estado llegara a taparla.
-                  padding: EdgeInsets.fromLTRB(
-                    26,
-                    AreaSegura.top(context, 36),
-                    26,
-                    0,
-                  ),
-                  child: CabeceraActividades(
-                    titulo: 'Agenda',
-                    onVolver: () => Navigator.pop(context),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
-                    children: [
-                      BuscadorActividades(
-                        onBuscar: (texto) => setState(() => _busqueda = texto),
-                        onFiltrar: _abrirFiltro,
-                      ),
-                      const SizedBox(height: 24),
-                      ..._contenido(visibles),
-                    ],
-                  ),
-                ),
-              ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BuscadorActividades(
+          onBuscar: (texto) => setState(() => _busqueda = texto),
+          onFiltrar: _abrirFiltro,
         ),
-
-          // La alerta **no ocupa sitio en la columna**: se superpone sobre el
-          // contenido justo debajo del botón de volver y del título, así que
-          // ninguna tarjeta se mueve al aparecer ni al desaparecer.
-          if (_alertaVisible)
-            Positioned(
-              top: AreaSegura.top(context, 36) + _topAlerta,
-              left: 26,
-              right: 26,
-              child: AlertaGuardado(
-                key: const Key('alerta-guardado'),
-                mensaje: '¡Ha guardado una actividad!',
-                enlace: 'Ir a favoritos',
-                onEnlace: _irAFavoritos,
-                onCerrar: () => setState(() => _alertaVisible = false),
-              ),
-            ),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: CustomBottomNav(currentIndex: -1, onTap: _irAMenu),
-      ),
+        const SizedBox(height: 24),
+        ..._contenido(visibles),
+      ],
     );
   }
 }

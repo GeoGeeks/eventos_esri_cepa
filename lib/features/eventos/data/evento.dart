@@ -16,6 +16,7 @@ class Evento {
     this.imagenUrl,
     this.horaInicio,
     this.horaFin,
+    this.modulosHabilitados = const [],
   });
 
   final String id;
@@ -25,6 +26,29 @@ class Evento {
   final DateTime fechaFinalizacion;
   final String? lugar;
   final String? urlEvento;
+
+  /// Módulos DINÁMICOS encendidos para este evento desde Admin
+  /// (`EventoExtension.modulosHabilitados` en `eventos_esri_cepa_api`) -
+  /// valores posibles: 'laboratorios'/'speakers'/'experiencias'/'stands'/
+  /// 'agendamientos'. Los 5 módulos "obligatorios" (Agenda, Notificaciones,
+  /// Usuarios, Galería, Encuestas) no viven aquí - siempre están
+  /// encendidos. Vacío mientras Admin no lo configure - `InvitadosScreen`
+  /// trata eso como "ningún dinámico con pestaña habilitado", no como
+  /// "todavía no se sabe" (ver `tieneAlgunModuloConPestana`).
+  final List<String> modulosHabilitados;
+
+  bool get tieneLaboratorios => modulosHabilitados.contains('laboratorios');
+  bool get tieneSpeakers => modulosHabilitados.contains('speakers');
+  bool get tieneExperiencias => modulosHabilitados.contains('experiencias');
+  bool get tieneStands => modulosHabilitados.contains('stands');
+
+  /// Los 4 módulos dinámicos que traen su propia pestaña en
+  /// `InvitadosScreen` (Agendamientos es el 5º dinámico, pero no tiene
+  /// pestaña ahí - es la `FormularioWebModal` de "agendar con expertos").
+  /// Si ninguno está encendido, Agenda deja de tener botón propio y pasa a
+  /// mostrarse embebida como una pestaña más.
+  bool get tieneAlgunModuloConPestana =>
+      tieneLaboratorios || tieneSpeakers || tieneExperiencias || tieneStands;
 
   /// Portada subida por un admin - null hasta que alguien la suba (ver
   /// `EventosExtensionAdminController.subirImagen`). Las tarjetas deben
@@ -79,6 +103,9 @@ class Evento {
       imagenUrl: json['imagenUrl'] as String?,
       horaInicio: _parsearFechaOpcional(json['horaInicio']),
       horaFin: _parsearFechaOpcional(json['horaFin']),
+      modulosHabilitados:
+          (json['modulosHabilitados'] as List<dynamic>? ?? [])
+              .cast<String>(),
     );
   }
 

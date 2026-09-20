@@ -22,7 +22,11 @@ class EventosCargando extends EventosEstado {
 }
 
 class EventosCargados extends EventosEstado {
-  const EventosCargados({required this.reservados, required this.proximos});
+  const EventosCargados({
+    required this.reservados,
+    required this.proximos,
+    this.asistidos = const [],
+  });
 
   /// Eventos a los que la persona ya esta inscrita (`GET
   /// /eventos/mis-inscripciones`) - "Eventos reservados" en Inicio/Reservas.
@@ -32,6 +36,12 @@ class EventosCargados extends EventosEstado {
   /// Para un colaborador interno son TODOS los activos (nunca tiene
   /// inscripciones, ver `EventosRepository.listarIdsInscritos`).
   final List<Evento> proximos;
+
+  /// Eventos a los que la persona estuvo inscrita y que YA pasaron
+  /// (`Evento.yaPaso`) - "Eventos asistidos" en Historial. Con default
+  /// `const []` para no romper los sitios (tests) que ya construyen
+  /// `EventosCargados` sin este campo.
+  final List<Evento> asistidos;
 }
 
 class EventosError extends EventosEstado {
@@ -102,10 +112,10 @@ class EventosStore {
 
       // "Activo" en eventosdb.Evento (IDEstadoEvento) no quiere decir
       // "todavía no pasó" - excluye aquí lo que ya terminó (ver
-      // Evento.yaPaso), para las dos listas: un evento reservado que ya
-      // pasó tampoco pertenece a "Eventos reservados" (ese es el dominio de
-      // "Eventos asistidos"/post-evento, todavía no conectado).
+      // Evento.yaPaso) para "reservados"/"próximos"; lo ya terminado es el
+      // dominio de "Eventos asistidos" (ver `asistidos` abajo).
       final vigentes = activos.where((e) => !e.yaPaso).toList();
+      final pasados = activos.where((e) => e.yaPaso).toList();
 
       estado.value = EventosCargados(
         reservados: [
@@ -118,6 +128,13 @@ class EventosStore {
                 for (final e in vigentes)
                   if (!idsInscritos.contains(e.id)) e,
               ],
+        // Mismo criterio que "reservados": para un colaborador (siempre
+        // tiene acceso a cualquier evento, nunca inscripción real) todo lo
+        // ya pasado cuenta como "asistido" también.
+        asistidos: [
+          for (final e in pasados)
+            if (esColaborador || idsInscritos.contains(e.id)) e,
+        ],
       );
     } catch (_) {
       // Un refresh silencioso que falla no debe borrar lo que ya se veía
