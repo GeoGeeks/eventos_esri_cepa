@@ -33,6 +33,18 @@ class NotificacionRecibida {
   final bool leida;
   final DateTime fecha;
 
+  NotificacionRecibida copyWith({bool? leida}) => NotificacionRecibida(
+    id: id,
+    notificacionId: notificacionId,
+    titulo: titulo,
+    cuerpo: cuerpo,
+    imagenUrl: imagenUrl,
+    accionRuta: accionRuta,
+    accionParams: accionParams,
+    leida: leida ?? this.leida,
+    fecha: fecha,
+  );
+
   /// "20/06" - mismo formato que ya usaba el mock de `NotificationsScreen`.
   String get fechaFormateada {
     final dia = fecha.day.toString().padLeft(2, '0');

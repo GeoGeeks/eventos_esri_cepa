@@ -75,28 +75,33 @@ class ActividadCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: onExpandir,
-                    child: SizedBox(
-                      width: 19,
-                      height: 8.4,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Transform.rotate(
-                          angle: expandida ? math.pi : 0,
-                          child: const AppIcon(
-                            SvgIcon.arrow,
-                            width: 14,
-                            height: 8.4,
-                            fit: BoxFit.fill,
-                            color: AppColors.primary,
+                  // Sin descripción ni objetivos no hay nada que ver al
+                  // expandir - se oculta la flecha entera en vez de dejarla
+                  // abrir una tarjeta vacía (ver Actividad.tieneDetalle).
+                  if (actividad.tieneDetalle) ...[
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onExpandir,
+                      child: SizedBox(
+                        width: 19,
+                        height: 8.4,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Transform.rotate(
+                            angle: expandida ? math.pi : 0,
+                            child: const AppIcon(
+                              SvgIcon.arrow,
+                              width: 14,
+                              height: 8.4,
+                              fit: BoxFit.fill,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ],

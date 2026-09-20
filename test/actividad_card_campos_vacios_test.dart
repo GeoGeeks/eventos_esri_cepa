@@ -124,6 +124,85 @@ void main() {
     );
   });
 
+  group('ActividadCard oculta la flecha de expandir sin detalle', () {
+    testWidgets('sin descripción ni objetivos, no pinta la flecha', (
+      tester,
+    ) async {
+      const actividad = Actividad(
+        titulo: 'Plenaria',
+        horario: '08:00 - 10:00',
+        ponente: '',
+        dia: 'Jueves',
+        lugar: 'Piso 5',
+        aforo: '',
+        etiquetas: ['Basico'],
+        descripcion: '',
+      );
+      await _montar(
+        tester,
+        ActividadCard(
+          actividad: actividad,
+          expandida: false,
+          onExpandir: () {},
+          onValorar: () {},
+        ),
+      );
+
+      expect(_icono(SvgIcon.arrow), findsNothing);
+    });
+
+    testWidgets('con solo descripción (sin objetivos), sí pinta la flecha', (
+      tester,
+    ) async {
+      const actividad = Actividad(
+        titulo: 'Plenaria',
+        horario: '08:00 - 10:00',
+        ponente: '',
+        lugar: 'Piso 5',
+        aforo: '',
+        etiquetas: ['Basico'],
+        descripcion: 'Una descripción real.',
+      );
+      await _montar(
+        tester,
+        ActividadCard(
+          actividad: actividad,
+          expandida: false,
+          onExpandir: () {},
+          onValorar: () {},
+        ),
+      );
+
+      expect(_icono(SvgIcon.arrow), findsOneWidget);
+    });
+
+    testWidgets('con solo objetivos (sin descripción), sí pinta la flecha', (
+      tester,
+    ) async {
+      const actividad = Actividad(
+        titulo: 'Plenaria',
+        horario: '08:00 - 10:00',
+        ponente: '',
+        lugar: 'Piso 5',
+        aforo: '',
+        etiquetas: ['Basico'],
+        descripcion: '',
+        objetivos: ['Un objetivo real.'],
+      );
+      await _montar(
+        tester,
+        ActividadCard(
+          actividad: actividad,
+          expandida: false,
+          onExpandir: () {},
+          onValorar: () {},
+        ),
+      );
+
+      expect(_icono(SvgIcon.arrow), findsOneWidget);
+    });
+  });
+
   group('Charla/Laboratorio.etiquetas descarta valores vacíos', () {
     test('Charla.etiquetas nunca incluye un valor en blanco', () {
       final charla = Charla(

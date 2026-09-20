@@ -53,6 +53,13 @@ class Actividad {
       id == null ||
       (horaFin != null && !DateTime.now().isBefore(horaFin!));
 
+  /// Sin descripción NI objetivos (la Charla real no siempre trae ninguno
+  /// de los dos) no hay nada que ver al expandir la tarjeta - `ActividadCard`
+  /// oculta la flecha en ese caso. Con al menos uno de los dos con
+  /// contenido, la flecha se queda: pedido explícito del usuario,
+  /// 2026-09-20.
+  bool get tieneDetalle => descripcion.isNotEmpty || objetivos.isNotEmpty;
+
   Actividad copyWith({bool? favorita, bool? valorada}) => Actividad(
     id: id,
     titulo: titulo,

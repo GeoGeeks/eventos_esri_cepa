@@ -546,9 +546,12 @@ class _ListadoReservados extends StatelessWidget {
         for (var i = 0; i < eventos.length; i++)
           Padding(
             padding: EdgeInsets.only(bottom: i == eventos.length - 1 ? 0 : 24),
+            // Sin alto fijo: un título que ocupa 2+ líneas (evento real
+            // largo, ej. "Planeta Esri Panamá") desbordaba el alto fijo de
+            // 122 - mismo criterio que EventosScreen (ver
+            // f813d79, "fix(ui): fix overflow... EventosScreen").
             child: SizedBox(
               width: 360,
-              height: 122,
               child: UpcomingEventCard(
                 title: eventos[i].nombre,
                 date: eventos[i].fechaYHoraFormateada,

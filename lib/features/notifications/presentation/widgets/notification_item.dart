@@ -19,6 +19,12 @@ class NotificationItem extends StatelessWidget {
   /// queda deshabilitado en vez de no hacer nada al tocarlo.
   final String? enlace;
 
+  /// Se dispara al tocar la tarjeta (en cualquier parte, incluido "Revise
+  /// los detalles") - `NotificationsScreen` lo usa para marcar la
+  /// notificación como leída. `null` dentro de esta clase: no decide aquí
+  /// si ya estaba leída ni hace la llamada de red, solo avisa del toque.
+  final VoidCallback? onTap;
+
   const NotificationItem({
     super.key,
     required this.title,
@@ -26,12 +32,21 @@ class NotificationItem extends StatelessWidget {
     required this.date,
     this.isNew = false,
     this.enlace,
+    this.onTap,
   });
 
   static const String _dateTimeIcon = 'assets/icons/date-time.svg';
 
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: _tarjeta(),
+    );
+  }
+
+  Widget _tarjeta() {
     return Container(
       width: 360,
       constraints: const BoxConstraints(minHeight: 88),
@@ -189,12 +204,19 @@ class NotificationItem extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: GestureDetector(
+                    // Gana sobre el `GestureDetector` externo de `build` (el
+                    // toque más interno se queda con el gesto) - por eso
+                    // también dispara `onTap` aquí a mano, para que "Revise
+                    // los detalles" cuente igual como lectura.
                     onTap: enlace == null
-                        ? null
-                        : () => launchUrl(
+                        ? onTap
+                        : () {
+                            onTap?.call();
+                            launchUrl(
                               Uri.parse(enlace!),
                               mode: LaunchMode.externalApplication,
-                            ),
+                            );
+                          },
                     child: IntrinsicWidth(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,

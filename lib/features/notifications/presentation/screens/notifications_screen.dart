@@ -75,6 +75,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
+  /// Al tocar la notificación en esta pantalla - antes solo se marcaba
+  /// "leída" al tocar el banner nativo del push (`PushNotificacionesService`),
+  /// nunca al abrirla desde este listado. Optimista y silencioso: ya estaba
+  /// marcada `leída` no vuelve a llamar al backend, y si la llamada falla
+  /// (`NotificacionesRepository.marcarLeido` ya se traga el error a
+  /// propósito - ver su doc-comment) el punto azul simplemente se queda
+  /// apagado en la UI sin bloquear nada más.
+  void _marcarLeida(NotificacionRecibida item) {
+    if (item.leida) return;
+    setState(() {
+      _notificaciones = [
+        for (final n in _notificaciones)
+          if (n.id == item.id) n.copyWith(leida: true) else n,
+      ];
+    });
+    _repository.marcarLeido(item.notificacionId);
+  }
+
   /// También optimista (el `Dismissible` ya animó la salida del ítem) - si
   /// falla, se vuelve a cargar la lista completa en vez de reinsertar el
   /// ítem a mano, para no pelear con la animación de salida ya en curso.
@@ -282,6 +300,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                                   date: item.fechaFormateada,
                                                   isNew: !item.leida,
                                                   enlace: item.accionRuta,
+                                                  onTap: () =>
+                                                      _marcarLeida(item),
                                                 ),
                                               ),
                                             ),

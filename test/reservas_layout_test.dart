@@ -196,4 +196,30 @@ void main() {
     await _montarReservas(tester);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'un título largo que ocupa 2+ líneas no desborda la tarjeta',
+    (tester) async {
+      // Reproduce el overflow real reportado con eventos de producción
+      // (ej. "Planeta Esri Panamá", "CUE Colombia 2026") - antes la
+      // tarjeta tenía un alto fijo de 122 que solo alcanzaba para un
+      // título de una sola línea.
+      EventosStore.estado.value = EventosCargados(
+        reservados: [
+          Evento(
+            id: 'panama',
+            nombre: 'Planeta Esri Panamá edición extendida con nombre largo',
+            fechaInicio: DateTime(2026, 12, 2),
+            fechaFinalizacion: DateTime(2026, 12, 2),
+            horaInicio: DateTime(2026, 12, 2, 11),
+          ),
+        ],
+        proximos: const [],
+      );
+
+      await _montarReservas(tester);
+
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

@@ -55,6 +55,7 @@ class _FakeNotificacionesRepository implements NotificacionesRepository {
   bool lanzarAlBorrarUna = false;
 
   final List<String> llamadasBorrarUna = [];
+  final List<String> llamadasMarcarLeido = [];
   int llamadasBorrarTodas = 0;
 
   @override
@@ -77,7 +78,9 @@ class _FakeNotificacionesRepository implements NotificacionesRepository {
   }
 
   @override
-  Future<void> marcarLeido(String idNotificacion) async {}
+  Future<void> marcarLeido(String idNotificacion) async {
+    llamadasMarcarLeido.add(idNotificacion);
+  }
 
   @override
   Future<void> registrarDeviceToken({
@@ -205,5 +208,67 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(urlLauncherFalso.urlLanzada, isNull);
+  });
+
+  testWidgets(
+    'tocar una notificación nueva la marca como leída (backend y UI)',
+    (tester) async {
+      final repo = _FakeNotificacionesRepository(
+        iniciales: [_item('1', leida: false)],
+      );
+      await _montar(tester, repo);
+
+      expect(
+        tester.widget<NotificationItem>(find.byType(NotificationItem)).isNew,
+        isTrue,
+      );
+
+      // El nombre real del asistente no aparece en la tarjeta - se toca el
+      // título, que sí es único y no compite con "Revise los detalles".
+      await tester.tap(find.text('Actualización del evento'));
+      await tester.pumpAndSettle();
+
+      expect(repo.llamadasMarcarLeido, ['campana-1']);
+      expect(
+        tester.widget<NotificationItem>(find.byType(NotificationItem)).isNew,
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets('tocar una notificación ya leída no vuelve a llamar al backend', (
+    tester,
+  ) async {
+    final repo = _FakeNotificacionesRepository(
+      iniciales: [_item('1', leida: true)],
+    );
+    await _montar(tester, repo);
+
+    await tester.tap(find.text('Actualización del evento'));
+    await tester.pumpAndSettle();
+
+    expect(repo.llamadasMarcarLeido, isEmpty);
+  });
+
+  testWidgets('"Revise los detalles" también marca la notificación como leída', (
+    tester,
+  ) async {
+    final urlLauncherFalso = _UrlLauncherFalso();
+    final original = UrlLauncherPlatform.instance;
+    UrlLauncherPlatform.instance = urlLauncherFalso;
+    addTearDown(() => UrlLauncherPlatform.instance = original);
+
+    final repo = _FakeNotificacionesRepository(
+      iniciales: [
+        _item('1', leida: false, accionRuta: 'https://esri.co/evento-x'),
+      ],
+    );
+    await _montar(tester, repo);
+
+    await tester.tap(find.text('Revise los detalles'));
+    await tester.pumpAndSettle();
+
+    expect(urlLauncherFalso.urlLanzada, 'https://esri.co/evento-x');
+    expect(repo.llamadasMarcarLeido, ['campana-1']);
   });
 }
