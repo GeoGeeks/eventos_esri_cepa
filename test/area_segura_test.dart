@@ -213,7 +213,14 @@ void main() {
     testWidgets('el menú de perfil no crece sus 110 de cabecera', (
       tester,
     ) async {
-      await _montar(tester, ProfileMenuScreen(onOpenEcard: () {}));
+      await _montar(
+        tester,
+        ProfileMenuScreen(
+          onOpenEcard: () {},
+          onGoToReservas: () {},
+          onGoToNotifications: () {},
+        ),
+      );
 
       final cabecera = tester.getRect(find.byKey(const Key('perfil-header')));
       expect(cabecera.top, moreOrLessEquals(0, epsilon: 0.5));
@@ -287,7 +294,11 @@ void main() {
 
       await _montar(
         tester,
-        ProfileMenuScreen(onOpenEcard: () {}),
+        ProfileMenuScreen(
+          onOpenEcard: () {},
+          onGoToReservas: () {},
+          onGoToNotifications: () {},
+        ),
         barra: kBarraCorta,
       );
       expect(

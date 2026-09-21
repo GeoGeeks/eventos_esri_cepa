@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/utils/area_segura.dart';
+import '../../../favoritos/favoritos.dart';
 import '../../../login/login_screen.dart';
 import '../../../login/presentation/bloc/auth_cubit.dart';
 import '../../../login/presentation/bloc/auth_state.dart';
@@ -15,7 +16,18 @@ import '../widgets/profile_section_title.dart';
 class ProfileMenuScreen extends StatelessWidget {
   final VoidCallback onOpenEcard;
 
-  const ProfileMenuScreen({super.key, required this.onOpenEcard});
+  /// Mismo patrón que `InicioApp.onGoToNotifications` - `Menu` ya tiene
+  /// pestañas propias para Reservas/Alertas, así que estos dos solo cambian
+  /// de pestaña (`_onNavTap`) en vez de empujar una pantalla nueva.
+  final VoidCallback onGoToReservas;
+  final VoidCallback onGoToNotifications;
+
+  const ProfileMenuScreen({
+    super.key,
+    required this.onOpenEcard,
+    required this.onGoToReservas,
+    required this.onGoToNotifications,
+  });
 
   /// Alto de la cabecera en Figma. Fijo: el fondo va a sangre por detrás de la
   /// barra de estado y solo se desplaza el contenido de dentro.
@@ -169,7 +181,7 @@ class ProfileMenuScreen extends StatelessWidget {
                         ProfileMenuItem(
                           icon: 'assets/icons/campana.svg',
                           title: 'Notificaciones',
-                          onTap: () {},
+                          onTap: onGoToNotifications,
                           showBorder: false,
                         ),
 
@@ -183,12 +195,24 @@ class ProfileMenuScreen extends StatelessWidget {
                         ProfileMenuItem(
                           icon: 'assets/icons/reservas.svg',
                           title: 'Reservas',
-                          onTap: () {},
+                          onTap: onGoToReservas,
                         ),
                         ProfileMenuItem(
                           icon: 'assets/icons/favoritos.svg',
                           title: 'Mis favoritos',
-                          onTap: () {},
+                          // Todos los favoritos del asistente, sin filtrar
+                          // por evento - GET /favoritos (backend) no tiene
+                          // ningún concepto de "evento actual" todavía, y
+                          // una persona puede estar inscrita a varios
+                          // eventos a la vez (ver root CLAUDE.md). Mismo
+                          // criterio que ya usa esta pantalla desde Agenda.
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const FavoritosScreen(cargarDesdeBackend: true),
+                            ),
+                          ),
                         ),
                         ProfileMenuItem(
                           icon: 'assets/icons/encuestas.svg',

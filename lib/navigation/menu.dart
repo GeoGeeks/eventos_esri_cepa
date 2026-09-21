@@ -145,6 +145,8 @@ class _MenuState extends State<Menu> {
             ? ECardScreen(onBack: () => setState(() => _showEcard = false))
             : ProfileMenuScreen(
                 onOpenEcard: () => setState(() => _showEcard = true),
+                onGoToReservas: () => _onNavTap(2),
+                onGoToNotifications: () => _onNavTap(3),
               );
 
       default:
