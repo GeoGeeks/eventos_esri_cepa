@@ -26,38 +26,59 @@ Future<void> main() async {
   // ninguna parte - nadie se enteraba hasta que el usuario lo reportara.
   await runZonedGuarded<Future<void>>(
     () async {
-      // `ensureInitialized` + `await` antes de `runApp`: Firebase.initializeApp
-      // usa canales de plataforma, que necesitan el binding listo primero. Sin
-      // esto, cualquier llamada a FirebaseMessaging (permiso, token) falla con
-      // "Firebase has not been initialized" apenas alguien inicia sesión.
       WidgetsFlutterBinding.ensureInitialized();
-      await Firebase.initializeApp();
-      // Sin esto, cada hot-reload/crash local de cualquier desarrollador
-      // ensuciaría el dashboard de Crashlytics - solo interesan los
-      // crashes reales de un build de producción/QA.
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-        !kDebugMode,
-      );
 
-      // Errores de framework (build/layout/etc.) - se siguen mostrando en
-      // consola en debug (comportamiento default de Flutter) y además se
-      // mandan a Crashlytics siempre, para no perder crashes de producción.
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-      // Errores de Dart puro (fuera del árbol de widgets) que no pasan por
-      // FlutterError.onError - ej. un `Future` que falla sin `catchError`.
-      PlatformDispatcher.instance.onError = (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        return true;
-      };
+      // PWA (rama poc/pwa-web, no se mergea): esta app nunca registró una
+      // app Web en el proyecto Firebase (`eventos-esri-cepa` solo tiene
+      // Android/iOS, ver root CLAUDE.md - "solo Android e iOS"), así que
+      // `Firebase.initializeApp()` sin `FirebaseOptions` explícitas no
+      // tiene con qué autenticarse en el navegador y lanza una excepción
+      // que tumbaba el arranque completo (splash nativo quedaba pegado
+      // para siempre, sin ningún frame de Flutter). Registrar una app Web
+      // de verdad (vía `flutterfire configure`) es trabajo aparte, fuera
+      // del alcance de "que cargue como PWA" - mientras tanto, en Web la
+      // app corre sin Firebase (sin push, sin Crashlytics), igual que
+      // corría antes de que existiera este `main()`.
+      if (!kIsWeb) {
+        // `await` antes de `runApp`: Firebase.initializeApp usa canales de
+        // plataforma, que necesitan el binding listo primero. Sin esto,
+        // cualquier llamada a FirebaseMessaging (permiso, token) falla con
+        // "Firebase has not been initialized" apenas alguien inicia sesión.
+        await Firebase.initializeApp();
+        // Sin esto, cada hot-reload/crash local de cualquier desarrollador
+        // ensuciaría el dashboard de Crashlytics - solo interesan los
+        // crashes reales de un build de producción/QA.
+        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+          !kDebugMode,
+        );
 
-      // Debe registrarse una sola vez, antes de `runApp` y con una función de
-      // nivel superior (ver el comentario de `manejarMensajeEnSegundoPlano`) -
-      // así el sistema operativo puede invocar la app en background/terminada.
-      FirebaseMessaging.onBackgroundMessage(manejarMensajeEnSegundoPlano);
+        // Errores de framework (build/layout/etc.) - se siguen mostrando en
+        // consola en debug (comportamiento default de Flutter) y además se
+        // mandan a Crashlytics siempre, para no perder crashes de producción.
+        FlutterError.onError =
+            FirebaseCrashlytics.instance.recordFlutterFatalError;
+        // Errores de Dart puro (fuera del árbol de widgets) que no pasan
+        // por FlutterError.onError - ej. un `Future` que falla sin
+        // `catchError`.
+        PlatformDispatcher.instance.onError = (error, stack) {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          return true;
+        };
+
+        // Debe registrarse una sola vez, antes de `runApp` y con una
+        // función de nivel superior (ver el comentario de
+        // `manejarMensajeEnSegundoPlano`) - así el sistema operativo puede
+        // invocar la app en background/terminada.
+        FirebaseMessaging.onBackgroundMessage(manejarMensajeEnSegundoPlano);
+      }
+
       runApp(const EsriEventosApp());
     },
-    (error, stack) =>
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true),
+    (error, stack) {
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      }
+    },
   );
 }
 

@@ -63,6 +63,14 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/icon.png"
   min_sdk_android: 21
+  # PWA (rama poc/pwa-web, no se mergea) - mismo ícono real de marca en
+  # vez del logo de Flutter por defecto que trae web/icons/ desde
+  # `flutter create`.
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#007AC2"
+    theme_color: "#007AC2"
 
 flutter_native_splash:
   color: "#007AC2"
