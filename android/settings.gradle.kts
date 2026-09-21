@@ -26,6 +26,9 @@ plugins {
     // no tiene bloque plugins{}) porque este proyecto usa el patrón
     // declarativo de plugins de Gradle moderno.
     id("com.google.gms.google-services") version "4.5.0" apply false
+    // Firebase Crashlytics (2026-09-20) - reporte de crashes en producción,
+    // mismo patrón de plugin declarativo que google-services arriba.
+    id("com.google.firebase.crashlytics") version "3.0.6" apply false
 }
 
 include(":app")

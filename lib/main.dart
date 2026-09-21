@@ -1,5 +1,10 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,17 +19,46 @@ import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'navigation/menu.dart';
 
 Future<void> main() async {
-  // `ensureInitialized` + `await` antes de `runApp`: Firebase.initializeApp
-  // usa canales de plataforma, que necesitan el binding listo primero. Sin
-  // esto, cualquier llamada a FirebaseMessaging (permiso, token) falla con
-  // "Firebase has not been initialized" apenas alguien inicia sesión.
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  // Debe registrarse una sola vez, antes de `runApp` y con una función de
-  // nivel superior (ver el comentario de `manejarMensajeEnSegundoPlano`) -
-  // así el sistema operativo puede invocar la app en background/terminada.
-  FirebaseMessaging.onBackgroundMessage(manejarMensajeEnSegundoPlano);
-  runApp(const EsriEventosApp());
+  // `runZonedGuarded` (patrón recomendado por FlutterFire) - captura
+  // cualquier error asíncrono que se escape de la zona raíz, además de los
+  // dos handlers de abajo (que cubren errores de widgets y de Dart puro
+  // respectivamente). Sin esto, un crash en producción no llegaba a
+  // ninguna parte - nadie se enteraba hasta que el usuario lo reportara.
+  await runZonedGuarded<Future<void>>(
+    () async {
+      // `ensureInitialized` + `await` antes de `runApp`: Firebase.initializeApp
+      // usa canales de plataforma, que necesitan el binding listo primero. Sin
+      // esto, cualquier llamada a FirebaseMessaging (permiso, token) falla con
+      // "Firebase has not been initialized" apenas alguien inicia sesión.
+      WidgetsFlutterBinding.ensureInitialized();
+      await Firebase.initializeApp();
+      // Sin esto, cada hot-reload/crash local de cualquier desarrollador
+      // ensuciaría el dashboard de Crashlytics - solo interesan los
+      // crashes reales de un build de producción/QA.
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+        !kDebugMode,
+      );
+
+      // Errores de framework (build/layout/etc.) - se siguen mostrando en
+      // consola en debug (comportamiento default de Flutter) y además se
+      // mandan a Crashlytics siempre, para no perder crashes de producción.
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      // Errores de Dart puro (fuera del árbol de widgets) que no pasan por
+      // FlutterError.onError - ej. un `Future` que falla sin `catchError`.
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+
+      // Debe registrarse una sola vez, antes de `runApp` y con una función de
+      // nivel superior (ver el comentario de `manejarMensajeEnSegundoPlano`) -
+      // así el sistema operativo puede invocar la app en background/terminada.
+      FirebaseMessaging.onBackgroundMessage(manejarMensajeEnSegundoPlano);
+      runApp(const EsriEventosApp());
+    },
+    (error, stack) =>
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true),
+  );
 }
 
 class EsriEventosApp extends StatelessWidget {

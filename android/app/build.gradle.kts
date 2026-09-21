@@ -8,6 +8,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
     // Firebase Cloud Messaging (2026-09-16) - lee android/app/google-services.json.
     id("com.google.gms.google-services")
+    // Firebase Crashlytics (2026-09-20) - reporte de crashes en producción.
+    id("com.google.firebase.crashlytics")
 }
 
 // Credenciales de la keystore de producción (Android). El archivo real
