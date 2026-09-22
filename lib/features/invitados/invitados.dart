@@ -28,6 +28,11 @@ import '../agenda/data/agenda_repository.dart';
 import '../agenda/data/franja_horaria.dart';
 import '../agenda/data/laboratorio.dart';
 import '../credencial/presentation/credencial_modal.dart';
+import '../encuestas/data/encuesta.dart';
+import '../encuestas/data/encuestas_repository.dart';
+import '../encuestas/presentation/screens/encuesta_mi_respuesta_screen.dart';
+import '../encuestas/presentation/screens/encuesta_responder_screen.dart';
+import '../encuestas/presentation/widgets/tarjeta_encuesta.dart';
 import '../eventos/data/evento.dart';
 import '../expositores/data/expositor.dart';
 import '../expositores/data/expositor_repository.dart';
@@ -60,6 +65,7 @@ class InvitadosScreen extends StatefulWidget {
   final RegistroLaboratorioRepository? registroRepository;
   final SpeakerRepository? speakerRepository;
   final ExpositorRepository? expositorRepository;
+  final EncuestasRepository? encuestasRepository;
 
   const InvitadosScreen({
     super.key,
@@ -73,6 +79,7 @@ class InvitadosScreen extends StatefulWidget {
     this.registroRepository,
     this.speakerRepository,
     this.expositorRepository,
+    this.encuestasRepository,
   });
 
   @override
@@ -108,6 +115,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       if (eventoReal.tieneExperiencias) 'Experiencias',
       if (eventoReal.tieneStands) 'Stands',
       if (eventoReal.tieneLaboratorios) 'Laboratorios',
+      if (eventoReal.tieneEncuestas) 'Encuestas',
     ];
   }
 
@@ -127,6 +135,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
       widget.speakerRepository ?? SpeakerRepository();
   late final ExpositorRepository _expositorRepository =
       widget.expositorRepository ?? ExpositorRepository();
+  late final EncuestasRepository _encuestasRepository =
+      widget.encuestasRepository ?? EncuestasRepository();
 
   /// Estado del cupo de cada laboratorio, por índice. Vive aquí porque la
   /// reserva sobrevive a que la tarjeta se pliegue y se despliegue.
@@ -154,6 +164,11 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
   List<Speaker> _speakersReales = const [];
   List<Expositor> _expositoresReales = const [];
 
+  /// Mismo criterio que `_cargandoLaboratorios`.
+  bool? _cargandoEncuestas;
+  String? _errorEncuestas;
+  List<Encuesta> _encuestasReales = const [];
+
   @override
   void initState() {
     super.initState();
@@ -161,6 +176,7 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     if (eventoReal != null) {
       _cargarLaboratoriosReales(eventoReal.id);
       _cargarInvitadosReales(eventoReal.id);
+      if (eventoReal.tieneEncuestas) _cargarEncuestasReales(eventoReal.id);
     }
   }
 
@@ -197,6 +213,78 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
             'e intenta de nuevo.';
         _cargandoInvitados = false;
       });
+    }
+  }
+
+  Future<void> _cargarEncuestasReales(String idEvento) async {
+    setState(() {
+      _cargandoEncuestas = true;
+      _errorEncuestas = null;
+    });
+    try {
+      final encuestas = await _encuestasRepository.listar(idEvento);
+      if (!mounted) return;
+      setState(() {
+        _encuestasReales = encuestas;
+        _cargandoEncuestas = false;
+      });
+    } catch (e) {
+      if (e is DioException) {
+        debugPrint(
+          '[InvitadosScreen] cargar encuestas($idEvento) falló: '
+          'status=${e.response?.statusCode} data=${e.response?.data} '
+          '(${e.message})',
+        );
+      } else {
+        debugPrint('[InvitadosScreen] cargar encuestas($idEvento) falló: $e');
+      }
+      if (!mounted) return;
+      setState(() {
+        _errorEncuestas =
+            'No se pudieron cargar las encuestas. Verifica tu conexión '
+            'e intenta de nuevo.';
+        _cargandoEncuestas = false;
+      });
+    }
+  }
+
+  /// Abre "Responder encuesta" o "Ver respuestas" según
+  /// `Encuesta.yaRespondida` - al volver de responder, recarga la lista
+  /// para que la tarjeta pase de un estado al otro sin salir de la pestaña.
+  Future<void> _abrirEncuesta(Encuesta encuesta) async {
+    if (!encuesta.yaRespondida) {
+      await Navigator.push<void>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EncuestaResponderScreen(
+            encuesta: encuesta,
+            repository: _encuestasRepository,
+          ),
+        ),
+      );
+      if (mounted && widget.eventoReal != null) {
+        _cargarEncuestasReales(widget.eventoReal!.id);
+      }
+      return;
+    }
+    try {
+      final respuesta = await _encuestasRepository.miRespuesta(encuesta.id);
+      if (!mounted || respuesta == null) return;
+      await Navigator.push<void>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EncuestaMiRespuestaScreen(
+            encuesta: encuesta,
+            respuesta: respuesta,
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      mostrarSnackBar(
+        context,
+        'No se pudo cargar la respuesta. Intenta de nuevo.',
+      );
     }
   }
 
@@ -490,6 +578,8 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
         return _tabExpositores('stand', widget.stands);
       case 'Laboratorios':
         return _tabLaboratorios();
+      case 'Encuestas':
+        return _tabEncuestas();
       case 'Agenda':
         return _tabAgendaEmbebida();
       default:
@@ -571,6 +661,32 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
         for (var i = 0; i < _laboratoriosReales.length; i++)
           _sesionDesdeLaboratorio(_laboratoriosReales[i], i),
       ]),
+    );
+  }
+
+  /// Sin modo mock: "Encuestas" solo existe con `eventoReal` (ver
+  /// `_tabsActivas`), así que siempre pasa por `_estadoCarga`.
+  Widget _tabEncuestas() {
+    return _estadoCarga(
+      cargando: _cargandoEncuestas,
+      error: _errorEncuestas,
+      vacio: _encuestasReales.isEmpty,
+      onReintentar: () => _cargarEncuestasReales(widget.eventoReal!.id),
+      contenido: () => _listaEncuestas(_encuestasReales),
+    );
+  }
+
+  Widget _listaEncuestas(List<Encuesta> items) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(top: 12),
+      itemCount: items.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      itemBuilder: (_, i) => TarjetaEncuesta(
+        encuesta: items[i],
+        onTap: () => _abrirEncuesta(items[i]),
+      ),
     );
   }
 
