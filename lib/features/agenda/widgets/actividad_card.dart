@@ -84,16 +84,18 @@ class ActividadCard extends StatelessWidget {
                       behavior: HitTestBehavior.opaque,
                       onTap: onExpandir,
                       child: SizedBox(
-                        width: 19,
-                        height: 8.4,
+                        // +28%, mismo ratio 5:3 - pedido explícito del
+                        // dueño, 2026-09-21 ("un poco más grande").
+                        width: 20,
+                        height: 10.8,
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Transform.rotate(
                             angle: expandida ? math.pi : 0,
                             child: const AppIcon(
                               SvgIcon.arrow,
-                              width: 14,
-                              height: 8.4,
+                              width: 18,
+                              height: 10.8,
                               fit: BoxFit.fill,
                               color: AppColors.primary,
                             ),

@@ -302,6 +302,9 @@ class _AgendaContenidoState extends State<AgendaContenido> {
       ..sort();
 
     return [
+      // Primero a propósito (pedido explícito del dueño, 2026-09-21) - ver
+      // el comentario equivalente en `FiltroData.grupos`.
+      GrupoFiltro(etiqueta: 'Día', titulo: 'Día', opciones: dias),
       GrupoFiltro(etiqueta: 'Lugar', titulo: 'Lugar', opciones: lugares),
       GrupoFiltro(
         etiqueta: 'Actividad',
@@ -334,10 +337,6 @@ class _AgendaContenidoState extends State<AgendaContenido> {
             if (p.valor.trim().isNotEmpty) p.valor,
         ],
       ),
-      // Al final a propósito - ver el comentario equivalente en
-      // `FiltroData.grupos`: los 5 grupos de arriba tienen posición
-      // pixel-verificada contra Figma, "Día" no.
-      GrupoFiltro(etiqueta: 'Día', titulo: 'Día', opciones: dias),
     ];
   }
 
