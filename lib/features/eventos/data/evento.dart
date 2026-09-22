@@ -30,11 +30,12 @@ class Evento {
   /// Módulos DINÁMICOS encendidos para este evento desde Admin
   /// (`EventoExtension.modulosHabilitados` en `eventos_esri_cepa_api`) -
   /// valores posibles: 'laboratorios'/'speakers'/'experiencias'/'stands'/
-  /// 'agendamientos'. Los 5 módulos "obligatorios" (Agenda, Notificaciones,
-  /// Usuarios, Galería, Encuestas) no viven aquí - siempre están
-  /// encendidos. Vacío mientras Admin no lo configure - `InvitadosScreen`
-  /// trata eso como "ningún dinámico con pestaña habilitado", no como
-  /// "todavía no se sabe" (ver `tieneAlgunModuloConPestana`).
+  /// 'agendamientos'/'encuestas'. Los 5 módulos "obligatorios" (Agenda,
+  /// Notificaciones, Usuarios, Galería, la encuesta `post_evento`) no
+  /// viven aquí - siempre están encendidos. Vacío mientras Admin no lo
+  /// configure - `InvitadosScreen` trata eso como "ningún dinámico con
+  /// pestaña habilitado", no como "todavía no se sabe" (ver
+  /// `tieneAlgunModuloConPestana`).
   final List<String> modulosHabilitados;
 
   bool get tieneLaboratorios => modulosHabilitados.contains('laboratorios');
@@ -42,13 +43,22 @@ class Evento {
   bool get tieneExperiencias => modulosHabilitados.contains('experiencias');
   bool get tieneStands => modulosHabilitados.contains('stands');
 
-  /// Los 4 módulos dinámicos que traen su propia pestaña en
-  /// `InvitadosScreen` (Agendamientos es el 5º dinámico, pero no tiene
-  /// pestaña ahí - es la `FormularioWebModal` de "agendar con expertos").
-  /// Si ninguno está encendido, Agenda deja de tener botón propio y pasa a
-  /// mostrarse embebida como una pestaña más.
+  /// Pestaña "Encuestas" (2026-09-22) - solo las encuestas `tipo: 'modulo'`
+  /// dentro del evento, NO la `post_evento` (esa sigue sin interruptor, ver
+  /// el comentario de arriba).
+  bool get tieneEncuestas => modulosHabilitados.contains('encuestas');
+
+  /// Los módulos dinámicos que traen su propia pestaña en `InvitadosScreen`
+  /// (Agendamientos es el 5º dinámico, pero no tiene pestaña ahí - es la
+  /// `FormularioWebModal` de "agendar con expertos"). Si ninguno está
+  /// encendido, Agenda deja de tener botón propio y pasa a mostrarse
+  /// embebida como una pestaña más.
   bool get tieneAlgunModuloConPestana =>
-      tieneLaboratorios || tieneSpeakers || tieneExperiencias || tieneStands;
+      tieneLaboratorios ||
+      tieneSpeakers ||
+      tieneExperiencias ||
+      tieneStands ||
+      tieneEncuestas;
 
   /// Portada subida por un admin - null hasta que alguien la suba (ver
   /// `EventosExtensionAdminController.subirImagen`). Las tarjetas deben

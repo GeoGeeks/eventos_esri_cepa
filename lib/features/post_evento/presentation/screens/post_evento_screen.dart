@@ -8,6 +8,9 @@ import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
+import '../../../encuestas/data/encuesta.dart';
+import '../../../encuestas/data/encuestas_repository.dart';
+import '../../../encuestas/presentation/screens/encuesta_responder_screen.dart';
 import '../../data/valoracion_store.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
 import '../widgets/agendar_modal.dart';
@@ -15,7 +18,26 @@ import '../widgets/agendar_modal.dart';
 class PostEventoScreen extends StatefulWidget {
   final VoidCallback? onBack;
 
-  const PostEventoScreen({super.key, this.onBack});
+  /// Evento real (ver `InvitadosScreen.eventoReal`) - `null` (default) deja
+  /// el comportamiento mock de siempre (`ValoracionPaso1Screen`/
+  /// `ValoracionPaso2Screen` con campos fijos, `ValoracionStore` como único
+  /// estado). Con él, "Valorar evento" pasa por la encuesta `post_evento`
+  /// real (ver `EncuestasRepository.postEvento`/`EncuestaResponderScreen`) -
+  /// mismo seam opcional que ya usa `InvitadosScreen`, para no bloquear
+  /// esto en que el resto de Post-evento (galería, agendar con expertos)
+  /// también se conecte a datos reales, que sigue pendiente (ver
+  /// CLAUDE.md, "Status").
+  final String? idEventoReal;
+
+  /// Seam para tests (inyectar un doble sin red real).
+  final EncuestasRepository? encuestasRepository;
+
+  const PostEventoScreen({
+    super.key,
+    this.onBack,
+    this.idEventoReal,
+    this.encuestasRepository,
+  });
 
   @override
   State<PostEventoScreen> createState() => _PostEventoScreenState();
@@ -27,6 +49,60 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   bool _showVideo = false;
   bool _showCertificadoToast = false; // ✅ nuevo estado del toast
   final ScrollController _scrollController = ScrollController();
+
+  late final EncuestasRepository _encuestasRepository =
+      widget.encuestasRepository ?? EncuestasRepository();
+
+  /// `null` mientras no se resuelve (modo mock, o real sin terminar de
+  /// cargar) - mismo criterio que `InvitadosScreen._cargandoLaboratorios`.
+  Encuesta? _encuestaPostEvento;
+
+  @override
+  void initState() {
+    super.initState();
+    final idEvento = widget.idEventoReal;
+    if (idEvento != null) _cargarEncuestaPostEvento(idEvento);
+  }
+
+  /// Si el evento tiene una encuesta `post_evento` configurada Y este
+  /// asistente ya la respondió, `ValoracionStore.eventoValorado` se marca
+  /// de una vez - mismo estado que ya lee `_BotonesAccion` vía
+  /// `ValueListenableBuilder`, sin tocar esa parte de la pantalla.
+  Future<void> _cargarEncuestaPostEvento(String idEvento) async {
+    try {
+      final encuesta = await _encuestasRepository.postEvento(idEvento);
+      if (!mounted || encuesta == null) return;
+      final miRespuesta = await _encuestasRepository.miRespuesta(encuesta.id);
+      if (!mounted) return;
+      setState(() => _encuestaPostEvento = encuesta);
+      if (miRespuesta != null) ValoracionStore.marcarValorado();
+    } catch (_) {
+      // Silencioso: sin encuesta post_evento resuelta, "Valorar evento"
+      // simplemente se queda con el mock de siempre (ver `_irAValorar`).
+    }
+  }
+
+  void _irAValorar() {
+    final encuesta = _encuestaPostEvento;
+    if (encuesta == null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ValoracionPaso1Screen()),
+      );
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EncuestaResponderScreen(
+          encuesta: encuesta,
+          esPostEvento: true,
+          repository: _encuestasRepository,
+          onRespondida: ValoracionStore.marcarValorado,
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -154,13 +230,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                                           ValoracionStore.eventoValorado,
                                       builder: (_, valorado, _) => _BotonesAccion(
                                         valorado: valorado,
-                                        onValorar: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const ValoracionPaso1Screen(),
-                                          ),
-                                        ),
+                                        onValorar: _irAValorar,
                                         onCertificado: () => setState(
                                           () => _showCertificadoToast = true,
                                         ),
