@@ -5,7 +5,6 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../../../navigation/menu.dart';
-import '../screens/post_evento_screen.dart'; // ✅ Import de PostEventoScreen
 
 class ValoracionSuccessDialog extends StatelessWidget {
   const ValoracionSuccessDialog({super.key});
@@ -39,11 +38,7 @@ class ValoracionSuccessDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             /// highlight superior (verde)
-            Container(
-              width: 360,
-              height: 4,
-              color: const Color(0xFF288835),
-            ),
+            Container(width: 360, height: 4, color: const Color(0xFF288835)),
 
             /// header (360x53, borde inferior #EBEBEB)
             Container(
@@ -55,10 +50,7 @@ class ValoracionSuccessDialog extends StatelessWidget {
                   bottom: BorderSide(color: Color(0xFFEBEBEB), width: 1),
                 ),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               child: Row(
                 children: [
                   /// check-circle 16x16 (icono: calificacionevento)
@@ -159,7 +151,8 @@ class ValoracionSuccessDialog extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: Align(
                 alignment: Alignment.centerRight,
-                child: IntrinsicWidth( // ✅ Ajusta el ancho al contenido interno del botón
+                child: IntrinsicWidth(
+                  // ✅ Ajusta el ancho al contenido interno del botón
                   child: SizedBox(
                     height: 32,
                     child: ElevatedButton(
@@ -174,15 +167,15 @@ class ValoracionSuccessDialog extends StatelessWidget {
                         ),
                         elevation: 0,
                       ),
-                      onPressed: () {
-                        // ✅ Navega directamente a PostEventoScreen
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (context) => const PostEventoScreen(),
-                          ),
-                          (route) => false,
-                        );
-                      },
+                      // Vuelve al Post-evento desde el que se abrió la
+                      // valoración (cierra este diálogo y la pantalla de la
+                      // encuesta), donde «Certificado» ya queda habilitado.
+                      // Antes reemplazaba toda la pila con un
+                      // `PostEventoScreen` nuevo, suelto: sin el menú
+                      // inferior y sin saber de qué evento era.
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).popUntil((route) => route.isFirst),
                       child: const Text(
                         'Descargar mi certificado',
                         style: TextStyle(

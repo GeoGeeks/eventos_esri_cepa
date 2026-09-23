@@ -23,11 +23,7 @@ class Menu extends StatefulWidget {
   /// deja `null` y se crea uno de verdad.
   final PushNotificacionesService? pushNotificaciones;
 
-  const Menu({
-    super.key,
-    this.initialIndex = 0,
-    this.pushNotificaciones,
-  });
+  const Menu({super.key, this.initialIndex = 0, this.pushNotificaciones});
 
   @override
   State<Menu> createState() => _MenuState();
@@ -39,6 +35,11 @@ class _MenuState extends State<Menu> {
   // Controla sub-vistas especiales
   bool _showEcard = false;
   bool _showPostEvento = false;
+
+  /// Evento cuyo post-evento se está mostrando (ver `_showPostEvento`) -
+  /// `PostEventoScreen` necesita su id para usar la encuesta `post_evento`
+  /// real en vez del flujo mock.
+  String? _idEventoPostEvento;
   bool _showEventosFromInicio = false;
 
   @override
@@ -111,6 +112,7 @@ class _MenuState extends State<Menu> {
     // Si está mostrando PostEvento, lo prioriza
     if (_showPostEvento) {
       return PostEventoScreen(
+        idEventoReal: _idEventoPostEvento,
         onBack: () => setState(() => _showPostEvento = false),
       );
     }
@@ -131,7 +133,10 @@ class _MenuState extends State<Menu> {
 
       case 1:
         return HistorialScreen(
-          onOpenPostEvento: () => setState(() => _showPostEvento = true),
+          onOpenPostEvento: (evento) => setState(() {
+            _idEventoPostEvento = evento.id;
+            _showPostEvento = true;
+          }),
         );
 
       case 2:
@@ -163,7 +168,9 @@ class _MenuState extends State<Menu> {
         child: CustomBottomNav(
           // Si estamos mostrando Eventos desde Inicio o PostEvento, le enviamos -1 para desmarcar ítems,
           // o puedes pasarle currentIndex si deseas que el ícono permanezca seleccionado.
-          currentIndex: (_showEventosFromInicio || _showPostEvento) ? -1 : currentIndex,
+          currentIndex: (_showEventosFromInicio || _showPostEvento)
+              ? -1
+              : currentIndex,
           onTap: _onNavTap,
         ),
       ),
