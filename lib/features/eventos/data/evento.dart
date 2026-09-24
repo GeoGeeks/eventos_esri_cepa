@@ -16,6 +16,7 @@ class Evento {
     this.imagenUrl,
     this.horaInicio,
     this.horaFin,
+    this.postEventoHabilitadoDesde,
     this.modulosHabilitados = const [],
   });
 
@@ -67,21 +68,38 @@ class Evento {
 
   /// `eventosdb.Evento` solo trae fecha, sin hora - estos dos son la
   /// extensión local, también opcionales: quedan `null` hasta que un admin
-  /// le ponga hora al evento.
+  /// le ponga hora al evento. Ya en hora local del dispositivo (ver
+  /// `_parsearFechaOpcional`).
   final DateTime? horaInicio;
   final DateTime? horaFin;
+
+  /// Desde cuándo está abierto el post-evento (galería, certificado) - `null`
+  /// = cerrado; no se abre solo al terminar el evento (ver la extensión de
+  /// Evento en `eventos_esri_cepa_api`).
+  final DateTime? postEventoHabilitadoDesde;
+
+  /// Misma regla que el backend (`postEventoAbierto`): hay fecha y ya pasó.
+  bool get postEventoAbierto {
+    final desde = postEventoHabilitadoDesde;
+    return desde != null && !desde.isAfter(DateTime.now());
+  }
 
   /// Lo que las tarjetas deben usar como `image` - la portada real si ya la
   /// subieron, o el asset generico mientras tanto (nunca un `image` vacio).
   String get imagenParaCarta => imagenUrl ?? Images.esriEventos;
 
-  /// `true` si el evento ya terminó (compara contra la fecha de HOY, no la
-  /// hora exacta - un evento que termina hoy sigue contando como vigente
-  /// todo el día). `EventosStore` lo usa para no mostrar un evento ya
-  /// pasado ni en "Eventos reservados" ni en "Próximos eventos".
+  /// `true` si el evento ya terminó. `EventosStore` lo usa para no mostrar
+  /// un evento ya pasado ni en "Eventos reservados" ni en "Próximos
+  /// eventos" (y sí en "Eventos asistidos").
+  ///
+  /// Termina al final del día de `fechaFinalizacion` - un evento que
+  /// termina hoy sigue vigente todo el día - o en `horaFin`, lo que sea
+  /// MÁS TARDE: `eventosdb` a veces trae `FechaFinalizacion` = día de
+  /// inicio en un evento de varios días (CUE_26_CO: 1 y 2 de octubre, con
+  /// `FechaFinalizacion` 2026-10-01), y `horaFin` es la corrección que se
+  /// hace desde nuestra propia API sin tocar `eventosdb`.
   bool get yaPaso {
-    final hoy = DateTime.now();
-    final finDelDia = DateTime(
+    var fin = DateTime(
       fechaFinalizacion.year,
       fechaFinalizacion.month,
       fechaFinalizacion.day,
@@ -89,7 +107,9 @@ class Evento {
       59,
       59,
     );
-    return finDelDia.isBefore(hoy);
+    final horaFin = this.horaFin;
+    if (horaFin != null && horaFin.isAfter(fin)) fin = horaFin;
+    return fin.isBefore(DateTime.now());
   }
 
   /// ⚠️ Sin fuente de dato real todavia: `eventosdb.Evento.IDTipoEvento` es
@@ -113,14 +133,19 @@ class Evento {
       imagenUrl: json['imagenUrl'] as String?,
       horaInicio: _parsearFechaOpcional(json['horaInicio']),
       horaFin: _parsearFechaOpcional(json['horaFin']),
-      modulosHabilitados:
-          (json['modulosHabilitados'] as List<dynamic>? ?? [])
-              .cast<String>(),
+      postEventoHabilitadoDesde: _parsearFechaOpcional(
+        json['postEventoHabilitadoDesde'],
+      ),
+      modulosHabilitados: (json['modulosHabilitados'] as List<dynamic>? ?? [])
+          .cast<String>(),
     );
   }
 
+  /// El backend manda instantes en UTC (`...Z`) - `.toLocal()` los pasa a
+  /// la hora del dispositivo; sin esto "8:00 a.m." de Colombia (13:00 UTC)
+  /// se mostraba como "1:00 p.m.".
   static DateTime? _parsearFechaOpcional(Object? valor) =>
-      valor == null ? null : DateTime.parse(valor as String);
+      valor == null ? null : DateTime.parse(valor as String).toLocal();
 
   static const List<String> _meses = [
     'Enero',
@@ -162,5 +187,44 @@ class Evento {
   String get fechaYHoraFormateada {
     final hora = horaFormateada;
     return hora == null ? fechaFormateada : '$fechaFormateada - $hora';
+  }
+
+  /// "Octubre 01, 2026" para un solo día, o "Octubre 01 y 02, 2026" /
+  /// "Octubre 01 - Noviembre 02, 2026" cuando `fechaFinalizacion` es
+  /// distinta. Si `horaFin` cae en un día posterior a `fechaFinalizacion`
+  /// (ver `yaPaso`), el rango llega hasta ese día.
+  String get rangoFechasFormateado {
+    final inicio = fechaInicio;
+    var fin = fechaFinalizacion;
+    final horaFin = this.horaFin;
+    if (horaFin != null &&
+        DateTime(horaFin.year, horaFin.month, horaFin.day).isAfter(fin)) {
+      fin = horaFin;
+    }
+    final mesInicio = _meses[inicio.month - 1];
+    final d1 = inicio.day.toString().padLeft(2, '0');
+    if (inicio.year == fin.year &&
+        inicio.month == fin.month &&
+        inicio.day == fin.day) {
+      return '$mesInicio $d1, ${inicio.year}';
+    }
+    final d2 = fin.day.toString().padLeft(2, '0');
+    if (inicio.year == fin.year && inicio.month == fin.month) {
+      return '$mesInicio $d1 y $d2, ${inicio.year}';
+    }
+    final mesFin = _meses[fin.month - 1];
+    return '$mesInicio $d1 - $mesFin $d2, ${fin.year}';
+  }
+
+  /// "8:00 - 17:00", solo la de inicio si no hay `horaFin`, o vacío si el
+  /// evento todavía no tiene hora asignada.
+  String get rangoHorasFormateado {
+    final inicio = horaInicio;
+    if (inicio == null) return '';
+    final h1 = '${inicio.hour}:${inicio.minute.toString().padLeft(2, '0')}';
+    final fin = horaFin;
+    if (fin == null) return h1;
+    final h2 = '${fin.hour}:${fin.minute.toString().padLeft(2, '0')}';
+    return '$h1 - $h2';
   }
 }

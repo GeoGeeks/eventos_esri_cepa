@@ -342,50 +342,12 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
     final eventoReal = widget.eventoReal;
     if (eventoReal == null) return widget.evento;
     return EventoDetalle(
-      fecha: _rangoFechas(eventoReal),
-      hora: _rangoHoras(eventoReal),
+      fecha: eventoReal.rangoFechasFormateado,
+      hora: eventoReal.rangoHorasFormateado,
       lugar: eventoReal.lugar ?? '',
       descripcion: eventoReal.descripcion ?? '',
       aviso: 'Información sujeta a cambios sin aviso.',
     );
-  }
-
-  static const List<String> _meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-  ];
-
-  /// "Octubre 01, 2026" para un solo día, o "Octubre 01 y 02, 2026" /
-  /// "Octubre 01 - Noviembre 02, 2026" cuando `fechaFinalizacion` es
-  /// distinta - mismo formato que ya usaba `InvitadosMockData.evento`.
-  static String _rangoFechas(Evento evento) {
-    final inicio = evento.fechaInicio;
-    final fin = evento.fechaFinalizacion;
-    final mesInicio = _meses[inicio.month - 1];
-    final d1 = inicio.day.toString().padLeft(2, '0');
-    if (inicio.year == fin.year &&
-        inicio.month == fin.month &&
-        inicio.day == fin.day) {
-      return '$mesInicio $d1, ${inicio.year}';
-    }
-    final d2 = fin.day.toString().padLeft(2, '0');
-    if (inicio.year == fin.year && inicio.month == fin.month) {
-      return '$mesInicio $d1 y $d2, ${inicio.year}';
-    }
-    final mesFin = _meses[fin.month - 1];
-    return '$mesInicio $d1 - $mesFin $d2, ${fin.year}';
-  }
-
-  /// "8:00 - 17:00", o vacío si el evento todavía no tiene hora asignada
-  /// (ver el doc-comment de `Evento.horaInicio`).
-  static String _rangoHoras(Evento evento) {
-    final inicio = evento.horaInicio;
-    if (inicio == null) return '';
-    final h1 = '${inicio.hour}:${inicio.minute.toString().padLeft(2, '0')}';
-    final fin = evento.horaFin;
-    if (fin == null) return h1;
-    final h2 = '${fin.hour}:${fin.minute.toString().padLeft(2, '0')}';
-    return '$h1 - $h2';
   }
 
   /// [indice] solo se conoce para laboratorios reales (para leer
