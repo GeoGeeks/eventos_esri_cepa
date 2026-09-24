@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/widgets/bottom_nav.dart';
+import '../features/eventos/data/evento.dart';
 import '../features/eventos/data/eventos_store.dart';
 import '../features/inicio/inicio.dart';
 import '../features/login/presentation/bloc/auth_cubit.dart';
@@ -37,9 +38,9 @@ class _MenuState extends State<Menu> {
   bool _showPostEvento = false;
 
   /// Evento cuyo post-evento se está mostrando (ver `_showPostEvento`) -
-  /// `PostEventoScreen` necesita su id para usar la encuesta `post_evento`
-  /// real en vez del flujo mock.
-  String? _idEventoPostEvento;
+  /// `PostEventoScreen` lo necesita para mostrar sus datos, su galería,
+  /// su certificado y su encuesta `post_evento` reales en vez del mock.
+  Evento? _eventoPostEvento;
   bool _showEventosFromInicio = false;
 
   @override
@@ -112,7 +113,7 @@ class _MenuState extends State<Menu> {
     // Si está mostrando PostEvento, lo prioriza
     if (_showPostEvento) {
       return PostEventoScreen(
-        idEventoReal: _idEventoPostEvento,
+        evento: _eventoPostEvento,
         onBack: () => setState(() => _showPostEvento = false),
       );
     }
@@ -134,7 +135,7 @@ class _MenuState extends State<Menu> {
       case 1:
         return HistorialScreen(
           onOpenPostEvento: (evento) => setState(() {
-            _idEventoPostEvento = evento.id;
+            _eventoPostEvento = evento;
             _showPostEvento = true;
           }),
         );

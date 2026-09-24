@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -8,9 +12,14 @@ import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
+import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/boton_reintentar.dart';
+import '../../../eventos/data/evento.dart';
 import '../../../encuestas/data/encuesta.dart';
 import '../../../encuestas/data/encuestas_repository.dart';
 import '../../../encuestas/presentation/screens/encuesta_responder_screen.dart';
+import '../../data/certificado_repository.dart';
+import '../../data/galeria_repository.dart';
 import '../../data/valoracion_store.dart';
 import '../../../post_evento/presentation/screens/valoracion_paso1_screen.dart';
 import '../widgets/agendar_modal.dart';
@@ -29,14 +38,33 @@ class PostEventoScreen extends StatefulWidget {
   /// CLAUDE.md, "Status").
   final String? idEventoReal;
 
-  /// Seam para tests (inyectar un doble sin red real).
+  /// Evento real completo (2026-09-23) - además de su id (que reemplaza a
+  /// [idEventoReal]), da la fecha/hora/lugar/descripción de la cabecera.
+  /// Con él la galería y el certificado también son reales: galería desde
+  /// `GET /eventos/:idEvento/galeria`, certificado en PDF desde
+  /// `GET /eventos/:idEvento/certificado`. Sin él (y sin [idEventoReal]),
+  /// todo queda en el mock de siempre - lo que usan los tests de layout.
+  final Evento? evento;
+
+  /// Seams para tests (inyectar dobles sin red real).
   final EncuestasRepository? encuestasRepository;
+  final GaleriaRepository? galeriaRepository;
+  final CertificadoRepository? certificadoRepository;
+
+  /// Qué hacer con el PDF ya descargado - por defecto abre la hoja de
+  /// compartir del sistema (guardar, abrir en un visor, enviar). Seam para
+  /// tests: `share_plus` necesita el canal de plataforma.
+  final Future<void> Function(File archivo)? compartirCertificado;
 
   const PostEventoScreen({
     super.key,
     this.onBack,
     this.idEventoReal,
+    this.evento,
     this.encuestasRepository,
+    this.galeriaRepository,
+    this.certificadoRepository,
+    this.compartirCertificado,
   });
 
   @override
@@ -53,15 +81,108 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   late final EncuestasRepository _encuestasRepository =
       widget.encuestasRepository ?? EncuestasRepository();
 
+  late final GaleriaRepository _galeriaRepository =
+      widget.galeriaRepository ?? GaleriaRepository();
+  late final CertificadoRepository _certificadoRepository =
+      widget.certificadoRepository ?? CertificadoRepository();
+
   /// `null` mientras no se resuelve (modo mock, o real sin terminar de
   /// cargar) - mismo criterio que `InvitadosScreen._cargandoLaboratorios`.
   Encuesta? _encuestaPostEvento;
 
+  /// El evento real no tiene encuesta `post_evento` (el backend respondió
+  /// 404): el certificado no exige valorar primero - misma regla que
+  /// `CertificadosService` en la API.
+  bool _sinEncuestaPostEvento = false;
+
+  GaleriaEvento? _galeriaReal;
+  bool _cargandoGaleria = false;
+  bool _galeriaNoDisponible = false;
+  bool _errorGaleria = false;
+  bool _descargandoCertificado = false;
+
+  /// Id del evento real, venga como [PostEventoScreen.evento] o como
+  /// [PostEventoScreen.idEventoReal]; `null` = modo mock.
+  String? get _idEvento => widget.evento?.id ?? widget.idEventoReal;
+
   @override
   void initState() {
     super.initState();
-    final idEvento = widget.idEventoReal;
-    if (idEvento != null) _cargarEncuestaPostEvento(idEvento);
+    final idEvento = _idEvento;
+    if (idEvento != null) {
+      _cargarEncuestaPostEvento(idEvento);
+      _cargarGaleria(idEvento);
+    }
+  }
+
+  Future<void> _cargarGaleria(String idEvento) async {
+    setState(() {
+      _cargandoGaleria = true;
+      _galeriaNoDisponible = false;
+      _errorGaleria = false;
+    });
+    try {
+      final galeria = await _galeriaRepository.obtener(idEvento);
+      if (!mounted) return;
+      setState(() {
+        _galeriaReal = galeria;
+        _cargandoGaleria = false;
+      });
+    } on GaleriaNoDisponibleException {
+      if (!mounted) return;
+      setState(() {
+        _galeriaNoDisponible = true;
+        _cargandoGaleria = false;
+      });
+    } catch (e) {
+      debugPrint('[PostEventoScreen] cargar galería($idEvento) falló: $e');
+      if (!mounted) return;
+      setState(() {
+        _errorGaleria = true;
+        _cargandoGaleria = false;
+      });
+    }
+  }
+
+  /// Descarga el PDF real y abre la hoja de compartir; si el backend no lo
+  /// entrega (post-evento cerrado, falta la encuesta, sin configurar),
+  /// muestra su mensaje. En modo mock queda el aviso de siempre.
+  Future<void> _alTocarCertificado() async {
+    final idEvento = _idEvento;
+    if (idEvento == null) {
+      setState(() => _showCertificadoToast = true);
+      return;
+    }
+    if (_descargandoCertificado) return;
+    setState(() => _descargandoCertificado = true);
+    try {
+      final archivo = await _certificadoRepository.descargar(idEvento);
+      if (!mounted) return;
+      setState(() => _showCertificadoToast = true);
+      final compartir = widget.compartirCertificado ?? _compartirConSistema;
+      await compartir(archivo);
+    } on CertificadoNoDisponibleException catch (e) {
+      if (mounted) mostrarSnackBar(context, e.mensaje);
+    } catch (e) {
+      debugPrint('[PostEventoScreen] descargar certificado falló: $e');
+      if (mounted) {
+        mostrarSnackBar(
+          context,
+          'No se pudo descargar el certificado. Intente de nuevo.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _descargandoCertificado = false);
+    }
+  }
+
+  static Future<void> _compartirConSistema(File archivo) async {
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(archivo.path, mimeType: 'application/pdf')],
+        title: 'Certificado de asistencia',
+      ),
+    );
   }
 
   /// Si el evento tiene una encuesta `post_evento` configurada Y este
@@ -71,7 +192,11 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   Future<void> _cargarEncuestaPostEvento(String idEvento) async {
     try {
       final encuesta = await _encuestasRepository.postEvento(idEvento);
-      if (!mounted || encuesta == null) return;
+      if (!mounted) return;
+      if (encuesta == null) {
+        setState(() => _sinEncuestaPostEvento = true);
+        return;
+      }
       final miRespuesta = await _encuestasRepository.miRespuesta(encuesta.id);
       if (!mounted) return;
       setState(() => _encuestaPostEvento = encuesta);
@@ -141,6 +266,15 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
   Widget _buildTabContent() {
     switch (_tabIndex) {
       case 0:
+        if (_idEvento != null) {
+          return _GaleriaRealTab(
+            galeria: _galeriaReal,
+            cargando: _cargandoGaleria,
+            noDisponible: _galeriaNoDisponible,
+            error: _errorGaleria,
+            onReintentar: () => _cargarGaleria(_idEvento!),
+          );
+        }
         return _GaleriaTab(
           imagenes: _galeria,
           showVideo: _showVideo,
@@ -212,7 +346,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _InfoEvento(),
+                            _InfoEvento(evento: widget.evento),
                             const SizedBox(height: 16),
 
                             // Los botones y el toast van en el mismo Stack: así
@@ -228,13 +362,17 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                                     ValueListenableBuilder<bool>(
                                       valueListenable:
                                           ValoracionStore.eventoValorado,
-                                      builder: (_, valorado, _) => _BotonesAccion(
-                                        valorado: valorado,
-                                        onValorar: _irAValorar,
-                                        onCertificado: () => setState(
-                                          () => _showCertificadoToast = true,
-                                        ),
-                                      ),
+                                      builder: (_, valorado, _) =>
+                                          _BotonesAccion(
+                                            valorado: valorado,
+                                            certificadoHabilitado:
+                                                valorado ||
+                                                _sinEncuestaPostEvento,
+                                            descargando:
+                                                _descargandoCertificado,
+                                            onValorar: _irAValorar,
+                                            onCertificado: _alTocarCertificado,
+                                          ),
                                     ),
                                     const SizedBox(height: 16),
                                     _TabBar(
@@ -333,8 +471,23 @@ class _HeaderBackBtn extends StatelessWidget {
 
 // ─── Info del evento ──────────────────────────────────────────────────────────
 class _InfoEvento extends StatelessWidget {
+  /// Evento real; `null` = los textos de ejemplo de siempre (modo mock).
+  final Evento? evento;
+
+  const _InfoEvento({this.evento});
+
   @override
   Widget build(BuildContext context) {
+    final evento = this.evento;
+    final fecha = evento?.rangoFechasFormateado ?? 'Octubre 02, 2026';
+    final hora = evento == null ? '8:00 - 11:00' : evento.rangoHorasFormateado;
+    final lugar = evento == null
+        ? 'Universidad Central Cra 36 # 24 - 45'
+        : (evento.lugar ?? '');
+    final descripcion = evento == null
+        ? 'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.'
+        : (evento.descripcion ?? '');
+
     const iconColor = Color(0xFF007AC2);
     const textoStyle = TextStyle(
       fontFamily: Fonts.medium,
@@ -374,44 +527,48 @@ class _InfoEvento extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const SizedBox(
+                  SizedBox(
                     height: 24,
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('Octubre 02, 2026', style: textoStyle),
+                      child: Text(fecha, style: textoStyle),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/time.svg',
-                        width: 16,
-                        height: 16,
-                        colorFilter: const ColorFilter.mode(
-                          iconColor,
-                          BlendMode.srcIn,
+              // Sin hora configurada (la extensión del evento no la trae)
+              // la fila del reloj se oculta en vez de quedar vacía.
+              if (hora.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/icons/time.svg',
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(
+                            iconColor,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const SizedBox(
-                    height: 24,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('8:00 - 11:00', style: textoStyle),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      height: 24,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(hora, style: textoStyle),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 6),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,23 +590,18 @@ class _InfoEvento extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Universidad Central Cra 36 # 24 - 45',
-                      style: textoStyle,
-                    ),
-                  ),
+                  Expanded(child: Text(lugar, style: textoStyle)),
                 ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        const SizedBox(
+        SizedBox(
           width: 360,
           child: Text(
-            'Es un evento presencial gratuito donde podrá conocer historias, soluciones e innovaciones en el campo de la tecnología y los SIG.',
-            style: TextStyle(
+            descripcion,
+            style: const TextStyle(
               fontFamily: Fonts.light,
               fontSize: 16,
               fontWeight: FontWeight.w300,
@@ -493,11 +645,20 @@ class _InfoEvento extends StatelessWidget {
 /// Sin valoración no se puede descargar el certificado.
 class _BotonesAccion extends StatelessWidget {
   final bool valorado;
+
+  /// Normalmente igual a [valorado]; `true` también cuando el evento real
+  /// no tiene encuesta `post_evento` (no hay nada que valorar antes).
+  final bool certificadoHabilitado;
+
+  /// Mientras se descarga el PDF el botón no responde a más toques.
+  final bool descargando;
   final VoidCallback? onValorar;
   final VoidCallback? onCertificado;
 
   const _BotonesAccion({
     required this.valorado,
+    required this.certificadoHabilitado,
+    this.descargando = false,
     this.onValorar,
     this.onCertificado,
   });
@@ -530,13 +691,15 @@ class _BotonesAccion extends StatelessWidget {
           Expanded(
             child: _Boton(
               key: const Key('post-evento-certificado'),
-              etiqueta: 'Certificado',
+              etiqueta: descargando ? 'Descargando…' : 'Certificado',
               icono: 'assets/icons/certificado.svg',
               // Apagado hasta que se valore; después, azul con letra blanca.
-              fondo: valorado ? _azul : _apagado,
-              contenido: valorado ? _blanco : _gris,
-              borde: valorado ? null : _gris,
-              onTap: valorado ? onCertificado : null,
+              fondo: certificadoHabilitado ? _azul : _apagado,
+              contenido: certificadoHabilitado ? _blanco : _gris,
+              borde: certificadoHabilitado ? null : _gris,
+              onTap: certificadoHabilitado && !descargando
+                  ? onCertificado
+                  : null,
             ),
           ),
         ],
@@ -1026,6 +1189,285 @@ class _GaleriaTab extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Tab Galería real (evento real) ──────────────────────────────────────────
+//
+// Mismas medidas de cuadrícula que `_GaleriaTab` (2 columnas, 25 de
+// separación, 167x111), con las fotos de `GET /eventos/:idEvento/galeria`.
+// Tocar una foto la abre a pantalla completa (`_VisorFotos`); el álbum
+// completo y el aftermovie se abren afuera (Flickr/YouTube), no se embeben.
+class _GaleriaRealTab extends StatelessWidget {
+  final GaleriaEvento? galeria;
+  final bool cargando;
+  final bool noDisponible;
+  final bool error;
+  final VoidCallback onReintentar;
+
+  const _GaleriaRealTab({
+    required this.galeria,
+    required this.cargando,
+    required this.noDisponible,
+    required this.error,
+    required this.onReintentar,
+  });
+
+  static const _estiloAviso = TextStyle(
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    color: Color(0xFF6B6B6B),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    if (cargando) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (noDisponible) {
+      return const _AvisoGaleria(
+        texto:
+            'La galería estará disponible cuando se habilite el post-evento.',
+      );
+    }
+    final datos = galeria;
+    if (error || datos == null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: Column(
+          children: [
+            const Text(
+              'No se pudo cargar la galería. Verifique su conexión.',
+              textAlign: TextAlign.center,
+              style: _estiloAviso,
+            ),
+            BotonReintentar(onPressed: onReintentar),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (datos.fotos.isEmpty)
+            const _AvisoGaleria(texto: 'Aún no hay fotos de este evento.')
+          else
+            GridView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 25,
+                mainAxisSpacing: 25,
+                childAspectRatio: 167 / 111,
+              ),
+              itemCount: datos.fotos.length,
+              itemBuilder: (context, i) => GestureDetector(
+                key: Key('galeria-foto-$i'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (_) => _VisorFotos(fotos: datos.fotos, inicial: i),
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: _FotoRed(url: datos.fotos[i].url),
+                ),
+              ),
+            ),
+          if (datos.flickrAlbumUrl != null) ...[
+            const SizedBox(height: 20),
+            _EnlaceExterno(
+              key: const Key('galeria-flickr'),
+              texto: 'Ver álbum completo en Flickr',
+              icono: Icons.photo_library_outlined,
+              url: datos.flickrAlbumUrl!,
+            ),
+          ],
+          if (datos.aftermovieUrl != null) ...[
+            const SizedBox(height: 12),
+            _EnlaceExterno(
+              key: const Key('galeria-aftermovie'),
+              texto: 'Ver aftermovie',
+              icono: Icons.play_circle_outline,
+              url: datos.aftermovieUrl!,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AvisoGaleria extends StatelessWidget {
+  final String texto;
+  const _AvisoGaleria({required this.texto});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 40, bottom: 24),
+      child: Center(
+        child: Text(
+          texto,
+          textAlign: TextAlign.center,
+          style: _GaleriaRealTab._estiloAviso,
+        ),
+      ),
+    );
+  }
+}
+
+/// Foto de red con un fondo gris mientras carga o si falla - sin él, una
+/// foto caída dejaba un hueco blanco en la cuadrícula.
+class _FotoRed extends StatelessWidget {
+  final String url;
+  final BoxFit fit;
+  const _FotoRed({required this.url, this.fit = BoxFit.cover});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      url,
+      fit: fit,
+      loadingBuilder: (_, hijo, progreso) =>
+          progreso == null ? hijo : const ColoredBox(color: Color(0xFFEBEBEB)),
+      errorBuilder: (_, _, _) => const ColoredBox(
+        color: Color(0xFFEBEBEB),
+        child: Center(
+          child: Icon(Icons.broken_image_outlined, color: Color(0xFF949494)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Enlace que se abre fuera de la app (navegador o app de Flickr/YouTube).
+class _EnlaceExterno extends StatelessWidget {
+  final String texto;
+  final IconData icono;
+  final String url;
+
+  const _EnlaceExterno({
+    super.key,
+    required this.texto,
+    required this.icono,
+    required this.url,
+  });
+
+  Future<void> _abrir(BuildContext context) async {
+    final uri = Uri.tryParse(url);
+    final abierto =
+        uri != null &&
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!abierto && context.mounted) {
+      mostrarSnackBar(context, 'No se pudo abrir el enlace.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _abrir(context),
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        children: [
+          Icon(icono, size: 20, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              texto,
+              style: const TextStyle(
+                fontFamily: Fonts.regular,
+                fontSize: 16,
+                color: AppColors.primary,
+                decoration: TextDecoration.underline,
+                decorationColor: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fotos a pantalla completa: se pasa de una a otra deslizando y se puede
+/// hacer zoom con dos dedos.
+class _VisorFotos extends StatefulWidget {
+  final List<FotoGaleria> fotos;
+  final int inicial;
+  const _VisorFotos({required this.fotos, required this.inicial});
+
+  @override
+  State<_VisorFotos> createState() => _VisorFotosState();
+}
+
+class _VisorFotosState extends State<_VisorFotos> {
+  late final PageController _paginas = PageController(
+    initialPage: widget.inicial,
+  );
+  late int _actual = widget.inicial;
+
+  @override
+  void dispose() {
+    _paginas.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _paginas,
+            itemCount: widget.fotos.length,
+            onPageChanged: (i) => setState(() => _actual = i),
+            itemBuilder: (_, i) => InteractiveViewer(
+              maxScale: 4,
+              child: Center(
+                child: _FotoRed(url: widget.fotos[i].url, fit: BoxFit.contain),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    key: const Key('visor-cerrar'),
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    tooltip: 'Cerrar',
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${_actual + 1} / ${widget.fotos.length}',
+                    style: const TextStyle(
+                      fontFamily: Fonts.regular,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
