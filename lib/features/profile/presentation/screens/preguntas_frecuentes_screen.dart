@@ -24,7 +24,8 @@ class PreguntasFrecuentesScreen extends StatefulWidget {
 
   final VoidCallback onBack;
 
-  /// Botón de correo de la cabecera - abre "Contáctenos" (soporte).
+  /// Botón de correo de la cabecera - misma acción que "Contáctenos" del
+  /// menú de Perfil (correo a `ProfileMenuScreen.correoContacto`).
   final VoidCallback onContactar;
 
   final List<CategoriaPreguntas> categorias;

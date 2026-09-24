@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/utils/area_segura.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../favoritos/favoritos.dart';
 import '../../../login/login_screen.dart';
-import '../../../login/soporte_screen.dart';
 import '../../../login/presentation/bloc/auth_cubit.dart';
 import '../../../login/presentation/bloc/auth_state.dart';
 import '../widgets/logout_button.dart';
@@ -36,14 +37,33 @@ class ProfileMenuScreen extends StatelessWidget {
     this.onOpenPreguntasFrecuentes,
   });
 
-  /// "Contáctenos" abre el formulario de soporte (`POST /soporte`) - la
-  /// misma pantalla a la que remite la respuesta "¿Cómo puedo contactar a
-  /// soporte?" de Preguntas frecuentes.
-  static void abrirContactenos(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SoporteScreen()),
+  /// Buzón al que llega "Contáctenos" (pedido de la PO, 2026-09-24).
+  static const correoContacto = 'vpiravaguen@esri.co';
+
+  /// `mailto:` armado a mano: `Uri(queryParameters:)` codifica los espacios
+  /// como `+`, y varias apps de correo los muestran literalmente en el
+  /// asunto.
+  static final Uri mailtoContacto = Uri.parse(
+    'mailto:$correoContacto'
+    '?subject=${Uri.encodeComponent('Contacto - App Eventos Esri Colombia')}',
+  );
+
+  /// "Contáctenos" abre la app de correo del teléfono con un mensaje nuevo
+  /// para [correoContacto] - la misma acción a la que remite la respuesta
+  /// "¿Cómo puedo contactar a soporte?" de Preguntas frecuentes. El
+  /// formulario de soporte (`SoporteScreen`) sigue siendo el camino cuando
+  /// el login falla.
+  static Future<void> abrirContactenos(BuildContext context) async {
+    final abierto = await launchUrl(
+      mailtoContacto,
+      mode: LaunchMode.externalApplication,
     );
+    if (!abierto && context.mounted) {
+      mostrarSnackBar(
+        context,
+        'No se encontró una aplicación de correo. Escríbanos a $correoContacto.',
+      );
+    }
   }
 
   /// Alto de la cabecera en Figma. Fijo: el fondo va a sangre por detrás de la
@@ -248,10 +268,18 @@ class ProfileMenuScreen extends StatelessWidget {
                           title: 'Contáctenos',
                           onTap: () => abrirContactenos(context),
                         ),
-                        ProfileMenuItem(
-                          icon: 'assets/icons/whatsapp.svg',
-                          title: 'Chat por WhatsApp',
-                          onTap: () {},
+                        // "Chat por WhatsApp" oculto a pedido de la PO
+                        // (2026-09-24): todavía no hay canal de WhatsApp.
+                        // Mismo recurso que "Configuración" arriba.
+                        Visibility(
+                          visible: false,
+                          maintainState: true,
+                          maintainAnimation: true,
+                          child: ProfileMenuItem(
+                            icon: 'assets/icons/whatsapp.svg',
+                            title: 'Chat por WhatsApp',
+                            onTap: () {},
+                          ),
                         ),
                         ProfileMenuItem(
                           icon: 'assets/icons/preguntas.svg',

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:esri_eventos/features/profile/data/preguntas_frecuentes_data.dart';
 import 'package:esri_eventos/features/profile/presentation/screens/preguntas_frecuentes_screen.dart';
+import 'package:esri_eventos/features/profile/presentation/screens/profile_menu_screen.dart';
 
 import 'fuentes_de_prueba.dart';
 
@@ -126,5 +127,16 @@ void main() {
 
     expect(volvio, isTrue);
     expect(contacto, isTrue);
+  });
+
+  test('Contáctenos es un correo a vpiravaguen@esri.co con asunto', () {
+    final uri = ProfileMenuScreen.mailtoContacto;
+    expect(uri.scheme, 'mailto');
+    expect(uri.path, 'vpiravaguen@esri.co');
+    expect(uri.toString(), isNot(contains('+')));
+    expect(
+      Uri.decodeComponent(uri.query),
+      'subject=Contacto - App Eventos Esri Colombia',
+    );
   });
 }
