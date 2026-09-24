@@ -14,6 +14,7 @@ import '../features/reservas/reservas_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
 import '../features/profile/presentation/screens/profile_menu_screen.dart';
 import '../features/profile/presentation/screens/e_card_screen.dart';
+import '../features/profile/presentation/screens/preguntas_frecuentes_screen.dart';
 import '../features/post_evento/presentation/screens/post_evento_screen.dart';
 
 class Menu extends StatefulWidget {
@@ -35,6 +36,7 @@ class _MenuState extends State<Menu> {
 
   // Controla sub-vistas especiales
   bool _showEcard = false;
+  bool _showPreguntasFrecuentes = false;
   bool _showPostEvento = false;
 
   /// Evento cuyo post-evento se está mostrando (ver `_showPostEvento`) -
@@ -96,6 +98,7 @@ class _MenuState extends State<Menu> {
       _showPostEvento = false; // Reset al tocar cualquier ícono del menú
       if (index == 4) {
         _showEcard = false;
+        _showPreguntasFrecuentes = false;
       }
     });
 
@@ -147,13 +150,22 @@ class _MenuState extends State<Menu> {
         return const NotificationsScreen();
 
       case 4:
-        return _showEcard
-            ? ECardScreen(onBack: () => setState(() => _showEcard = false))
-            : ProfileMenuScreen(
-                onOpenEcard: () => setState(() => _showEcard = true),
-                onGoToReservas: () => _onNavTap(2),
-                onGoToNotifications: () => _onNavTap(3),
-              );
+        if (_showEcard) {
+          return ECardScreen(onBack: () => setState(() => _showEcard = false));
+        }
+        if (_showPreguntasFrecuentes) {
+          return PreguntasFrecuentesScreen(
+            onBack: () => setState(() => _showPreguntasFrecuentes = false),
+            onContactar: () => ProfileMenuScreen.abrirContactenos(context),
+          );
+        }
+        return ProfileMenuScreen(
+          onOpenEcard: () => setState(() => _showEcard = true),
+          onGoToReservas: () => _onNavTap(2),
+          onGoToNotifications: () => _onNavTap(3),
+          onOpenPreguntasFrecuentes: () =>
+              setState(() => _showPreguntasFrecuentes = true),
+        );
 
       default:
         return const SizedBox.shrink();

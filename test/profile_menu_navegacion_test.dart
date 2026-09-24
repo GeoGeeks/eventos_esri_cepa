@@ -84,6 +84,16 @@ void main() {
     expect(llamado, isTrue);
   });
 
+  testWidgets('"Chat por WhatsApp" no se ve y "Contáctenos" sí', (
+    tester,
+  ) async {
+    await _montar(tester, onGoToReservas: () {}, onGoToNotifications: () {});
+
+    expect(find.text('Chat por WhatsApp'), findsNothing);
+    expect(find.text('Contáctenos'), findsOneWidget);
+    expect(find.text('Preguntas frecuentes'), findsOneWidget);
+  });
+
   testWidgets('tocar "Reservas" llama a onGoToReservas', (tester) async {
     var llamado = false;
     await _montar(
