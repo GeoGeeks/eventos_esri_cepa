@@ -7,6 +7,7 @@ import '../../../../core/constants/images.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../favoritos/favoritos.dart';
 import '../../../login/login_screen.dart';
+import '../../../login/soporte_screen.dart';
 import '../../../login/presentation/bloc/auth_cubit.dart';
 import '../../../login/presentation/bloc/auth_state.dart';
 import '../widgets/logout_button.dart';
@@ -22,12 +23,28 @@ class ProfileMenuScreen extends StatelessWidget {
   final VoidCallback onGoToReservas;
   final VoidCallback onGoToNotifications;
 
+  /// Sub-vista "Preguntas frecuentes" dentro del tab Perfil (mismo patrón
+  /// que [onOpenEcard]). Opcional para no romper los tests que montan esta
+  /// pantalla sola.
+  final VoidCallback? onOpenPreguntasFrecuentes;
+
   const ProfileMenuScreen({
     super.key,
     required this.onOpenEcard,
     required this.onGoToReservas,
     required this.onGoToNotifications,
+    this.onOpenPreguntasFrecuentes,
   });
+
+  /// "Contáctenos" abre el formulario de soporte (`POST /soporte`) - la
+  /// misma pantalla a la que remite la respuesta "¿Cómo puedo contactar a
+  /// soporte?" de Preguntas frecuentes.
+  static void abrirContactenos(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SoporteScreen()),
+    );
+  }
 
   /// Alto de la cabecera en Figma. Fijo: el fondo va a sangre por detrás de la
   /// barra de estado y solo se desplaza el contenido de dentro.
@@ -209,8 +226,9 @@ class ProfileMenuScreen extends StatelessWidget {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const FavoritosScreen(cargarDesdeBackend: true),
+                              builder: (_) => const FavoritosScreen(
+                                cargarDesdeBackend: true,
+                              ),
                             ),
                           ),
                         ),
@@ -228,7 +246,7 @@ class ProfileMenuScreen extends StatelessWidget {
                         ProfileMenuItem(
                           icon: 'assets/icons/contactenos.svg',
                           title: 'Contáctenos',
-                          onTap: () {},
+                          onTap: () => abrirContactenos(context),
                         ),
                         ProfileMenuItem(
                           icon: 'assets/icons/whatsapp.svg',
@@ -238,7 +256,7 @@ class ProfileMenuScreen extends StatelessWidget {
                         ProfileMenuItem(
                           icon: 'assets/icons/preguntas.svg',
                           title: 'Preguntas frecuentes',
-                          onTap: () {},
+                          onTap: onOpenPreguntasFrecuentes ?? () {},
                           showBorder: false,
                         ),
 
