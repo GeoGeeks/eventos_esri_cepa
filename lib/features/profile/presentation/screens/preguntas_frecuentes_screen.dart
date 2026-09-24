@@ -201,8 +201,8 @@ class _ItemPregunta extends StatelessWidget {
   static const _estiloRespuesta = TextStyle(
     fontFamily: Fonts.regular,
     fontWeight: Fonts.wRegular,
-    fontSize: Fonts.textXs,
-    height: 16 / 12,
+    fontSize: Fonts.textSm,
+    height: 20 / 14,
     color: AppColors.textMuted,
   );
 
