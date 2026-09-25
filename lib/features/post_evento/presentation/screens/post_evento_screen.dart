@@ -1200,7 +1200,8 @@ class _GaleriaTab extends StatelessWidget {
 // Mismas medidas de cuadrícula que `_GaleriaTab` (2 columnas, 25 de
 // separación, 167x111), con las fotos de `GET /eventos/:idEvento/galeria`.
 // Tocar una foto la abre a pantalla completa (`_VisorFotos`); el álbum
-// completo y el aftermovie se abren afuera (Flickr/YouTube), no se embeben.
+// completo y el aftermovie (solo si el evento los tiene) se abren afuera, no
+// se embeben.
 class _GaleriaRealTab extends StatelessWidget {
   final GaleriaEvento? galeria;
   final bool cargando;
@@ -1290,7 +1291,7 @@ class _GaleriaRealTab extends StatelessWidget {
             const SizedBox(height: 20),
             _EnlaceExterno(
               key: const Key('galeria-flickr'),
-              texto: 'Ver álbum completo en Flickr',
+              texto: 'Ver álbum completo',
               icono: Icons.photo_library_outlined,
               url: datos.flickrAlbumUrl!,
             ),
