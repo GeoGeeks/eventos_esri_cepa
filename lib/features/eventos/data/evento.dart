@@ -1,4 +1,5 @@
 import '../../../core/constants/images.dart';
+import '../../../core/utils/hora_evento.dart';
 
 /// Evento real, tal como lo devuelve `GET /eventos` de `eventos_esri_cepa_api`
 /// (fusión de `eventosdb.Evento` con la extensión local `EventoExtension` -
@@ -18,6 +19,9 @@ class Evento {
     this.horaFin,
     this.postEventoHabilitadoDesde,
     this.modulosHabilitados = const [],
+    this.horarioTexto,
+    this.finalizadoSegunApi,
+    this.postEventoAbiertoSegunApi,
   });
 
   final String id;
@@ -68,10 +72,19 @@ class Evento {
 
   /// `eventosdb.Evento` solo trae fecha, sin hora - estos dos son la
   /// extensión local, también opcionales: quedan `null` hasta que un admin
-  /// le ponga hora al evento. Ya en hora local del dispositivo (ver
-  /// `_parsearFechaOpcional`).
+  /// le ponga hora al evento. Son horas de AGENDA (ver
+  /// `core/utils/hora_evento.dart`): los dígitos son la hora del evento y se
+  /// pintan tal cual, sin pasar por la zona horaria del teléfono.
   final DateTime? horaInicio;
   final DateTime? horaFin;
+
+  /// Decisiones que ya manda la API (`horarioTexto`, `finalizado`,
+  /// `postEventoAbierto` en `GET /eventos`): si llegan, mandan sobre el
+  /// cálculo local, así una regla se corrige sin publicar la app. `null`
+  /// si la API desplegada todavía no las envía.
+  final String? horarioTexto;
+  final bool? finalizadoSegunApi;
+  final bool? postEventoAbiertoSegunApi;
 
   /// Desde cuándo está abierto el post-evento (galería, certificado) - `null`
   /// = cerrado; no se abre solo al terminar el evento (ver la extensión de
@@ -79,7 +92,11 @@ class Evento {
   final DateTime? postEventoHabilitadoDesde;
 
   /// Misma regla que el backend (`postEventoAbierto`): hay fecha y ya pasó.
+  /// `postEventoHabilitadoDesde` es un instante real, así que aquí sí se
+  /// compara con `DateTime.now()`.
   bool get postEventoAbierto {
+    final segunApi = postEventoAbiertoSegunApi;
+    if (segunApi != null) return segunApi;
     final desde = postEventoHabilitadoDesde;
     return desde != null && !desde.isAfter(DateTime.now());
   }
@@ -98,8 +115,13 @@ class Evento {
   /// inicio en un evento de varios días (CUE_26_CO: 1 y 2 de octubre, con
   /// `FechaFinalizacion` 2026-10-01), y `horaFin` es la corrección que se
   /// hace desde nuestra propia API sin tocar `eventosdb`.
+  ///
+  /// Manda `finalizado` de la API; el cálculo local es el respaldo y se hace
+  /// en hora del evento (`horaFin` es hora de agenda).
   bool get yaPaso {
-    var fin = DateTime(
+    final segunApi = finalizadoSegunApi;
+    if (segunApi != null) return segunApi;
+    var fin = DateTime.utc(
       fechaFinalizacion.year,
       fechaFinalizacion.month,
       fechaFinalizacion.day,
@@ -109,7 +131,7 @@ class Evento {
     );
     final horaFin = this.horaFin;
     if (horaFin != null && horaFin.isAfter(fin)) fin = horaFin;
-    return fin.isBefore(DateTime.now());
+    return fin.isBefore(ahoraEnHoraDelEvento());
   }
 
   /// ⚠️ Sin fuente de dato real todavia: `eventosdb.Evento.IDTipoEvento` es
@@ -131,19 +153,28 @@ class Evento {
       lugar: json['Lugar'] as String?,
       urlEvento: json['UrlEvento'] as String?,
       imagenUrl: json['imagenUrl'] as String?,
-      horaInicio: _parsearFechaOpcional(json['horaInicio']),
-      horaFin: _parsearFechaOpcional(json['horaFin']),
+      horaInicio: _parsearHoraDeAgenda(json['horaInicio']),
+      horaFin: _parsearHoraDeAgenda(json['horaFin']),
       postEventoHabilitadoDesde: _parsearFechaOpcional(
         json['postEventoHabilitadoDesde'],
       ),
       modulosHabilitados: (json['modulosHabilitados'] as List<dynamic>? ?? [])
           .cast<String>(),
+      horarioTexto: json['horarioTexto'] as String?,
+      finalizadoSegunApi: json['finalizado'] as bool?,
+      postEventoAbiertoSegunApi: json['postEventoAbierto'] as bool?,
     );
   }
 
-  /// El backend manda instantes en UTC (`...Z`) - `.toLocal()` los pasa a
-  /// la hora del dispositivo; sin esto "8:00 a.m." de Colombia (13:00 UTC)
-  /// se mostraba como "1:00 p.m.".
+  /// Hora de agenda: se conservan los dígitos (ver `leerHoraDeAgenda`).
+  /// Antes pasaba por `toLocal()` y el CUE (07:00Z = 7:00 a.m.) se veía a
+  /// las 2:00.
+  static DateTime? _parsearHoraDeAgenda(Object? valor) =>
+      valor == null ? null : leerHoraDeAgenda(valor as String);
+
+  /// Instantes reales (`postEventoHabilitadoDesde`): `.toLocal()` los pasa a
+  /// la hora del dispositivo. No usar para horas de agenda (ver
+  /// `_parsearHoraDeAgenda`).
   static DateTime? _parsearFechaOpcional(Object? valor) =>
       valor == null ? null : DateTime.parse(valor as String).toLocal();
 
@@ -219,6 +250,8 @@ class Evento {
   /// "8:00 - 17:00", solo la de inicio si no hay `horaFin`, o vacío si el
   /// evento todavía no tiene hora asignada.
   String get rangoHorasFormateado {
+    final segunApi = horarioTexto;
+    if (segunApi != null) return segunApi;
     final inicio = horaInicio;
     if (inicio == null) return '';
     final h1 = '${inicio.hour}:${inicio.minute.toString().padLeft(2, '0')}';

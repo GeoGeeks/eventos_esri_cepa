@@ -1,3 +1,5 @@
+import '../../../core/utils/hora_evento.dart';
+
 class Actividad {
   /// Id real de la Charla que esto representa - `null` cuando la actividad
   /// es mock/de prueba. `AgendaScreen`/`FavoritosScreen` lo usan para
@@ -27,6 +29,10 @@ class Actividad {
   /// decide si se pinta «Valorar»: ver [mostrarValorar].
   final DateTime? horaFin;
 
+  /// Decisión de la API (`Charla.valorable`); si no llega, se calcula con
+  /// [horaFin] - ver [mostrarValorar].
+  final bool? valorable;
+
   const Actividad({
     this.id,
     required this.titulo,
@@ -42,6 +48,7 @@ class Actividad {
     this.favorita = false,
     this.valorada = false,
     this.horaFin,
+    this.valorable,
   });
 
   /// En modo mock (`id == null`) siempre `true` - comportamiento de
@@ -49,9 +56,15 @@ class Actividad {
   /// solo se pinta una vez terminada la charla (`horaFin` ya pasó); si la
   /// Charla real no trae `horaFin`, tampoco se pinta - pedido explícito
   /// del usuario, 2026-09-18.
+  ///
+  /// Manda lo que decida la API (`valorable`), así la regla se corrige sin
+  /// publicar la app. Si no llega, se calcula en hora del evento: `horaFin`
+  /// es hora de agenda y compararla con `DateTime.now()` habilitaba
+  /// «Valorar» 5 horas antes.
   bool get mostrarValorar =>
       id == null ||
-      (horaFin != null && !DateTime.now().isBefore(horaFin!));
+      (valorable ??
+          (horaFin != null && !ahoraEnHoraDelEvento().isBefore(horaFin!)));
 
   /// Sin descripción NI objetivos (la Charla real no siempre trae ninguno
   /// de los dos) no hay nada que ver al expandir la tarjeta - `ActividadCard`
@@ -75,6 +88,7 @@ class Actividad {
     favorita: favorita ?? this.favorita,
     valorada: valorada ?? this.valorada,
     horaFin: horaFin,
+    valorable: valorable,
   );
 }
 

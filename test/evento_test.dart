@@ -20,17 +20,49 @@ Map<String, dynamic> _json({
 
 void main() {
   group('Evento.fromJson', () {
-    test('pasa las horas del backend (UTC) a hora local', () {
+    test(
+      'las horas de agenda conservan sus dígitos (07:00Z = 7:00 del evento)',
+      () {
+        final evento = Evento.fromJson(
+          _json(
+            horaInicio: '2026-10-01T07:00:00.000Z',
+            horaFin: '2026-10-02T18:00:00.000Z',
+          ),
+        );
+
+        expect(evento.horaInicio!.hour, 7);
+        expect(evento.horaFin!.hour, 18);
+        // Antes pasaban por toLocal() y el CUE se veía "2:00 - 13:00".
+        expect(evento.rangoHorasFormateado, '7:00 - 18:00');
+      },
+    );
+
+    test('también con offset: 07:00-05:00 se lee como las 7:00', () {
       final evento = Evento.fromJson(
-        _json(horaInicio: '2026-10-01T13:00:00.000Z'),
+        _json(horaInicio: '2026-10-01T07:00:00-05:00'),
       );
 
-      expect(evento.horaInicio!.isUtc, isFalse);
-      expect(
-        evento.horaInicio,
-        DateTime.parse('2026-10-01T13:00:00.000Z').toLocal(),
-      );
+      expect(evento.horaInicio!.hour, 7);
     });
+
+    test(
+      'manda lo que decide la API: horarioTexto, finalizado y postEventoAbierto',
+      () {
+        final evento = Evento.fromJson({
+          ..._json(
+            horaInicio: '2026-10-01T07:00:00.000Z',
+            fechaFinalizacion: '2020-01-01',
+          ),
+          'horarioTexto': '7:30 - 18:00',
+          'finalizado': false,
+          'postEventoAbierto': true,
+        });
+
+        expect(evento.rangoHorasFormateado, '7:30 - 18:00');
+        expect(evento.yaPaso, isFalse);
+        expect(evento.postEventoAbierto, isTrue);
+      },
+    );
 
     test('lee la apertura del post-evento', () {
       final abierto = Evento.fromJson(
