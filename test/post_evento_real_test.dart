@@ -113,7 +113,7 @@ void main() {
     expect(find.text('Octubre 02, 2026'), findsNothing);
   });
 
-  testWidgets('la galería muestra las fotos reales y el enlace a Flickr', (
+  testWidgets('la galería muestra las fotos reales y el enlace al álbum', (
     tester,
   ) async {
     await _montar(tester);
@@ -122,7 +122,7 @@ void main() {
       expect(find.byKey(Key('galeria-foto-$i')), findsOneWidget);
     }
     expect(find.byKey(const Key('galeria-foto-3')), findsNothing);
-    expect(find.text('Ver álbum completo en Flickr'), findsOneWidget);
+    expect(find.text('Ver álbum completo'), findsOneWidget);
     expect(find.text('Ver aftermovie'), findsNothing);
   });
 
