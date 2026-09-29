@@ -149,7 +149,7 @@ class DetalleEventoModal extends StatelessWidget {
                   // Cierra el detalle y abre el formulario de registro.
                   onPressed: () {
                     Navigator.of(context).pop();
-                    RegistroModal.mostrar(context);
+                    RegistroModal.mostrar(context, idEvento: evento.id);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF007AC2),

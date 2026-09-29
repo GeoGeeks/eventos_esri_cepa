@@ -12,15 +12,21 @@ class RegistroModal {
 
   static const String titulo = 'Registro';
 
-  /// Formulario público de registro del evento.
-  static const String url =
-      'https://registroeventos.esri.co/registro-publico/PE_26_BOG';
+  /// Formulario público de registro de [idEvento] (`IDEvento` de
+  /// eventosdb). Antes era fijo el de Planeta Esri Bogotá, así que
+  /// «Registrarse» abría ese formulario en cualquier evento.
+  static String urlDe(String idEvento) =>
+      'https://registroeventos.esri.co/registro-publico/'
+      '${Uri.encodeComponent(idEvento)}';
 
-  static Future<void> mostrar(BuildContext context, {String? url}) {
+  static Future<void> mostrar(
+    BuildContext context, {
+    required String idEvento,
+  }) {
     return FormularioWebModal.mostrar(
       context,
       titulo: titulo,
-      url: url ?? RegistroModal.url,
+      url: urlDe(idEvento),
     );
   }
 }

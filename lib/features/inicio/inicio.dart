@@ -176,7 +176,8 @@ class _SeccionEventos extends StatelessWidget {
                       // salir de Inicio.
                       onViewMore: () => onAbrirDetalle(e),
                       // "Registrarse" → el formulario de registro.
-                      onRegister: () => RegistroModal.mostrar(context),
+                      onRegister: () =>
+                          RegistroModal.mostrar(context, idEvento: e.id),
                     ),
                   ),
                 ),

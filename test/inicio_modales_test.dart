@@ -135,6 +135,11 @@ void main() {
     tester.takeException();
     expect(find.byType(FormularioWebModal), findsOneWidget);
     expect(find.text('Registro'), findsOneWidget);
+    // El formulario es el del evento tocado, no uno fijo.
+    expect(
+      tester.widget<FormularioWebModal>(find.byType(FormularioWebModal)).enlace,
+      'https://registroeventos.esri.co/registro-publico/planeta',
+    );
     expect(find.byType(InicioApp), findsOneWidget);
     expect(vecesQueNavego[0], 0);
   });
