@@ -83,37 +83,37 @@ class _AgendaScreenState extends State<AgendaScreen> {
       body: Stack(
         children: [
           Column(
-              children: [
-                Padding(
-                  // La cabecera va a 36 de Figma; solo baja si la barra de
-                  // estado llegara a taparla.
-                  padding: EdgeInsets.fromLTRB(
-                    26,
-                    AreaSegura.top(context, 36),
-                    26,
-                    0,
-                  ),
-                  child: CabeceraActividades(
-                    titulo: 'Agenda',
-                    onVolver: () => Navigator.pop(context),
+            children: [
+              Padding(
+                // La cabecera va a 36 de Figma; solo baja si la barra de
+                // estado llegara a taparla.
+                padding: EdgeInsets.fromLTRB(
+                  26,
+                  AreaSegura.top(context, 36),
+                  26,
+                  0,
+                ),
+                child: CabeceraActividades(
+                  titulo: 'Agenda',
+                  onVolver: () => Navigator.pop(context),
+                ),
+              ),
+              const SizedBox(height: 30),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
+                  child: AgendaContenido(
+                    actividades: widget.actividades,
+                    idEvento: widget.idEvento,
+                    repository: widget.repository,
+                    valoracionesRepository: widget.valoracionesRepository,
+                    onFavoritoMarcado: (marcada) =>
+                        setState(() => _alertaVisible = marcada),
                   ),
                 ),
-                const SizedBox(height: 30),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(26, 0, 26, 24),
-                    child: AgendaContenido(
-                      actividades: widget.actividades,
-                      idEvento: widget.idEvento,
-                      repository: widget.repository,
-                      valoracionesRepository: widget.valoracionesRepository,
-                      onFavoritoMarcado: (marcada) =>
-                          setState(() => _alertaVisible = marcada),
-                    ),
-                  ),
-                ),
-              ],
-        ),
+              ),
+            ],
+          ),
 
           // La alerta **no ocupa sitio en la columna**: se superpone sobre el
           // contenido justo debajo del botón de volver y del título, así que
@@ -211,8 +211,8 @@ class _AgendaContenidoState extends State<AgendaContenido> {
     // se queda con las opciones "Lugar"/"Tipo de Actividad" derivadas de lo
     // cargado, sin Temática/Producto/Nivel reales - ver _gruposFiltroReales).
     final futuroCatalogos = _repository.listarCatalogos().catchError(
-          (_) => CatalogosAgenda.vacio,
-        );
+      (_) => CatalogosAgenda.vacio,
+    );
     // Igual: si falla, simplemente ninguna charla aparece como ya
     // valorada - no bloquea ver la agenda.
     final futuroValoraciones = _valoracionesRepository
@@ -258,22 +258,22 @@ class _AgendaContenidoState extends State<AgendaContenido> {
 
   /// `ponente`/`aforo` quedan vacíos a propósito: la Charla real del
   /// backend no trae esos dos campos - ver el doc-comment de esa clase.
-  Actividad _actividadDesdeCharla(Charla charla, bool yaValorada) =>
-      Actividad(
-        id: charla.id,
-        titulo: charla.nombre,
-        horario: charla.horarioFormateado,
-        ponente: '',
-        dia: charla.dia ?? '',
-        lugar: charla.lugar ?? '',
-        aforo: '',
-        etiquetas: charla.etiquetas,
-        descripcion: charla.descripcion ?? '',
-        objetivos: const [],
-        favorita: FavoritosStore.contiene(charla.id),
-        valorada: yaValorada,
-        horaFin: charla.horaFin,
-      );
+  Actividad _actividadDesdeCharla(Charla charla, bool yaValorada) => Actividad(
+    id: charla.id,
+    titulo: charla.nombre,
+    horario: charla.horarioFormateado,
+    ponente: '',
+    dia: charla.dia ?? '',
+    lugar: charla.lugar ?? '',
+    aforo: '',
+    etiquetas: charla.etiquetas,
+    descripcion: charla.descripcion ?? '',
+    objetivos: const [],
+    favorita: FavoritosStore.contiene(charla.id),
+    valorada: yaValorada,
+    horaFin: charla.horaFin,
+    valorable: charla.valorable,
+  );
 
   /// "Día", "Lugar" y "Tipo de Actividad" no tienen catálogo real en el
   /// backend (son columnas de texto libre en Charla, no tablas de catálogo
@@ -287,19 +287,16 @@ class _AgendaContenidoState extends State<AgendaContenido> {
     final dias = {
       for (final c in charlas)
         if (c.dia != null && c.dia!.isNotEmpty) c.dia!,
-    }.toList()
-      ..sort();
+    }.toList()..sort();
     final lugares = {
       for (final c in charlas)
         if (c.lugar != null && c.lugar!.isNotEmpty) c.lugar!,
-    }.toList()
-      ..sort();
+    }.toList()..sort();
     final tipos = {
       for (final c in charlas)
         if (c.tipoActividad != null && c.tipoActividad!.isNotEmpty)
           c.tipoActividad!,
-    }.toList()
-      ..sort();
+    }.toList()..sort();
 
     return [
       // Primero a propósito (pedido explícito del dueño, 2026-09-21) - ver
