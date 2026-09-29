@@ -206,13 +206,14 @@ class _AgendaContenidoState extends State<AgendaContenido> {
       _cargando = true;
       _errorCarga = null;
     });
-    // El catálogo de filtro no depende del evento (es global) - se pide en
-    // paralelo, y si falla no bloquea ver la agenda (el filtro simplemente
-    // se queda con las opciones "Lugar"/"Tipo de Actividad" derivadas de lo
-    // cargado, sin Temática/Producto/Nivel reales - ver _gruposFiltroReales).
-    final futuroCatalogos = _repository.listarCatalogos().catchError(
-      (_) => CatalogosAgenda.vacio,
-    );
+    // El catálogo de filtro se pide solo con los valores que usa este
+    // evento - en paralelo, y si falla no bloquea ver la agenda (el filtro
+    // simplemente se queda con las opciones "Lugar"/"Tipo de Actividad"
+    // derivadas de lo cargado, sin Temática/Producto/Nivel reales - ver
+    // _gruposFiltroReales).
+    final futuroCatalogos = _repository
+        .listarCatalogos(idEvento: idEvento)
+        .catchError((_) => CatalogosAgenda.vacio);
     // Igual: si falla, simplemente ninguna charla aparece como ya
     // valorada - no bloquea ver la agenda.
     final futuroValoraciones = _valoracionesRepository
@@ -266,6 +267,7 @@ class _AgendaContenidoState extends State<AgendaContenido> {
     ponente: charla.ponenteTexto,
     dia: charla.dia ?? '',
     lugar: charla.lugar ?? '',
+    tipoActividad: charla.tipoActividad ?? '',
     aforo: '',
     etiquetas: charla.etiquetas,
     descripcion: charla.descripcion ?? '',
@@ -355,19 +357,8 @@ class _AgendaContenidoState extends State<AgendaContenido> {
         _normalizar(actividad.lugar).contains(termino);
   }
 
-  bool _coincideFiltro(Actividad actividad) {
-    for (final valores in _filtros.values) {
-      if (valores.isEmpty) continue;
-      final coincide = valores.any(
-        (valor) =>
-            valor == actividad.dia ||
-            valor == actividad.lugar ||
-            actividad.etiquetas.contains(valor),
-      );
-      if (!coincide) return false;
-    }
-    return true;
-  }
+  bool _coincideFiltro(Actividad actividad) =>
+      coincideConFiltros(actividad, _filtros);
 
   static String _normalizar(String texto) {
     const conAcento = 'áàäâãéèëêíìïîóòöôõúùüûñÁÀÄÂÃÉÈËÊÍÌÏÎÓÒÖÔÕÚÙÜÛÑ';
