@@ -24,12 +24,20 @@ import '../widgets/e_card_widget.dart';
 class ECardScreen extends StatefulWidget {
   final VoidCallback onBack;
 
-  /// Cómo se comparte la imagen PNG de la tarjeta. Por defecto, la guarda
-  /// en un archivo temporal y abre el menú de compartir del sistema; los
-  /// tests pasan un doble para no abrirlo.
+  /// Qué hacer con la imagen PNG de la tarjeta al tocar "Compartir" y
+  /// "Guardar". Por defecto, ambos abren el menú de compartir del sistema
+  /// (que en iPhone trae "Guardar imagen" y en Android "Guardar en
+  /// Archivos"), sin librerías ni permisos de galería extra; los tests pasan
+  /// dobles para no abrirlo.
   final Future<void> Function(Uint8List png)? compartirImagen;
+  final Future<void> Function(Uint8List png)? guardarImagen;
 
-  const ECardScreen({super.key, required this.onBack, this.compartirImagen});
+  const ECardScreen({
+    super.key,
+    required this.onBack,
+    this.compartirImagen,
+    this.guardarImagen,
+  });
 
   @override
   State<ECardScreen> createState() => _ECardScreenState();
@@ -47,15 +55,31 @@ class _ECardScreenState extends State<ECardScreen> {
   /// Envuelve la tarjeta para poder capturarla como imagen al compartir.
   final GlobalKey _claveTarjeta = GlobalKey();
 
-  bool _compartiendo = false;
+  /// Evita capturas simultáneas si se toca dos veces.
+  bool _generandoImagen = false;
 
-  /// "Compartir": captura la tarjeta tal como se ve (con los datos que el
-  /// asistente eligió mostrar y su QR vCard) y abre el menú de compartir
-  /// del sistema. Quien la recibe puede escanear el QR para guardar el
-  /// contacto.
-  Future<void> _compartir() async {
-    if (_compartiendo) return;
-    setState(() => _compartiendo = true);
+  /// "Compartir": la tarjeta tal como se ve (con los datos que el asistente
+  /// eligió mostrar y su QR vCard). Quien la recibe puede escanear el QR
+  /// para guardar el contacto.
+  Future<void> _compartir() => _enviarImagen(
+    destino: widget.compartirImagen ?? _compartirConSistema,
+    mensajeError: 'No se pudo compartir la e-card. Intente de nuevo.',
+  );
+
+  /// "Guardar": la misma imagen, para que el asistente la conserve.
+  Future<void> _guardar() => _enviarImagen(
+    destino: widget.guardarImagen ?? _guardarConSistema,
+    mensajeError: 'No se pudo guardar la e-card. Intente de nuevo.',
+  );
+
+  /// Captura la tarjeta como PNG y se la entrega a [destino]; si algo falla,
+  /// avisa con [mensajeError].
+  Future<void> _enviarImagen({
+    required Future<void> Function(Uint8List png) destino,
+    required String mensajeError,
+  }) async {
+    if (_generandoImagen) return;
+    setState(() => _generandoImagen = true);
     try {
       final limite =
           _claveTarjeta.currentContext?.findRenderObject()
@@ -64,29 +88,31 @@ class _ECardScreenState extends State<ECardScreen> {
       final imagen = await limite.toImage(pixelRatio: 3);
       final datos = await imagen.toByteData(format: ui.ImageByteFormat.png);
       if (datos == null) throw StateError('No se pudo generar la imagen');
-
-      final compartir = widget.compartirImagen ?? _compartirConSistema;
-      await compartir(datos.buffer.asUint8List());
+      await destino(datos.buffer.asUint8List());
     } catch (_) {
-      if (mounted) {
-        mostrarSnackBar(
-          context,
-          'No se pudo compartir la e-card. Intente de nuevo.',
-        );
-      }
+      if (mounted) mostrarSnackBar(context, mensajeError);
     } finally {
-      if (mounted) setState(() => _compartiendo = false);
+      if (mounted) setState(() => _generandoImagen = false);
     }
   }
 
-  static Future<void> _compartirConSistema(Uint8List png) async {
+  static Future<void> _compartirConSistema(Uint8List png) =>
+      _abrirMenuDelSistema(png, titulo: 'Mi e-card');
+
+  static Future<void> _guardarConSistema(Uint8List png) =>
+      _abrirMenuDelSistema(png, titulo: 'Guardar mi e-card');
+
+  static Future<void> _abrirMenuDelSistema(
+    Uint8List png, {
+    required String titulo,
+  }) async {
     final carpeta = await getTemporaryDirectory();
     final archivo = File('${carpeta.path}/mi-e-card.png');
     await archivo.writeAsBytes(png, flush: true);
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(archivo.path, mimeType: 'image/png')],
-        title: 'Mi e-card',
+        title: titulo,
       ),
     );
   }
@@ -244,7 +270,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             ECardActionButton(
                               iconAsset: SvgIcon.guardar,
                               label: 'Guardar',
-                              onTap: () {},
+                              onTap: _guardar,
                             ),
                           ],
                         ),

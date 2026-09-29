@@ -38,8 +38,9 @@ class _AuthRepositorySinRed implements AuthRepository {
 
 Future<void> _montar(
   WidgetTester tester,
-  Future<void> Function(Uint8List png) compartirImagen,
-) async {
+  Future<void> Function(Uint8List png) compartirImagen, {
+  Future<void> Function(Uint8List png)? guardarImagen,
+}) async {
   tester.view.physicalSize = const Size(412, 917);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
@@ -54,7 +55,11 @@ Future<void> _montar(
       child: MaterialApp(
         // En la app la e-card vive dentro del Scaffold de Menu.
         home: Scaffold(
-          body: ECardScreen(onBack: () {}, compartirImagen: compartirImagen),
+          body: ECardScreen(
+            onBack: () {},
+            compartirImagen: compartirImagen,
+            guardarImagen: guardarImagen,
+          ),
         ),
       ),
     ),
@@ -99,6 +104,48 @@ void main() {
 
     expect(
       find.text('No se pudo compartir la e-card. Intente de nuevo.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('"Guardar" entrega la misma imagen PNG por su propia vía', (
+    tester,
+  ) async {
+    Uint8List? compartido;
+    Uint8List? guardado;
+    await _montar(
+      tester,
+      (png) async => compartido = png,
+      guardarImagen: (png) async => guardado = png,
+    );
+
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Guardar'));
+      for (var i = 0; i < 20 && guardado == null; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    });
+
+    expect(guardado, isNotNull);
+    expect(guardado!.sublist(0, 4), [0x89, 0x50, 0x4E, 0x47]);
+    expect(compartido, isNull);
+  });
+
+  testWidgets('si guardar falla, avisa con su propio mensaje', (tester) async {
+    await _montar(
+      tester,
+      (_) async {},
+      guardarImagen: (_) async => throw Exception('sin espacio'),
+    );
+
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Guardar'));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    await tester.pump();
+
+    expect(
+      find.text('No se pudo guardar la e-card. Intente de nuevo.'),
       findsOneWidget,
     );
   });
