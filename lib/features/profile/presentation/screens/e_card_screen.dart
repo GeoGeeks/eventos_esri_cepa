@@ -1,11 +1,19 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../login/presentation/bloc/auth_cubit.dart';
 import '../../../login/presentation/bloc/auth_state.dart';
 import '../../data/ecard_visibility_config.dart';
@@ -16,10 +24,12 @@ import '../widgets/e_card_widget.dart';
 class ECardScreen extends StatefulWidget {
   final VoidCallback onBack;
 
-  const ECardScreen({
-    super.key,
-    required this.onBack,
-  });
+  /// Cómo se comparte la imagen PNG de la tarjeta. Por defecto, la guarda
+  /// en un archivo temporal y abre el menú de compartir del sistema; los
+  /// tests pasan un doble para no abrirlo.
+  final Future<void> Function(Uint8List png)? compartirImagen;
+
+  const ECardScreen({super.key, required this.onBack, this.compartirImagen});
 
   @override
   State<ECardScreen> createState() => _ECardScreenState();
@@ -33,6 +43,53 @@ class _ECardScreenState extends State<ECardScreen> {
   bool _showNotification = false;
 
   ECardVisibilityConfig _visibilityConfig = const ECardVisibilityConfig();
+
+  /// Envuelve la tarjeta para poder capturarla como imagen al compartir.
+  final GlobalKey _claveTarjeta = GlobalKey();
+
+  bool _compartiendo = false;
+
+  /// "Compartir": captura la tarjeta tal como se ve (con los datos que el
+  /// asistente eligió mostrar y su QR vCard) y abre el menú de compartir
+  /// del sistema. Quien la recibe puede escanear el QR para guardar el
+  /// contacto.
+  Future<void> _compartir() async {
+    if (_compartiendo) return;
+    setState(() => _compartiendo = true);
+    try {
+      final limite =
+          _claveTarjeta.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      if (limite == null) throw StateError('Tarjeta no disponible');
+      final imagen = await limite.toImage(pixelRatio: 3);
+      final datos = await imagen.toByteData(format: ui.ImageByteFormat.png);
+      if (datos == null) throw StateError('No se pudo generar la imagen');
+
+      final compartir = widget.compartirImagen ?? _compartirConSistema;
+      await compartir(datos.buffer.asUint8List());
+    } catch (_) {
+      if (mounted) {
+        mostrarSnackBar(
+          context,
+          'No se pudo compartir la e-card. Intente de nuevo.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _compartiendo = false);
+    }
+  }
+
+  static Future<void> _compartirConSistema(Uint8List png) async {
+    final carpeta = await getTemporaryDirectory();
+    final archivo = File('${carpeta.path}/mi-e-card.png');
+    await archivo.writeAsBytes(png, flush: true);
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(archivo.path, mimeType: 'image/png')],
+        title: 'Mi e-card',
+      ),
+    );
+  }
 
   Future<void> _openConfig() async {
     final result = await showDialog<ECardVisibilityConfig>(
@@ -164,9 +221,12 @@ class _ECardScreenState extends State<ECardScreen> {
                         const SizedBox(height: 24),
 
                         /// Tarjeta E-Card Widget
-                        ECardWidget(
-                          visibilityConfig: _visibilityConfig,
-                          perfil: perfil,
+                        RepaintBoundary(
+                          key: _claveTarjeta,
+                          child: ECardWidget(
+                            visibilityConfig: _visibilityConfig,
+                            perfil: perfil,
+                          ),
                         ),
 
                         const SizedBox(height: 24),
@@ -178,7 +238,7 @@ class _ECardScreenState extends State<ECardScreen> {
                             ECardActionButton(
                               iconAsset: SvgIcon.compartir,
                               label: 'Compartir',
-                              onTap: () {},
+                              onTap: _compartir,
                             ),
                             const SizedBox(width: 24),
                             ECardActionButton(
