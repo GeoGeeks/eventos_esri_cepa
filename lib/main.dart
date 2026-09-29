@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/config/firebase_web.dart';
 import 'core/constants/fonts.dart';
 import 'features/login/data/soporte_repository.dart';
 import 'features/login/login_screen.dart';
@@ -28,18 +29,17 @@ Future<void> main() async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // PWA (rama poc/pwa-web, no se mergea): esta app nunca registró una
-      // app Web en el proyecto Firebase (`eventos-esri-cepa` solo tiene
-      // Android/iOS, ver root CLAUDE.md - "solo Android e iOS"), así que
-      // `Firebase.initializeApp()` sin `FirebaseOptions` explícitas no
-      // tiene con qué autenticarse en el navegador y lanza una excepción
-      // que tumbaba el arranque completo (splash nativo quedaba pegado
-      // para siempre, sin ningún frame de Flutter). Registrar una app Web
-      // de verdad (vía `flutterfire configure`) es trabajo aparte, fuera
-      // del alcance de "que cargue como PWA" - mientras tanto, en Web la
-      // app corre sin Firebase (sin push, sin Crashlytics), igual que
-      // corría antes de que existiera este `main()`.
-      if (!kIsWeb) {
+      // PWA (rama poc/pwa-web, no se mergea): en web Firebase se inicializa
+      // con la configuración de la app Web registrada el 2026-09-29
+      // (`opcionesFirebaseWeb`), solo para push web - Crashlytics no existe
+      // en web. Envuelto en try/catch: si falla, la PWA abre igual, sin
+      // notificaciones (antes, un `initializeApp()` sin opciones en web
+      // dejaba el splash pegado para siempre).
+      if (kIsWeb) {
+        try {
+          await Firebase.initializeApp(options: opcionesFirebaseWeb);
+        } catch (_) {}
+      } else {
         // `await` antes de `runApp`: Firebase.initializeApp usa canales de
         // plataforma, que necesitan el binding listo primero. Sin esto,
         // cualquier llamada a FirebaseMessaging (permiso, token) falla con
@@ -112,6 +112,8 @@ class EsriEventosApp extends StatelessWidget {
         BlocProvider(create: (_) => _authCubit ?? AuthCubit()),
       ],
       child: MaterialApp(
+        // Avisos de push con la PWA abierta (ver PushNotificacionesService).
+        scaffoldMessengerKey: PushNotificacionesService.mensajero,
         debugShowCheckedModeBanner: false,
         title: 'Esri Eventos',
         theme: ThemeData(
