@@ -1,11 +1,19 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../login/presentation/bloc/auth_cubit.dart';
 import '../../../login/presentation/bloc/auth_state.dart';
 import '../../data/ecard_visibility_config.dart';
@@ -16,9 +24,19 @@ import '../widgets/e_card_widget.dart';
 class ECardScreen extends StatefulWidget {
   final VoidCallback onBack;
 
+  /// Qué hacer con la imagen PNG de la tarjeta al tocar "Compartir" y
+  /// "Guardar". Por defecto, ambos abren el menú de compartir del sistema
+  /// (que en iPhone trae "Guardar imagen" y en Android "Guardar en
+  /// Archivos"), sin librerías ni permisos de galería extra; los tests pasan
+  /// dobles para no abrirlo.
+  final Future<void> Function(Uint8List png)? compartirImagen;
+  final Future<void> Function(Uint8List png)? guardarImagen;
+
   const ECardScreen({
     super.key,
     required this.onBack,
+    this.compartirImagen,
+    this.guardarImagen,
   });
 
   @override
@@ -33,6 +51,71 @@ class _ECardScreenState extends State<ECardScreen> {
   bool _showNotification = false;
 
   ECardVisibilityConfig _visibilityConfig = const ECardVisibilityConfig();
+
+  /// Envuelve la tarjeta para poder capturarla como imagen al compartir.
+  final GlobalKey _claveTarjeta = GlobalKey();
+
+  /// Evita capturas simultáneas si se toca dos veces.
+  bool _generandoImagen = false;
+
+  /// "Compartir": la tarjeta tal como se ve (con los datos que el asistente
+  /// eligió mostrar y su QR vCard). Quien la recibe puede escanear el QR
+  /// para guardar el contacto.
+  Future<void> _compartir() => _enviarImagen(
+    destino: widget.compartirImagen ?? _compartirConSistema,
+    mensajeError: 'No se pudo compartir la e-card. Intente de nuevo.',
+  );
+
+  /// "Guardar": la misma imagen, para que el asistente la conserve.
+  Future<void> _guardar() => _enviarImagen(
+    destino: widget.guardarImagen ?? _guardarConSistema,
+    mensajeError: 'No se pudo guardar la e-card. Intente de nuevo.',
+  );
+
+  /// Captura la tarjeta como PNG y se la entrega a [destino]; si algo falla,
+  /// avisa con [mensajeError].
+  Future<void> _enviarImagen({
+    required Future<void> Function(Uint8List png) destino,
+    required String mensajeError,
+  }) async {
+    if (_generandoImagen) return;
+    setState(() => _generandoImagen = true);
+    try {
+      final limite =
+          _claveTarjeta.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      if (limite == null) throw StateError('Tarjeta no disponible');
+      final imagen = await limite.toImage(pixelRatio: 3);
+      final datos = await imagen.toByteData(format: ui.ImageByteFormat.png);
+      if (datos == null) throw StateError('No se pudo generar la imagen');
+      await destino(datos.buffer.asUint8List());
+    } catch (_) {
+      if (mounted) mostrarSnackBar(context, mensajeError);
+    } finally {
+      if (mounted) setState(() => _generandoImagen = false);
+    }
+  }
+
+  static Future<void> _compartirConSistema(Uint8List png) =>
+      _abrirMenuDelSistema(png, titulo: 'Mi e-card');
+
+  static Future<void> _guardarConSistema(Uint8List png) =>
+      _abrirMenuDelSistema(png, titulo: 'Guardar mi e-card');
+
+  static Future<void> _abrirMenuDelSistema(
+    Uint8List png, {
+    required String titulo,
+  }) async {
+    final carpeta = await getTemporaryDirectory();
+    final archivo = File('${carpeta.path}/mi-e-card.png');
+    await archivo.writeAsBytes(png, flush: true);
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(archivo.path, mimeType: 'image/png')],
+        title: titulo,
+      ),
+    );
+  }
 
   Future<void> _openConfig() async {
     final result = await showDialog<ECardVisibilityConfig>(
@@ -164,9 +247,12 @@ class _ECardScreenState extends State<ECardScreen> {
                         const SizedBox(height: 24),
 
                         /// Tarjeta E-Card Widget
-                        ECardWidget(
-                          visibilityConfig: _visibilityConfig,
-                          perfil: perfil,
+                        RepaintBoundary(
+                          key: _claveTarjeta,
+                          child: ECardWidget(
+                            visibilityConfig: _visibilityConfig,
+                            perfil: perfil,
+                          ),
                         ),
 
                         const SizedBox(height: 24),
@@ -178,13 +264,13 @@ class _ECardScreenState extends State<ECardScreen> {
                             ECardActionButton(
                               iconAsset: SvgIcon.compartir,
                               label: 'Compartir',
-                              onTap: () {},
+                              onTap: _compartir,
                             ),
                             const SizedBox(width: 24),
                             ECardActionButton(
                               iconAsset: SvgIcon.guardar,
                               label: 'Guardar',
-                              onTap: () {},
+                              onTap: _guardar,
                             ),
                           ],
                         ),
