@@ -15,9 +15,10 @@ const FirebaseOptions opcionesFirebaseWeb = FirebaseOptions(
 );
 
 /// Clave pública VAPID (Firebase → Cloud Messaging → Certificados de push
-/// web). Sin ella no se puede pedir el token de push en el navegador: vacía,
-/// la PWA simplemente no ofrece activar notificaciones.
+/// web). Es pública por diseño: el navegador la usa para pedir el token de
+/// push. Se puede reemplazar al compilar con `--dart-define=VAPID_KEY=...`.
 const String clavePublicaVapid = String.fromEnvironment(
   'VAPID_KEY',
-  defaultValue: '',
+  defaultValue:
+      'BJ_uu-hW5OdAcndgyQRl7WsNj4OQcqnpfdxhIHvrq2vPZ3N4OM3zanfV5zQPmQNgGAwGJJ-YNVXWCxyOamEmGTg',
 );
