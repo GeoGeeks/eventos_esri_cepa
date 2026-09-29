@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,6 +12,7 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/constants/images.dart';
 import '../../../../core/utils/area_segura.dart';
+import '../../../../core/utils/descarga_navegador.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/boton_reintentar.dart';
@@ -156,6 +158,19 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     if (_descargandoCertificado) return;
     setState(() => _descargandoCertificado = true);
     try {
+      if (kIsWeb) {
+        // PWA: sin carpeta temporal ni hoja de compartir del sistema; el
+        // PDF se entrega como descarga del navegador.
+        final pdf = await _certificadoRepository.descargarPdf(idEvento);
+        if (!mounted) return;
+        setState(() => _showCertificadoToast = true);
+        descargarEnNavegador(
+          pdf.bytes,
+          nombreArchivo: pdf.nombreArchivo,
+          tipo: 'application/pdf',
+        );
+        return;
+      }
       final archivo = await _certificadoRepository.descargar(idEvento);
       if (!mounted) return;
       setState(() => _showCertificadoToast = true);

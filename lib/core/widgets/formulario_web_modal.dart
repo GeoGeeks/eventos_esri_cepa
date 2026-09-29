@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../constants/app_colors.dart';
@@ -50,11 +52,20 @@ class FormularioWebModal extends StatefulWidget {
   });
 
   /// Abre la ventana sobre la pantalla actual.
+  ///
+  /// En el navegador (PWA) no hay WebView: el formulario se abre en una
+  /// pestaña nueva. Tampoco serviría un iframe, porque los formularios de
+  /// registro y de Microsoft Bookings no se dejan incrustar en otro sitio.
   static Future<void> mostrar(
     BuildContext context, {
     required String titulo,
     required String url,
   }) {
+    if (kIsWeb) {
+      // Sin await antes: el navegador solo deja abrir la pestaña si ocurre
+      // en el mismo toque del usuario.
+      return launchUrl(Uri.parse(url), webOnlyWindowName: '_blank');
+    }
     return showDialog<void>(
       context: context,
       // El velo del diseño: #000000 al 50 % (modalOverlay es 0x80).
