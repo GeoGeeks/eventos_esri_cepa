@@ -65,6 +65,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
         ponente: charla.ponenteTexto,
         dia: charla.dia ?? '',
         lugar: charla.lugar ?? '',
+        tipoActividad: charla.tipoActividad ?? '',
         aforo: '',
         etiquetas: charla.etiquetas,
         descripcion: charla.descripcion ?? '',
@@ -107,19 +108,8 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
         actividad.lugar.toLowerCase().contains(termino);
   }
 
-  bool _coincideFiltro(Actividad actividad) {
-    for (final valores in _filtros.values) {
-      if (valores.isEmpty) continue;
-      final coincide = valores.any(
-        (valor) =>
-            valor == actividad.dia ||
-            valor == actividad.lugar ||
-            actividad.etiquetas.contains(valor),
-      );
-      if (!coincide) return false;
-    }
-    return true;
-  }
+  bool _coincideFiltro(Actividad actividad) =>
+      coincideConFiltros(actividad, _filtros);
 
   void _alternarExpandida(int indice) {
     setState(() {

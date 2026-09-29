@@ -29,6 +29,11 @@ class Actividad {
   /// decide si se pinta «Valorar»: ver [mostrarValorar].
   final DateTime? horaFin;
 
+  /// Tipo de actividad de la charla real ("Salón para sector", "Summit
+  /// GeoIA"...), vacío en modo mock. El filtro "Tipo de Actividad" arma sus
+  /// opciones con este dato, así que también tiene que compararlo al filtrar.
+  final String tipoActividad;
+
   /// Decisión de la API (`Charla.valorable`); si no llega, se calcula con
   /// [horaFin] - ver [mostrarValorar].
   final bool? valorable;
@@ -49,6 +54,7 @@ class Actividad {
     this.valorada = false,
     this.horaFin,
     this.valorable,
+    this.tipoActividad = '',
   });
 
   /// En modo mock (`id == null`) siempre `true` - comportamiento de
@@ -89,6 +95,7 @@ class Actividad {
     valorada: valorada ?? this.valorada,
     horaFin: horaFin,
     valorable: valorable,
+    tipoActividad: tipoActividad,
   );
 }
 
@@ -179,4 +186,27 @@ class AgendaMockData {
       favorita: true,
     ),
   ];
+}
+
+/// Si [actividad] cumple los filtros elegidos: dentro de cada grupo basta
+/// con que coincida uno de los valores marcados, y tiene que cumplir todos
+/// los grupos. Un valor coincide con el día, el lugar, el tipo de actividad
+/// o cualquiera de las etiquetas (temática, producto, nivel). Compartida por
+/// Agenda y Favoritos para que filtren igual.
+bool coincideConFiltros(
+  Actividad actividad,
+  Map<String, Set<String>> filtros,
+) {
+  for (final valores in filtros.values) {
+    if (valores.isEmpty) continue;
+    final coincide = valores.any(
+      (valor) =>
+          valor == actividad.dia ||
+          valor == actividad.lugar ||
+          valor == actividad.tipoActividad ||
+          actividad.etiquetas.contains(valor),
+    );
+    if (!coincide) return false;
+  }
+  return true;
 }

@@ -154,6 +154,32 @@ void main() {
       expect(catalogos.tematicas.first.valor, 'GeoIA');
     });
 
+    test('con idEvento pide solo los valores que usa ese evento', () async {
+      when(
+        () => dio.get<Map<String, dynamic>>(
+          '/catalogos-agenda',
+          queryParameters: {'idEvento': 'CUE_26_CO'},
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: '/catalogos-agenda'),
+          statusCode: 200,
+          data: const {},
+        ),
+      );
+
+      await repositorio.listarCatalogos(idEvento: 'CUE_26_CO');
+
+      verify(
+        () => dio.get<Map<String, dynamic>>(
+          '/catalogos-agenda',
+          queryParameters: {'idEvento': 'CUE_26_CO'},
+          options: any(named: 'options'),
+        ),
+      ).called(1);
+    });
+
     test('sin sesión guardada, manda la petición sin Authorization', () async {
       when(
         () => tokenStorage.leerAccessToken(),
