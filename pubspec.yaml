@@ -27,6 +27,8 @@ dependencies:
   # Formulario de registro: registroeventos.esri.co es una SPA que se pinta con
   # JavaScript, así que se muestra dentro de la app en un WebView.
   webview_flutter: ^4.13.0
+  # Solo PWA: descarga del certificado desde el navegador (Blob + enlace).
+  web: ^1.1.1
   dio: ^5.11.0
   flutter_secure_storage: ^10.3.1
   firebase_core: ^4.15.0

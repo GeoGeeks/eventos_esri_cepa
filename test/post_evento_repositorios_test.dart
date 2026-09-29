@@ -125,6 +125,25 @@ void main() {
       expect(archivo.readAsStringSync(), '%PDF-1.3 prueba');
     });
 
+    test('descargarPdf entrega los bytes sin tocar el disco (PWA)', () async {
+      when(
+        () => dio.get<List<int>>(ruta, options: any(named: 'options')),
+      ).thenAnswer(
+        (_) async => Response(
+          requestOptions: RequestOptions(path: ruta),
+          data: utf8.encode('%PDF-1.3 prueba'),
+        ),
+      );
+
+      final pdf = await repositorio.descargarPdf('PE_26_BOG');
+
+      expect(utf8.decode(pdf.bytes), '%PDF-1.3 prueba');
+      // Sin Content-Disposition (el navegador no expone ese encabezado por
+      // CORS) queda el nombre genérico.
+      expect(pdf.nombreArchivo, 'Certificado_PE_26_BOG.pdf');
+      expect(carpeta.listSync(), isEmpty);
+    });
+
     test('un 403 trae el mensaje real del backend (cuerpo en bytes)', () {
       when(
         () => dio.get<List<int>>(ruta, options: any(named: 'options')),

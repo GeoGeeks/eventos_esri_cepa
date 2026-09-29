@@ -16,6 +16,15 @@ class CertificadoNoDisponibleException implements Exception {
   final String mensaje;
 }
 
+/// El PDF del certificado ya descargado, todavía sin guardar.
+class CertificadoPdf {
+  const CertificadoPdf({required this.bytes, required this.nombreArchivo});
+  final List<int> bytes;
+
+  /// `Certificado_<idEvento>_<Nombre>.pdf` si el backend lo sugiere.
+  final String nombreArchivo;
+}
+
 /// Descarga el certificado de asistencia (`GET /eventos/:idEvento/
 /// certificado`, un PDF generado al vuelo) y lo deja en un archivo local
 /// para abrirlo o compartirlo.
@@ -39,6 +48,19 @@ class CertificadoRepository {
   ///
   /// @throws [CertificadoNoDisponibleException] ante un 403/404 del backend.
   Future<File> descargar(String idEvento) async {
+    final pdf = await descargarPdf(idEvento);
+    final carpeta = await _carpetaDestino();
+    final archivo = File('${carpeta.path}/${pdf.nombreArchivo}');
+    await archivo.writeAsBytes(pdf.bytes, flush: true);
+    return archivo;
+  }
+
+  /// Descarga el PDF sin guardarlo en disco. Es lo que usa la PWA: en el
+  /// navegador no hay carpeta temporal ni `File`, el PDF se entrega con una
+  /// descarga del propio navegador.
+  ///
+  /// @throws [CertificadoNoDisponibleException] ante un 403/404 del backend.
+  Future<CertificadoPdf> descargarPdf(String idEvento) async {
     final accessToken = await _tokenStorage.leerAccessToken();
     final Response<List<int>> respuesta;
     try {
@@ -57,12 +79,10 @@ class CertificadoRepository {
       rethrow;
     }
 
-    final carpeta = await _carpetaDestino();
-    final archivo = File(
-      '${carpeta.path}/${_nombreArchivo(respuesta.headers, idEvento)}',
+    return CertificadoPdf(
+      bytes: respuesta.data!,
+      nombreArchivo: _nombreArchivo(respuesta.headers, idEvento),
     );
-    await archivo.writeAsBytes(respuesta.data!, flush: true);
-    return archivo;
   }
 
   /// Con `responseType: bytes` el cuerpo de un error también llega como
