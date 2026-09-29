@@ -50,10 +50,15 @@ class AgendaRepository {
   /// `GET /catalogos-agenda` - sin auth en el backend (ver ese repo,
   /// `CatalogosAgendaController`), pero se manda el token igual si existe
   /// por si algún día se protege sin tener que tocar este repositorio.
-  Future<CatalogosAgenda> listarCatalogos() async {
+  ///
+  /// Con [idEvento], la API devuelve solo los valores que usa alguna
+  /// actividad de ese evento: así el filtro no ofrece temáticas o niveles
+  /// sin charlas (al elegirlos no salía nada).
+  Future<CatalogosAgenda> listarCatalogos({String? idEvento}) async {
     final accessToken = await _tokenStorage.leerAccessToken();
     final respuesta = await _dio.get<Map<String, dynamic>>(
       '/catalogos-agenda',
+      queryParameters: idEvento == null ? null : {'idEvento': idEvento},
       options: accessToken == null
           ? null
           : Options(headers: {'Authorization': 'Bearer $accessToken'}),
