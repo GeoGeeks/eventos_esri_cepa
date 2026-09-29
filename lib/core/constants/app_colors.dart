@@ -47,4 +47,10 @@ class AppColors {
 
   /// Botón de reserva cuando ya no quedan cupos.
   static const Color deshabilitado = Color(0xFFD4D4D4);
+
+  /// "Responder encuesta" en la tarjeta de Encuestas (`color.text.link` de
+  /// Figma) - mismo hex que [navActiveHighlight]/[filterButtonText], pero
+  /// con nombre propio porque el rol es distinto (enlace de tarjeta, no
+  /// hover de nav/filtro).
+  static const Color textLink = Color(0xFF00619B);
 }

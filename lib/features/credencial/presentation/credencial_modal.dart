@@ -36,8 +36,7 @@ class CredencialModal extends StatefulWidget {
     cargo: EcardMockData.cargo,
     empresa: EcardMockData.empresa,
     evento: CredencialMockData.evento,
-    codigo:
-        '${CredencialMockData.codigoEvento}-${EcardMockData.documento}',
+    codigo: '${CredencialMockData.codigoEvento}-${EcardMockData.documento}',
   );
 
   static Future<void> mostrar(
@@ -113,57 +112,57 @@ class _CredencialModalState extends State<CredencialModal> {
         alignment: Alignment.bottomCenter,
         child: SingleChildScrollView(
           child: Container(
-          // 581 del diseño como mínimo: el nombre y el evento crecen en
-          // renglones y el panel con ellos.
-          constraints: const BoxConstraints(minHeight: 581),
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            color: AppColors.white,
-            border: Border(
-              top: BorderSide(color: AppColors.lightGray),
-              left: BorderSide(color: AppColors.lightGray),
-              right: BorderSide(color: AppColors.lightGray),
-            ),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x1A000000),
-                offset: Offset(-1, -1),
-                blurRadius: 32,
+            // 581 del diseño como mínimo: el nombre y el evento crecen en
+            // renglones y el panel con ellos.
+            constraints: const BoxConstraints(minHeight: 581),
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: AppColors.white,
+              border: Border(
+                top: BorderSide(color: AppColors.lightGray),
+                left: BorderSide(color: AppColors.lightGray),
+                right: BorderSide(color: AppColors.lightGray),
               ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 24.5,
-                right: 23.5,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Center(
-                      child: AppIcon(
-                        SvgIcon.x,
-                        width: 9,
-                        height: 9,
-                        color: AppColors.textMuted,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  offset: Offset(-1, -1),
+                  blurRadius: 32,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 24.5,
+                  right: 23.5,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Center(
+                        child: AppIcon(
+                          SvgIcon.x,
+                          width: 9,
+                          height: 9,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              // Sin `Positioned`: es el contenido el que da el alto al panel.
-              // 48 arriba y los 81 que sobraban abajo en el diseño.
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 48, 24, 81),
-                child: _construirCuerpo(),
-              ),
-            ],
+                // Sin `Positioned`: es el contenido el que da el alto al panel.
+                // 48 arriba y los 81 que sobraban abajo en el diseño.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 48, 24, 81),
+                  child: _construirCuerpo(),
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -180,6 +179,10 @@ class _CredencialModalState extends State<CredencialModal> {
           datos: snapshot.data,
           cargando: snapshot.connectionState != ConnectionState.done,
           error: snapshot.hasError,
+          mensajeError: switch (snapshot.error) {
+            CredencialNoDisponibleException(:final mensaje) => mensaje,
+            _ => null,
+          },
         );
       },
     );
@@ -195,7 +198,15 @@ class _Contenido extends StatelessWidget {
   final bool cargando;
   final bool error;
 
-  const _Contenido({this.datos, this.cargando = false, this.error = false});
+  /// Aviso de la API para el asistente; sin él, el mensaje genérico.
+  final String? mensajeError;
+
+  const _Contenido({
+    this.datos,
+    this.cargando = false,
+    this.error = false,
+    this.mensajeError,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -241,12 +252,13 @@ class _Contenido extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           )
         else if (error || datos == null)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
             child: Text(
-              'No se pudo cargar la credencial. Intente de nuevo.',
+              mensajeError ??
+                  'No se pudo cargar la credencial. Intente de nuevo.',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: Fonts.regular,
                 fontSize: Fonts.text0h,
                 fontWeight: Fonts.wRegular,

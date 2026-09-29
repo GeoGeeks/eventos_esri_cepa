@@ -30,34 +30,39 @@ class DetalleActividad extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(descripcion, style: estiloTexto),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 16,
-          child: Text(
-            tituloObjetivos,
-            style: const TextStyle(
-              fontFamily: Fonts.medium,
-              fontSize: Fonts.textSm,
-              fontWeight: Fonts.wMedium,
-              height: 16 / 14,
-              letterSpacing: 0,
-              color: AppColors.modalSubtitle,
+        // Una Charla real nunca trae objetivos (solo Laboratorio los tiene,
+        // ver Actividad._actividadDesdeCharla) - sin esto se veía el
+        // encabezado "Objetivos" seguido de nada.
+        if (objetivos.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 16,
+            child: Text(
+              tituloObjetivos,
+              style: const TextStyle(
+                fontFamily: Fonts.medium,
+                fontSize: Fonts.textSm,
+                fontWeight: Fonts.wMedium,
+                height: 16 / 14,
+                letterSpacing: 0,
+                color: AppColors.modalSubtitle,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.only(left: 5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var i = 0; i < objetivos.length; i++) ...[
-                if (i > 0) const SizedBox(height: 16),
-                Text('${i + 1}. ${objetivos[i]}', style: estiloTexto),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.only(left: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < objetivos.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 16),
+                  Text('${i + 1}. ${objetivos[i]}', style: estiloTexto),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

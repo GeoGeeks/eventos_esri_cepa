@@ -28,37 +28,99 @@ void main() {
   });
 
   group('obtener', () {
-    test('hace GET a /eventos/:idEvento/credencial y parsea la respuesta', () async {
-      when(
-        () => dio.get<Map<String, dynamic>>(
-          '/eventos/CUE2026/credencial',
-          options: any(named: 'options'),
+    DioException errorDeLaApi(int status, Object? cuerpo) {
+      final peticion = RequestOptions(path: '/eventos/CUE_26_CO/credencial');
+      return DioException(
+        requestOptions: peticion,
+        response: Response(
+          requestOptions: peticion,
+          statusCode: status,
+          data: cuerpo,
         ),
-      ).thenAnswer(
-        (_) async => Response(
-          requestOptions:
-              RequestOptions(path: '/eventos/CUE2026/credencial'),
-          statusCode: 200,
-          data: {
-            'id': 'credencial-1',
-            'idEvento': 'CUE2026',
-            'estado': 'pendiente',
-            'codigoQr':
-                '{"id":"credencial-1","nombre":"Ana","apellido":"Gomez","cedula":"111"}',
-          },
-        ),
+        type: DioExceptionType.badResponse,
       );
+    }
 
-      final credencial = await repositorio.obtener('CUE2026');
+    test(
+      'un 404 con mensaje se convierte en CredencialNoDisponibleException con ese texto',
+      () async {
+        when(
+          () => dio.get<Map<String, dynamic>>(
+            '/eventos/CUE_26_CO/credencial',
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(
+          errorDeLaApi(404, {
+            'statusCode': 404,
+            'message':
+                'No encontramos su credencial. Acérquese al punto de registro con su documento.',
+            'error': 'Not Found',
+          }),
+        );
 
-      expect(credencial.id, 'credencial-1');
-      expect(credencial.idEvento, 'CUE2026');
-      expect(credencial.estado, 'pendiente');
-      expect(
-        credencial.codigoQr,
-        '{"id":"credencial-1","nombre":"Ana","apellido":"Gomez","cedula":"111"}',
-      );
-    });
+        await expectLater(
+          repositorio.obtener('CUE_26_CO'),
+          throwsA(
+            isA<CredencialNoDisponibleException>().having(
+              (e) => e.mensaje,
+              'mensaje',
+              'No encontramos su credencial. Acérquese al punto de registro con su documento.',
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'un error sin mensaje (p. ej. 500 o sin red) se propaga tal cual',
+      () async {
+        when(
+          () => dio.get<Map<String, dynamic>>(
+            '/eventos/CUE_26_CO/credencial',
+            options: any(named: 'options'),
+          ),
+        ).thenThrow(errorDeLaApi(500, 'Internal Server Error'));
+
+        await expectLater(
+          repositorio.obtener('CUE_26_CO'),
+          throwsA(isA<DioException>()),
+        );
+      },
+    );
+
+    test(
+      'hace GET a /eventos/:idEvento/credencial y parsea la respuesta',
+      () async {
+        when(
+          () => dio.get<Map<String, dynamic>>(
+            '/eventos/CUE2026/credencial',
+            options: any(named: 'options'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            requestOptions: RequestOptions(path: '/eventos/CUE2026/credencial'),
+            statusCode: 200,
+            data: {
+              'id': 'credencial-1',
+              'idEvento': 'CUE2026',
+              'estado': 'pendiente',
+              'codigoQr':
+                  '{"id":"credencial-1","nombre":"Ana","apellido":"Gomez","cedula":"111"}',
+            },
+          ),
+        );
+
+        final credencial = await repositorio.obtener('CUE2026');
+
+        expect(credencial.id, 'credencial-1');
+        expect(credencial.idEvento, 'CUE2026');
+        expect(credencial.estado, 'pendiente');
+        expect(
+          credencial.codigoQr,
+          '{"id":"credencial-1","nombre":"Ana","apellido":"Gomez","cedula":"111"}',
+        );
+      },
+    );
 
     test('manda el Bearer token en la cabecera', () async {
       when(
@@ -68,8 +130,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => Response(
-          requestOptions:
-              RequestOptions(path: '/eventos/CUE2026/credencial'),
+          requestOptions: RequestOptions(path: '/eventos/CUE2026/credencial'),
           statusCode: 200,
           data: {
             'id': 'credencial-1',

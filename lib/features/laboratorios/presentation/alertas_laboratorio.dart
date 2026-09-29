@@ -35,7 +35,7 @@ class AlertasLaboratorio {
       constructor: (contexto) => AlertaModal(
         color: AppColors.success,
         titulo: 'Gracias',
-        encabezado: '¡Su cupo a sido reservado con éxito!',
+        encabezado: '¡Su cupo ha sido reservado con éxito!',
         descripcion:
             'Lo esperamos en nuestro laboratorio, debe presentarse 15 minutos '
             'antes al salón EFG y su cupo será reservado hasta pasados 5 '

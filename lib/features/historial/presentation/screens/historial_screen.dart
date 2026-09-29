@@ -12,7 +12,10 @@ import '../../../eventos/data/evento.dart';
 import '../../../eventos/data/eventos_store.dart';
 
 class HistorialScreen extends StatefulWidget {
-  final VoidCallback? onOpenPostEvento;
+  /// Abre el post-evento del evento tocado. Recibe el [Evento] (no un
+  /// `VoidCallback`) para que `PostEventoScreen` sepa de qué evento es y
+  /// use sus datos reales (encuesta `post_evento`) en vez del mock.
+  final ValueChanged<Evento>? onOpenPostEvento;
 
   const HistorialScreen({super.key, this.onOpenPostEvento});
 
@@ -28,8 +31,9 @@ class _HistorialScreenState extends State<HistorialScreen> {
 
   List<Evento> _filtrar(List<Evento> asistidos) {
     return asistidos.where((evento) {
-      final matchesSearch =
-          evento.nombre.toLowerCase().contains(query.toLowerCase());
+      final matchesSearch = evento.nombre.toLowerCase().contains(
+        query.toLowerCase(),
+      );
 
       bool matchesFilter = true;
       if (virtualSelected && !presencialSelected) {
@@ -114,8 +118,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
                                 child: SizedBox(
                                   height: 32,
                                   child: TextField(
-                                    onChanged: (v) =>
-                                        setState(() => query = v),
+                                    onChanged: (v) => setState(() => query = v),
                                     style: const TextStyle(
                                       fontFamily: Fonts.regular,
                                       fontSize: 16,
@@ -132,7 +135,9 @@ class _HistorialScreenState extends State<HistorialScreen> {
                                       ),
                                       prefixIcon: Padding(
                                         padding: EdgeInsets.only(
-                                            left: 13, right: 8),
+                                          left: 13,
+                                          right: 8,
+                                        ),
                                         child: Icon(
                                           Icons.search,
                                           size: 16,
@@ -178,9 +183,8 @@ class _HistorialScreenState extends State<HistorialScreen> {
                               ),
                               const SizedBox(width: 8),
                               _SplitFilterButton(
-                                onTap: () => setState(
-                                  () => showFilter = !showFilter,
-                                ),
+                                onTap: () =>
+                                    setState(() => showFilter = !showFilter),
                               ),
                             ],
                           ),
@@ -247,7 +251,9 @@ class _HistorialScreenState extends State<HistorialScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              BotonReintentar(onPressed: () => EventosStore.cargar(forzar: true)),
+              BotonReintentar(
+                onPressed: () => EventosStore.cargar(forzar: true),
+              ),
             ],
           ),
         ),
@@ -289,11 +295,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
               // Siempre "Finalizado": esta lista solo trae eventos con
               // `Evento.yaPaso == true` (ver `EventosStore.cargar`).
               estado: 'Finalizado',
-              onViewMore: () {
-                if (widget.onOpenPostEvento != null) {
-                  widget.onOpenPostEvento!();
-                }
-              },
+              onViewMore: () => widget.onOpenPostEvento?.call(eventos[i]),
               onRegister: () {},
             ),
           ),
@@ -408,10 +410,7 @@ class _FilterDropdownContainer extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: const Color(0xFFEBEBEB),
-            width: 1,
-          ),
+          border: Border.all(color: const Color(0xFFEBEBEB), width: 1),
           boxShadow: const [
             BoxShadow(
               color: Color.fromRGBO(0, 0, 0, 0.25),
@@ -442,9 +441,7 @@ class _FilterDropdownContainer extends StatelessWidget {
             SizedBox(
               width: 219,
               height: 1,
-              child: Container(
-                color: const Color(0xFFEBEBEB),
-              ),
+              child: Container(color: const Color(0xFFEBEBEB)),
             ),
             const SizedBox(height: 8),
             SizedBox(

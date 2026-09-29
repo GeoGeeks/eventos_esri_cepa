@@ -489,7 +489,7 @@ void main() {
 
     // Alerta de gracias.
     expect(find.text('Gracias'), findsOneWidget);
-    expect(find.text('¡Su cupo a sido reservado con éxito!'), findsOneWidget);
+    expect(find.text('¡Su cupo ha sido reservado con éxito!'), findsOneWidget);
 
     // «Cancelar reserva» encadena con la alerta de cancelación.
     await tester.tap(find.byKey(const Key('alerta-boton')));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/widgets/bottom_nav.dart';
+import '../features/eventos/data/evento.dart';
 import '../features/eventos/data/eventos_store.dart';
 import '../features/inicio/inicio.dart';
 import '../features/login/presentation/bloc/auth_cubit.dart';
@@ -13,6 +14,7 @@ import '../features/reservas/reservas_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
 import '../features/profile/presentation/screens/profile_menu_screen.dart';
 import '../features/profile/presentation/screens/e_card_screen.dart';
+import '../features/profile/presentation/screens/preguntas_frecuentes_screen.dart';
 import '../features/post_evento/presentation/screens/post_evento_screen.dart';
 
 class Menu extends StatefulWidget {
@@ -23,11 +25,7 @@ class Menu extends StatefulWidget {
   /// deja `null` y se crea uno de verdad.
   final PushNotificacionesService? pushNotificaciones;
 
-  const Menu({
-    super.key,
-    this.initialIndex = 0,
-    this.pushNotificaciones,
-  });
+  const Menu({super.key, this.initialIndex = 0, this.pushNotificaciones});
 
   @override
   State<Menu> createState() => _MenuState();
@@ -38,7 +36,13 @@ class _MenuState extends State<Menu> {
 
   // Controla sub-vistas especiales
   bool _showEcard = false;
+  bool _showPreguntasFrecuentes = false;
   bool _showPostEvento = false;
+
+  /// Evento cuyo post-evento se está mostrando (ver `_showPostEvento`) -
+  /// `PostEventoScreen` lo necesita para mostrar sus datos, su galería,
+  /// su certificado y su encuesta `post_evento` reales en vez del mock.
+  Evento? _eventoPostEvento;
   bool _showEventosFromInicio = false;
 
   @override
@@ -94,6 +98,7 @@ class _MenuState extends State<Menu> {
       _showPostEvento = false; // Reset al tocar cualquier ícono del menú
       if (index == 4) {
         _showEcard = false;
+        _showPreguntasFrecuentes = false;
       }
     });
 
@@ -111,6 +116,7 @@ class _MenuState extends State<Menu> {
     // Si está mostrando PostEvento, lo prioriza
     if (_showPostEvento) {
       return PostEventoScreen(
+        evento: _eventoPostEvento,
         onBack: () => setState(() => _showPostEvento = false),
       );
     }
@@ -131,7 +137,10 @@ class _MenuState extends State<Menu> {
 
       case 1:
         return HistorialScreen(
-          onOpenPostEvento: () => setState(() => _showPostEvento = true),
+          onOpenPostEvento: (evento) => setState(() {
+            _eventoPostEvento = evento;
+            _showPostEvento = true;
+          }),
         );
 
       case 2:
@@ -141,13 +150,22 @@ class _MenuState extends State<Menu> {
         return const NotificationsScreen();
 
       case 4:
-        return _showEcard
-            ? ECardScreen(onBack: () => setState(() => _showEcard = false))
-            : ProfileMenuScreen(
-                onOpenEcard: () => setState(() => _showEcard = true),
-                onGoToReservas: () => _onNavTap(2),
-                onGoToNotifications: () => _onNavTap(3),
-              );
+        if (_showEcard) {
+          return ECardScreen(onBack: () => setState(() => _showEcard = false));
+        }
+        if (_showPreguntasFrecuentes) {
+          return PreguntasFrecuentesScreen(
+            onBack: () => setState(() => _showPreguntasFrecuentes = false),
+            onContactar: () => ProfileMenuScreen.abrirContactenos(context),
+          );
+        }
+        return ProfileMenuScreen(
+          onOpenEcard: () => setState(() => _showEcard = true),
+          onGoToReservas: () => _onNavTap(2),
+          onGoToNotifications: () => _onNavTap(3),
+          onOpenPreguntasFrecuentes: () =>
+              setState(() => _showPreguntasFrecuentes = true),
+        );
 
       default:
         return const SizedBox.shrink();
@@ -163,7 +181,9 @@ class _MenuState extends State<Menu> {
         child: CustomBottomNav(
           // Si estamos mostrando Eventos desde Inicio o PostEvento, le enviamos -1 para desmarcar ítems,
           // o puedes pasarle currentIndex si deseas que el ícono permanezca seleccionado.
-          currentIndex: (_showEventosFromInicio || _showPostEvento) ? -1 : currentIndex,
+          currentIndex: (_showEventosFromInicio || _showPostEvento)
+              ? -1
+              : currentIndex,
           onTap: _onNavTap,
         ),
       ),

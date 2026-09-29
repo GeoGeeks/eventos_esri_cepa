@@ -295,17 +295,23 @@ void main() {
       ),
     );
 
+    // "Día" (2 opciones) pasó a ser el primer grupo (2026-09-21, pedido
+    // explícito del dueño) - más corto que "Lugar" (4 opciones), así que
+    // los paneles de abajo suben. Offsets recalculados contra la altura
+    // real de cada panel (`_altoGrupo` en filtro_modal.dart), no a ojo:
+    // Día=88.5, Lugar=148.5, Actividad=148.5 (+17.5 de separación c/u).
     for (var i = 0; i < 3; i++) {
+      const topesGrupo = [0.0, 88.5 + 17.5, 88.5 + 17.5 + 148.5 + 17.5];
       final linea = tester.getRect(lineas.at(i));
-      expect(linea.top, moreOrLessEquals(353 + i * 166, epsilon: 0.5));
+      expect(linea.top, moreOrLessEquals(353 + topesGrupo[i], epsilon: 0.5));
       expect(linea.height, moreOrLessEquals(1, epsilon: 0.01));
       expect(linea.left, moreOrLessEquals(129, epsilon: 0.5));
     }
 
-    final titulo = tester.getRect(find.text('Lugar').last);
+    final titulo = tester.getRect(find.text('Día').last);
     expect(titulo.top, moreOrLessEquals(328, epsilon: 0.5));
 
-    final opcion = tester.getRect(find.text('Auditorio 103').last);
+    final opcion = tester.getRect(find.text('Jueves').last);
     expect(opcion.top, moreOrLessEquals(366.5, epsilon: 0.5));
   });
 

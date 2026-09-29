@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
-// Constantes globales de tu arquitectura
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/widgets/app_icons.dart';
-import '../../../../navigation/menu.dart';
 
-class ValoracionSuccessDialog extends StatelessWidget {
-  const ValoracionSuccessDialog({super.key});
+/// Confirmación tras enviar una encuesta `modulo` - misma estructura visual
+/// que `ValoracionSuccessDialog` (barra verde + header + contenido +
+/// footer), pero genérica: cierra de vuelta a la pestaña "Encuestas" en vez
+/// de navegar al certificado, que solo aplica a la encuesta `post_evento`.
+class EncuestaSuccessDialog extends StatelessWidget {
+  const EncuestaSuccessDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +21,7 @@ class ValoracionSuccessDialog extends StatelessWidget {
       child: Container(
         width: 360,
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
+          color: AppColors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -37,55 +40,40 @@ class ValoracionSuccessDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            /// highlight superior (verde)
-            Container(width: 360, height: 4, color: const Color(0xFF288835)),
-
-            /// header (360x53, borde inferior #EBEBEB)
+            Container(width: 360, height: 4, color: AppColors.success),
             Container(
               width: 360,
               height: 53,
               decoration: const BoxDecoration(
-                color: Color(0xFFFFFFFF),
+                color: AppColors.white,
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFEBEBEB), width: 1),
+                  bottom: BorderSide(color: AppColors.lightGray, width: 1),
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               child: Row(
                 children: [
-                  /// check-circle 16x16 (icono: calificacionevento)
                   AppIcon(
                     SvgIcon.calificacionevento,
                     width: 16,
                     height: 16,
-                    color: const Color(0xFF288835),
+                    color: AppColors.success,
                   ),
                   const SizedBox(width: 12),
-
-                  /// Panel heading
                   const Expanded(
                     child: Text(
-                      '¡Gracias por tu valoración!',
+                      '¡Gracias por su respuesta!',
                       style: TextStyle(
                         fontFamily: Fonts.medium,
                         fontWeight: Fonts.wMedium,
                         fontSize: 20,
                         height: 24 / 20,
-                        color: Color(0xFF141414),
+                        color: AppColors.textTitle,
                       ),
                     ),
                   ),
-
-                  /// action-container 40x40 con icono "x": lleva a inicio
                   GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) => const Menu(initialIndex: 0),
-                        ),
-                        (route) => false,
-                      );
-                    },
+                    onTap: () => Navigator.of(context).pop(),
                     child: SizedBox(
                       width: 40,
                       height: 40,
@@ -94,7 +82,7 @@ class ValoracionSuccessDialog extends StatelessWidget {
                           SvgIcon.x,
                           width: 8,
                           height: 8,
-                          color: const Color(0xFF6B6B6B),
+                          color: AppColors.textMuted,
                         ),
                       ),
                     ),
@@ -102,62 +90,41 @@ class ValoracionSuccessDialog extends StatelessWidget {
                 ],
               ),
             ),
-
-            /// panel-content (360x84, padding 12, overflow-y scroll)
             SizedBox(
               width: 360,
               height: 84,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(12),
-                child: RichText(
-                  text: const TextSpan(
-                    style: TextStyle(
-                      fontFamily: Fonts.regular,
-                      fontWeight: Fonts.wRegular,
-                      fontSize: Fonts.text0h,
-                      height: 20 / 16,
-                      color: Color(0xFF141414),
-                    ),
-                    children: [
-                      TextSpan(
-                        text:
-                            'Ya puede acceder a su certificado de asistencia '
-                            'y revivir los mejores momentos de la ',
-                      ),
-                      TextSpan(
-                        text: 'CUE 2026',
-                        style: TextStyle(
-                          fontFamily: Fonts.demi,
-                          fontWeight: Fonts.wDemi,
-                        ),
-                      ),
-                      TextSpan(text: '.'),
-                    ],
+                child: Text(
+                  'Su respuesta fue registrada correctamente.',
+                  style: const TextStyle(
+                    fontFamily: Fonts.regular,
+                    fontWeight: Fonts.wRegular,
+                    fontSize: Fonts.text0h,
+                    height: 20 / 16,
+                    color: AppColors.textTitle,
                   ),
                 ),
               ),
             ),
-
-            /// footer (360x57, padding 12, borde superior #EBEBEB)
             Container(
               width: 360,
               height: 57,
               decoration: const BoxDecoration(
-                color: Color(0xFFFFFFFF),
+                color: AppColors.white,
                 border: Border(
-                  top: BorderSide(color: Color(0xFFEBEBEB), width: 1),
+                  top: BorderSide(color: AppColors.lightGray, width: 1),
                 ),
               ),
               padding: const EdgeInsets.all(12),
               child: Align(
                 alignment: Alignment.centerRight,
                 child: IntrinsicWidth(
-                  // ✅ Ajusta el ancho al contenido interno del botón
                   child: SizedBox(
                     height: 32,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF007AC2),
+                        backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 8,
@@ -167,23 +134,23 @@ class ValoracionSuccessDialog extends StatelessWidget {
                         ),
                         elevation: 0,
                       ),
-                      // Vuelve al Post-evento desde el que se abrió la
-                      // valoración (cierra este diálogo y la pantalla de la
-                      // encuesta), donde «Certificado» ya queda habilitado.
-                      // Antes reemplazaba toda la pila con un
-                      // `PostEventoScreen` nuevo, suelto: sin el menú
-                      // inferior y sin saber de qué evento era.
-                      onPressed: () => Navigator.of(
-                        context,
-                      ).popUntil((route) => route.isFirst),
+                      // Pop del diálogo Y de la pantalla de la encuesta: dos
+                      // pops porque `EncuestaResponderScreen` sigue en la
+                      // pila debajo de este diálogo (a diferencia de
+                      // `ValoracionSuccessDialog`, que reemplaza toda la
+                      // pila con `pushAndRemoveUntil`).
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                      },
                       child: const Text(
-                        'Descargar mi certificado',
+                        'Cerrar',
                         style: TextStyle(
                           fontFamily: Fonts.regular,
                           fontWeight: Fonts.wRegular,
                           fontSize: 14,
                           height: 16 / 14,
-                          color: Color(0xFFFFFFFF),
+                          color: AppColors.white,
                         ),
                       ),
                     ),
