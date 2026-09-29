@@ -6,6 +6,7 @@ import '../../../../core/constants/fonts.dart';
 import '../../../../core/utils/area_segura.dart';
 import '../../../notificaciones/data/notificacion_recibida.dart';
 import '../../../notificaciones/data/notificaciones_repository.dart';
+import '../../../notificaciones/presentation/activar_push_web.dart';
 import '../widgets/empty_notifications.dart';
 import '../widgets/notification_item.dart';
 
@@ -177,6 +178,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
 
                   const SizedBox(height: 12),
+
+                  /// PWA: ofrecer activar el push web (no ocupa espacio en
+                  /// Android/iOS nativos).
+                  const ActivarPushWeb(),
 
                   /// CONTENIDO: cargando / error / lista o estado vacío
                   Expanded(

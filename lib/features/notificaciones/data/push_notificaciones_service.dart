@@ -1,8 +1,10 @@
-import 'dart:io';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../../../core/config/firebase_web.dart';
 import 'notificaciones_repository.dart';
 
 /// Handler de mensajes recibidos con la app en segundo plano/terminada.
@@ -58,6 +60,36 @@ class PushNotificacionesService {
 
   bool _notificacionesLocalesListas = false;
 
+  /// Para avisar dentro de la PWA cuando llega una notificación con la
+  /// pestaña abierta (en web no existe `flutter_local_notifications`). Va en
+  /// el `scaffoldMessengerKey` del `MaterialApp`.
+  static final GlobalKey<ScaffoldMessengerState> mensajero =
+      GlobalKey<ScaffoldMessengerState>();
+
+  /// Push web (PWA): hay clave VAPID y Firebase se inicializó en el
+  /// navegador. En Android/iOS siempre es `false`.
+  static bool get pushWebDisponible =>
+      kIsWeb && clavePublicaVapid.isNotEmpty && Firebase.apps.isNotEmpty;
+
+  /// Estado del permiso de notificaciones en este navegador (solo PWA).
+  Future<AuthorizationStatus> permisoWeb() async =>
+      (await _messaging.getNotificationSettings()).authorizationStatus;
+
+  /// Botón "Activar notificaciones" de la PWA: pide el permiso (el
+  /// navegador solo lo muestra tras un toque del usuario) y registra el
+  /// token del navegador.
+  ///
+  /// @returns `true` si quedaron activas.
+  Future<bool> activarEnWeb() async {
+    if (!pushWebDisponible) return false;
+    final permiso = await _messaging.requestPermission();
+    if (permiso.authorizationStatus != AuthorizationStatus.authorized) {
+      return false;
+    }
+    await _registrarTokenActual();
+    return true;
+  }
+
   /// Pide permiso al usuario, obtiene el device token actual y lo registra
   /// contra el backend (`POST /notificaciones/device-token`) - se llama una
   /// vez por sesión iniciada (ver `Menu.initState`), nunca desde `main()`
@@ -69,15 +101,29 @@ class PushNotificacionesService {
   /// este dispositivo hasta que lo habilite manualmente desde los ajustes
   /// del sistema (no hay, todavía, una pantalla propia que se lo pida de
   /// nuevo).
+  ///
+  /// En la PWA no pide el permiso (el navegador lo exige tras un toque, ver
+  /// `activarEnWeb`): solo registra el token si ya estaba concedido.
   Future<void> registrarParaSesionActual() async {
+    if (kIsWeb) {
+      if (!pushWebDisponible) return;
+      if (await permisoWeb() != AuthorizationStatus.authorized) return;
+      await _registrarTokenActual();
+      return;
+    }
+
     final permiso = await _messaging.requestPermission();
     if (permiso.authorizationStatus == AuthorizationStatus.denied) return;
 
     await _inicializarNotificacionesLocales();
+    await _registrarTokenActual();
+  }
 
-    final token = await _messaging.getToken();
+  Future<void> _registrarTokenActual() async {
+    final token = await _messaging.getToken(
+      vapidKey: kIsWeb ? clavePublicaVapid : null,
+    );
     if (token != null) await _registrarToken(token);
-
     _messaging.onTokenRefresh.listen(_registrarToken);
   }
 
@@ -102,7 +148,11 @@ class PushNotificacionesService {
   Future<void> _registrarToken(String token) {
     return _repository.registrarDeviceToken(
       token: token,
-      plataforma: Platform.isIOS ? 'IOS' : 'ANDROID',
+      plataforma: kIsWeb
+          ? 'WEB'
+          : defaultTargetPlatform == TargetPlatform.iOS
+          ? 'IOS'
+          : 'ANDROID',
     );
   }
 
@@ -121,6 +171,19 @@ class PushNotificacionesService {
   Future<void> _mostrarNotificacionLocal(RemoteMessage mensaje) async {
     final notificacion = mensaje.notification;
     if (notificacion == null) return;
+
+    if (kIsWeb) {
+      // Con la pestaña abierta el navegador no muestra la notificación: se
+      // avisa dentro de la PWA.
+      final texto = [
+        notificacion.title,
+        notificacion.body,
+      ].whereType<String>().where((t) => t.isNotEmpty).join('\n');
+      mensajero.currentState?.showSnackBar(
+        SnackBar(content: Text(texto), duration: const Duration(seconds: 6)),
+      );
+      return;
+    }
 
     await _notificacionesLocales.show(
       id: mensaje.hashCode,
