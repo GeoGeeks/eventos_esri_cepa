@@ -28,6 +28,7 @@ class Charla {
     this.publicosObjetivo = const [],
     this.nivelesSesion = const [],
     this.valorable,
+    this.ponentes = const [],
   });
 
   final String id;
@@ -50,6 +51,14 @@ class Charla {
   /// terminó en hora del evento. `null` si la API todavía no lo manda
   /// (versión anterior desplegada) - ver `Actividad.mostrarValorar`.
   final bool? valorable;
+
+  /// Speakers asignados a la charla desde el panel (`ponentes` de la API),
+  /// en orden alfabético. Vacío si no tiene o si la API desplegada todavía
+  /// no lo manda.
+  final List<String> ponentes;
+
+  /// Lo que la tarjeta muestra como ponente: los nombres separados por coma.
+  String get ponenteTexto => ponentes.join(', ');
 
   /// "10:00 - 11:00" - lo que `ActividadCard.horario` espera ya compuesto.
   String get horarioFormateado =>
@@ -96,6 +105,9 @@ class Charla {
       publicosObjetivo: catalogo('publicosObjetivo'),
       nivelesSesion: catalogo('nivelesSesion'),
       valorable: json['valorable'] as bool?,
+      ponentes: (json['ponentes'] as List<dynamic>? ?? const [])
+          .whereType<String>()
+          .toList(),
     );
   }
 }

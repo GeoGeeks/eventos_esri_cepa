@@ -256,13 +256,14 @@ class _AgendaContenidoState extends State<AgendaContenido> {
     }
   }
 
-  /// `ponente`/`aforo` quedan vacíos a propósito: la Charla real del
-  /// backend no trae esos dos campos - ver el doc-comment de esa clase.
+  /// `ponente` sale de los speakers asignados a la charla (`Charla.ponentes`,
+  /// vacío si no tiene); `aforo` queda vacío a propósito: la Charla real del
+  /// backend no trae ese dato - ver el doc-comment de esa clase.
   Actividad _actividadDesdeCharla(Charla charla, bool yaValorada) => Actividad(
     id: charla.id,
     titulo: charla.nombre,
     horario: charla.horarioFormateado,
-    ponente: '',
+    ponente: charla.ponenteTexto,
     dia: charla.dia ?? '',
     lugar: charla.lugar ?? '',
     aforo: '',

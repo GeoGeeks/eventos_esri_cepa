@@ -62,7 +62,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
         id: charla.id,
         titulo: charla.nombre,
         horario: charla.horarioFormateado,
-        ponente: '',
+        ponente: charla.ponenteTexto,
         dia: charla.dia ?? '',
         lugar: charla.lugar ?? '',
         aforo: '',
