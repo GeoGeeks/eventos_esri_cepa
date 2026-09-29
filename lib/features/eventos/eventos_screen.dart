@@ -605,7 +605,10 @@ class _ListadoEventos extends StatelessWidget {
                             ? 'Presencial'
                             : 'Virtual',
                         onViewMore: () => onVerMas(entries[index].value[i]),
-                        onRegister: () => RegistroModal.mostrar(context),
+                        onRegister: () => RegistroModal.mostrar(
+                          context,
+                          idEvento: entries[index].value[i].id,
+                        ),
                       ),
                     ),
                   ),
