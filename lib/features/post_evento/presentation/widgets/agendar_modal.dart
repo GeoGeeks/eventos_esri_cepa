@@ -12,11 +12,18 @@ class AgendarModal {
 
   static const String titulo = 'Agendar';
 
+  /// Enlace de respaldo para el modo de prueba (sin evento real).
   static const String url =
       'https://bookings.cloud.microsoft/book/EsriColombiaEcuadorPanam@esri.co/'
       '?ismsaljsauthenabled=true';
 
-  static Future<void> mostrar(BuildContext context) {
-    return FormularioWebModal.mostrar(context, titulo: titulo, url: url);
+  /// [enlace] es la agenda del experto que se tocó (cada uno tiene la
+  /// suya, cargada desde el panel); sin él, el de respaldo.
+  static Future<void> mostrar(BuildContext context, {String? enlace}) {
+    return FormularioWebModal.mostrar(
+      context,
+      titulo: titulo,
+      url: enlace ?? url,
+    );
   }
 }

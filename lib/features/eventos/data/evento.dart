@@ -53,6 +53,9 @@ class Evento {
   /// el comentario de arriba).
   bool get tieneEncuestas => modulosHabilitados.contains('encuestas');
 
+  /// Pestaña «Agendar con expertos» del post-evento (2026-09-30).
+  bool get tieneAgendamientos => modulosHabilitados.contains('agendamientos');
+
   /// Los módulos dinámicos que traen su propia pestaña en `InvitadosScreen`
   /// (Agendamientos es el 5º dinámico, pero no tiene pestaña ahí - es la
   /// `FormularioWebModal` de "agendar con expertos"). Si ninguno está
