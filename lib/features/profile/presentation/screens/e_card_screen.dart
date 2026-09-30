@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +13,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/constants/icons.dart';
 import '../../../../core/utils/area_segura.dart';
+import '../../../../core/utils/descarga_navegador.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../login/presentation/bloc/auth_cubit.dart';
@@ -106,6 +108,17 @@ class _ECardScreenState extends State<ECardScreen> {
     Uint8List png, {
     required String titulo,
   }) async {
+    if (kIsWeb) {
+      // PWA: sin carpeta temporal ni hoja de compartir del sistema; la
+      // imagen se entrega como descarga del navegador (mismo mecanismo que
+      // el certificado).
+      descargarEnNavegador(
+        png,
+        nombreArchivo: 'mi-e-card.png',
+        tipo: 'image/png',
+      );
+      return;
+    }
     final carpeta = await getTemporaryDirectory();
     final archivo = File('${carpeta.path}/mi-e-card.png');
     await archivo.writeAsBytes(png, flush: true);
