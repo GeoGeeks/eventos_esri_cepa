@@ -14,10 +14,12 @@ import '../../../../core/utils/area_segura.dart';
 import '../../../../core/widgets/app_icons.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/boton_reintentar.dart';
+import '../../../../core/widgets/imagen_evento.dart';
 import '../../../eventos/data/evento.dart';
 import '../../../encuestas/data/encuesta.dart';
 import '../../../encuestas/data/encuestas_repository.dart';
 import '../../../encuestas/presentation/screens/encuesta_responder_screen.dart';
+import '../../data/agendamientos_repository.dart';
 import '../../data/certificado_repository.dart';
 import '../../data/galeria_repository.dart';
 import '../../data/valoracion_store.dart';
@@ -50,6 +52,7 @@ class PostEventoScreen extends StatefulWidget {
   final EncuestasRepository? encuestasRepository;
   final GaleriaRepository? galeriaRepository;
   final CertificadoRepository? certificadoRepository;
+  final AgendamientosRepository? agendamientosRepository;
 
   /// Qué hacer con el PDF ya descargado - por defecto abre la hoja de
   /// compartir del sistema (guardar, abrir en un visor, enviar). Seam para
@@ -64,6 +67,7 @@ class PostEventoScreen extends StatefulWidget {
     this.encuestasRepository,
     this.galeriaRepository,
     this.certificadoRepository,
+    this.agendamientosRepository,
     this.compartirCertificado,
   });
 
@@ -72,7 +76,15 @@ class PostEventoScreen extends StatefulWidget {
 }
 
 class _PostEventoScreenState extends State<PostEventoScreen> {
-  static const _tabs = ['Galería', 'Agendar con expertos'];
+  /// «Agendar con expertos» solo si el evento tiene encendido el módulo
+  /// `agendamientos` en el panel; sin el evento completo (modo de prueba, o
+  /// solo `idEventoReal`) se muestra como siempre.
+  bool get _mostrarAgendar => widget.evento?.tieneAgendamientos ?? true;
+
+  List<String> get _tabs => [
+    'Galería',
+    if (_mostrarAgendar) 'Agendar con expertos',
+  ];
   int _tabIndex = 0;
   bool _showVideo = false;
   bool _showCertificadoToast = false; // ✅ nuevo estado del toast
@@ -85,6 +97,13 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
       widget.galeriaRepository ?? GaleriaRepository();
   late final CertificadoRepository _certificadoRepository =
       widget.certificadoRepository ?? CertificadoRepository();
+  late final AgendamientosRepository _agendamientosRepository =
+      widget.agendamientosRepository ?? AgendamientosRepository();
+
+  /// Expertos reales del evento; `null` mientras cargan o si falló.
+  List<ExpertoAgendamiento>? _expertosReales;
+  bool _cargandoExpertos = false;
+  bool _errorExpertos = false;
 
   /// `null` mientras no se resuelve (modo mock, o real sin terminar de
   /// cargar) - mismo criterio que `InvitadosScreen._cargandoLaboratorios`.
@@ -117,6 +136,29 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
       ValoracionStore.reiniciar();
       _cargarEncuestaPostEvento(idEvento);
       _cargarGaleria(idEvento);
+      if (_mostrarAgendar) _cargarExpertos(idEvento);
+    }
+  }
+
+  Future<void> _cargarExpertos(String idEvento) async {
+    setState(() {
+      _cargandoExpertos = true;
+      _errorExpertos = false;
+    });
+    try {
+      final expertos = await _agendamientosRepository.listar(idEvento);
+      if (!mounted) return;
+      setState(() {
+        _expertosReales = expertos;
+        _cargandoExpertos = false;
+      });
+    } catch (e) {
+      debugPrint('[PostEventoScreen] cargar expertos($idEvento) falló: $e');
+      if (!mounted) return;
+      setState(() {
+        _errorExpertos = true;
+        _cargandoExpertos = false;
+      });
     }
   }
 
@@ -240,7 +282,7 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     super.dispose();
   }
 
-  static const _expertos = [
+  static const _expertosMock = [
     _Experto(
       imagenAsset: Images.fotoInvitado,
       nombre: 'Edwin Chirivi',
@@ -287,7 +329,15 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
           onCerrarVideo: () => setState(() => _showVideo = false),
         );
       case 1:
-        return _ExpertosTab(expertos: _expertos);
+        if (_idEvento != null) {
+          return _ExpertosRealTab(
+            expertos: _expertosReales,
+            cargando: _cargandoExpertos,
+            error: _errorExpertos,
+            onReintentar: () => _cargarExpertos(_idEvento!),
+          );
+        }
+        return _ExpertosTab(expertos: _expertosMock);
       default:
         return const SizedBox();
     }
@@ -1643,7 +1693,7 @@ class _ExpertosTab extends StatelessWidget {
             return Padding(
               padding: EdgeInsets.only(top: index > 0 ? 12 : 0),
               child: _ExpertoCard(
-                imagenAsset: experto.imagenAsset,
+                imagen: experto.imagenAsset,
                 nombre: experto.nombre,
                 cargo: experto.cargo,
                 // Abre el formulario de reservas de Microsoft Bookings.
@@ -1657,15 +1707,95 @@ class _ExpertosTab extends StatelessWidget {
   }
 }
 
+/// Expertos reales del evento (`GET /eventos/:idEvento/agendamientos`):
+/// cada tarjeta abre la agenda propia del experto.
+class _ExpertosRealTab extends StatelessWidget {
+  final List<ExpertoAgendamiento>? expertos;
+  final bool cargando;
+  final bool error;
+  final VoidCallback onReintentar;
+
+  const _ExpertosRealTab({
+    required this.expertos,
+    required this.cargando,
+    required this.error,
+    required this.onReintentar,
+  });
+
+  static const _estiloAviso = TextStyle(
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    color: Color(0xFF6B6B6B),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    if (cargando) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final datos = expertos;
+    if (error || datos == null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: Column(
+          children: [
+            const Text(
+              'No se pudieron cargar los expertos. Verifique su conexión.',
+              textAlign: TextAlign.center,
+              style: _estiloAviso,
+            ),
+            BotonReintentar(onPressed: onReintentar),
+          ],
+        ),
+      );
+    }
+    if (datos.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: Text(
+          'Pronto habrá expertos disponibles para agendar.',
+          textAlign: TextAlign.center,
+          style: _estiloAviso,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < datos.length; i++)
+            Padding(
+              key: Key('experto-${datos[i].id}'),
+              padding: EdgeInsets.only(top: i > 0 ? 12 : 0),
+              child: _ExpertoCard(
+                imagen: datos[i].imagenUrl ?? Images.fotoInvitado,
+                nombre: datos[i].nombre,
+                cargo: datos[i].cargo ?? '',
+                onAgendar: () =>
+                    AgendarModal.mostrar(context, enlace: datos[i].enlace),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Experto Card (según Figma CSS) ───────────────────────────────────────────
 class _ExpertoCard extends StatelessWidget {
-  final String imagenAsset;
+  /// URL de la foto real o ruta de un asset (ver [ImagenEvento]).
+  final String imagen;
   final String nombre;
   final String cargo;
   final VoidCallback onAgendar;
 
   const _ExpertoCard({
-    required this.imagenAsset,
+    required this.imagen,
     required this.nombre,
     required this.cargo,
     required this.onAgendar,
@@ -1686,8 +1816,8 @@ class _ExpertoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ClipOval(
-            child: Image.asset(
-              imagenAsset,
+            child: ImagenEvento(
+              url: imagen,
               width: 92,
               height: 92,
               fit: BoxFit.cover,

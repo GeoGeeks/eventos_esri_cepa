@@ -8,6 +8,8 @@ import 'package:esri_eventos/features/encuestas/data/encuesta.dart';
 import 'package:esri_eventos/features/encuestas/data/encuestas_repository.dart';
 import 'package:esri_eventos/features/encuestas/data/respuesta_encuesta.dart';
 import 'package:esri_eventos/features/eventos/data/evento.dart';
+import 'package:esri_eventos/core/widgets/formulario_web_modal.dart';
+import 'package:esri_eventos/features/post_evento/data/agendamientos_repository.dart';
 import 'package:esri_eventos/features/post_evento/data/certificado_repository.dart';
 import 'package:esri_eventos/features/post_evento/data/galeria_repository.dart';
 import 'package:esri_eventos/features/post_evento/data/valoracion_store.dart';
@@ -56,6 +58,29 @@ class _EncuestasConPostEvento extends EncuestasRepository {
       : null;
 }
 
+class _AgendamientosFalsos extends AgendamientosRepository {
+  _AgendamientosFalsos(this.expertos) : super(dio: Dio());
+
+  final List<ExpertoAgendamiento> expertos;
+  int llamadas = 0;
+
+  @override
+  Future<List<ExpertoAgendamiento>> listar(String idEvento) async {
+    llamadas++;
+    return expertos;
+  }
+}
+
+final _planetaConAgendar = Evento(
+  id: 'PE_26_BOG',
+  nombre: 'Planeta Esri Bogotá 2026',
+  descripcion: 'Planeta Esri en la Universidad Central.',
+  fechaInicio: DateTime(2026, 9, 10),
+  fechaFinalizacion: DateTime(2026, 9, 10),
+  lugar: 'Universidad Central',
+  modulosHabilitados: const ['agendamientos'],
+);
+
 class _GaleriaFalsa extends GaleriaRepository {
   _GaleriaFalsa({this.galeria, this.cerrada = false}) : super(dio: Dio());
 
@@ -98,6 +123,8 @@ Future<void> _montar(
   CertificadoRepository? certificado,
   Future<void> Function(File)? compartir,
   EncuestasRepository? encuestas,
+  Evento? evento,
+  AgendamientosRepository? agendamientos,
 }) async {
   tester.view.physicalSize = const Size(412, 917);
   tester.view.devicePixelRatio = 1.0;
@@ -107,11 +134,13 @@ Future<void> _montar(
   await tester.pumpWidget(
     MaterialApp(
       home: PostEventoScreen(
-        evento: _planeta,
+        evento: evento ?? _planeta,
         encuestasRepository: encuestas ?? _EncuestasSinPostEvento(),
         galeriaRepository: galeria ?? _GaleriaFalsa(galeria: _tresFotos),
         certificadoRepository: certificado ?? _CertificadoFalso(),
         compartirCertificado: compartir ?? (_) async {},
+        agendamientosRepository:
+            agendamientos ?? _AgendamientosFalsos(const []),
       ),
     ),
   );
@@ -253,5 +282,76 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('certificado-toast')), findsNothing);
+  });
+
+  testWidgets('sin el módulo agendamientos no hay pestaña de expertos', (
+    tester,
+  ) async {
+    final agendamientos = _AgendamientosFalsos(const []);
+    await _montar(tester, agendamientos: agendamientos);
+
+    expect(find.text('Agendar con expertos'), findsNothing);
+    expect(agendamientos.llamadas, 0);
+  });
+
+  testWidgets(
+    'con el módulo, muestra los expertos reales y abre la agenda de cada uno',
+    (tester) async {
+      await _montar(
+        tester,
+        evento: _planetaConAgendar,
+        agendamientos: _AgendamientosFalsos(const [
+          ExpertoAgendamiento(
+            id: 'e1',
+            nombre: 'Laura Gómez',
+            cargo: 'Especialista en ArcGIS Pro',
+            enlace: 'https://bookings.example/laura',
+          ),
+          ExpertoAgendamiento(
+            id: 'e2',
+            nombre: 'Pedro Ruiz',
+            enlace: 'https://bookings.example/pedro',
+          ),
+        ]),
+      );
+
+      await tester.tap(find.text('Agendar con expertos'));
+      await tester.pump();
+
+      expect(find.text('Laura Gómez'), findsOneWidget);
+      expect(find.text('Pedro Ruiz'), findsOneWidget);
+      expect(find.text('Edwin Chirivi'), findsNothing);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('experto-e2')),
+          matching: find.text('Agendar'),
+        ),
+      );
+      await tester.pump();
+      // El WebView no existe en un test: su excepción se descarta.
+      tester.takeException();
+
+      expect(
+        tester
+            .widget<FormularioWebModal>(find.byType(FormularioWebModal))
+            .enlace,
+        'https://bookings.example/pedro',
+      );
+    },
+  );
+
+  testWidgets('sin expertos cargados avisa en vez de dejar la pestaña vacía', (
+    tester,
+  ) async {
+    await _montar(tester, evento: _planetaConAgendar);
+
+    await tester.tap(find.text('Agendar con expertos'));
+    await tester.pump();
+
+    expect(
+      find.text('Pronto habrá expertos disponibles para agendar.'),
+      findsOneWidget,
+    );
   });
 }
