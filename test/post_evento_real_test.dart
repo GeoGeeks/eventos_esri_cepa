@@ -35,6 +35,27 @@ class _EncuestasSinPostEvento extends EncuestasRepository {
   Future<RespuestaEncuesta?> miRespuesta(String id) async => null;
 }
 
+/// Con encuesta `post_evento`; [respondida] dice si este asistente ya la
+/// contestó.
+class _EncuestasConPostEvento extends EncuestasRepository {
+  _EncuestasConPostEvento({required this.respondida}) : super(dio: Dio());
+
+  final bool respondida;
+
+  @override
+  Future<Encuesta?> postEvento(String idEvento) async => Encuesta(
+    id: 'enc-$idEvento',
+    idEvento: idEvento,
+    tipo: 'post_evento',
+    titulo: 'Encuesta de satisfacción',
+  );
+
+  @override
+  Future<RespuestaEncuesta?> miRespuesta(String id) async => respondida
+      ? RespuestaEncuesta(id: 'r1', encuestaId: id, respuestasPorPregunta: {})
+      : null;
+}
+
 class _GaleriaFalsa extends GaleriaRepository {
   _GaleriaFalsa({this.galeria, this.cerrada = false}) : super(dio: Dio());
 
@@ -76,6 +97,7 @@ Future<void> _montar(
   GaleriaRepository? galeria,
   CertificadoRepository? certificado,
   Future<void> Function(File)? compartir,
+  EncuestasRepository? encuestas,
 }) async {
   tester.view.physicalSize = const Size(412, 917);
   tester.view.devicePixelRatio = 1.0;
@@ -86,7 +108,7 @@ Future<void> _montar(
     MaterialApp(
       home: PostEventoScreen(
         evento: _planeta,
-        encuestasRepository: _EncuestasSinPostEvento(),
+        encuestasRepository: encuestas ?? _EncuestasSinPostEvento(),
         galeriaRepository: galeria ?? _GaleriaFalsa(galeria: _tresFotos),
         certificadoRepository: certificado ?? _CertificadoFalso(),
         compartirCertificado: compartir ?? (_) async {},
@@ -103,6 +125,34 @@ void main() {
   setUpAll(cargarFuentesReales);
 
   setUp(ValoracionStore.reiniciar);
+
+  testWidgets(
+    'la encuesta respondida en otro evento no habilita el certificado aquí',
+    (tester) async {
+      // Quedó marcado de otro evento en la misma sesión.
+      ValoracionStore.marcarValorado();
+      final certificado = _CertificadoFalso();
+
+      await _montar(
+        tester,
+        certificado: certificado,
+        encuestas: _EncuestasConPostEvento(respondida: false),
+      );
+
+      expect(ValoracionStore.eventoValorado.value, isFalse);
+      await tester.tap(find.byKey(const Key('post-evento-certificado')));
+      await tester.pump();
+      expect(certificado.descargas, 0);
+    },
+  );
+
+  testWidgets('si ya respondió la encuesta de este evento, queda valorado', (
+    tester,
+  ) async {
+    await _montar(tester, encuestas: _EncuestasConPostEvento(respondida: true));
+
+    expect(ValoracionStore.eventoValorado.value, isTrue);
+  });
 
   testWidgets('la cabecera muestra los datos del evento real', (tester) async {
     await _montar(tester);

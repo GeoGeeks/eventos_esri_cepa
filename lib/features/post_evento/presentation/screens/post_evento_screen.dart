@@ -110,6 +110,11 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     super.initState();
     final idEvento = _idEvento;
     if (idEvento != null) {
+      // «Ya valoró» es de ESTE evento: `ValoracionStore` es uno solo para
+      // toda la sesión, y sin reiniciarlo la encuesta respondida en otro
+      // evento dejaba «Certificado» habilitado y «Valorar evento» bloqueado
+      // aquí. `_cargarEncuestaPostEvento` lo vuelve a marcar si corresponde.
+      ValoracionStore.reiniciar();
       _cargarEncuestaPostEvento(idEvento);
       _cargarGaleria(idEvento);
     }
