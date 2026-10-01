@@ -13,7 +13,9 @@ import 'package:esri_eventos/features/post_evento/data/agendamientos_repository.
 import 'package:esri_eventos/features/post_evento/data/certificado_repository.dart';
 import 'package:esri_eventos/features/post_evento/data/galeria_repository.dart';
 import 'package:esri_eventos/features/post_evento/data/valoracion_store.dart';
+import 'package:esri_eventos/features/encuestas/presentation/screens/encuesta_mi_respuesta_screen.dart';
 import 'package:esri_eventos/features/post_evento/presentation/screens/post_evento_screen.dart';
+import 'package:esri_eventos/features/post_evento/presentation/screens/valoracion_paso1_screen.dart';
 
 import 'fuentes_de_prueba.dart';
 
@@ -80,6 +82,15 @@ final _planetaConAgendar = Evento(
   lugar: 'Universidad Central',
   modulosHabilitados: const ['agendamientos'],
 );
+
+/// La encuesta post-evento no se pudo cargar (sin señal, 500...).
+class _EncuestasQueFallan extends EncuestasRepository {
+  _EncuestasQueFallan() : super(dio: Dio());
+
+  @override
+  Future<Encuesta?> postEvento(String idEvento) async =>
+      throw Exception('sin conexión');
+}
 
 class _GaleriaFalsa extends GaleriaRepository {
   _GaleriaFalsa({this.galeria, this.cerrada = false}) : super(dio: Dio());
@@ -354,4 +365,48 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'evento real sin encuesta post-evento: «Valorar evento» queda en gris y no abre el formulario de prueba',
+    (tester) async {
+      await _montar(tester);
+
+      await tester.tap(find.byKey(const Key('post-evento-valorar')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ValoracionPaso1Screen), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'si la encuesta no cargó, avisa en vez de abrir el formulario de prueba',
+    (tester) async {
+      await _montar(tester, encuestas: _EncuestasQueFallan());
+
+      await tester.tap(find.byKey(const Key('post-evento-valorar')));
+      await tester.pump();
+
+      expect(find.byType(ValoracionPaso1Screen), findsNothing);
+      expect(
+        find.text('No se pudo cargar la encuesta. Intente de nuevo.'),
+        findsOneWidget,
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 6));
+    },
+  );
+
+  testWidgets(
+    'con la encuesta ya respondida, «Valorar evento» abre sus respuestas',
+    (tester) async {
+      await _montar(
+        tester,
+        encuestas: _EncuestasConPostEvento(respondida: true),
+      );
+
+      await tester.tap(find.byKey(const Key('post-evento-valorar')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EncuestaMiRespuestaScreen), findsOneWidget);
+    },
+  );
 }

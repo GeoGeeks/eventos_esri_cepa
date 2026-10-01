@@ -18,6 +18,7 @@ import '../../../../core/widgets/imagen_evento.dart';
 import '../../../eventos/data/evento.dart';
 import '../../../encuestas/data/encuesta.dart';
 import '../../../encuestas/data/encuestas_repository.dart';
+import '../../../encuestas/presentation/screens/encuesta_mi_respuesta_screen.dart';
 import '../../../encuestas/presentation/screens/encuesta_responder_screen.dart';
 import '../../data/agendamientos_repository.dart';
 import '../../data/certificado_repository.dart';
@@ -254,13 +255,63 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
     }
   }
 
+  /// «Valorar evento» ya respondido: muestra lo que la persona contestó
+  /// (pedido de la PO: siempre debe poder ver sus respuestas).
+  Future<void> _verRespuestas() async {
+    final encuesta = _encuestaPostEvento;
+    if (encuesta == null) return;
+    try {
+      final respuesta = await _encuestasRepository.miRespuesta(encuesta.id);
+      if (!mounted) return;
+      if (respuesta == null) {
+        mostrarSnackBar(context, 'Todavía no ha respondido esta encuesta.');
+        return;
+      }
+      await Navigator.push<void>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EncuestaMiRespuestaScreen(
+            encuesta: encuesta,
+            respuesta: respuesta,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('[PostEventoScreen] ver respuestas falló: $e');
+      if (mounted) {
+        mostrarSnackBar(
+          context,
+          'No se pudieron cargar sus respuestas. Intente de nuevo.',
+        );
+      }
+    }
+  }
+
   void _irAValorar() {
     final encuesta = _encuestaPostEvento;
     if (encuesta == null) {
-      Navigator.push(
+      final idEvento = _idEvento;
+      if (idEvento == null) {
+        // Modo de prueba (sin evento real): el formulario de diseño.
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ValoracionPaso1Screen()),
+        );
+        return;
+      }
+      // Evento real: nunca el formulario de prueba, que no guarda nada.
+      if (_sinEncuestaPostEvento) {
+        mostrarSnackBar(
+          context,
+          'Este evento no tiene encuesta de satisfacción.',
+        );
+        return;
+      }
+      mostrarSnackBar(
         context,
-        MaterialPageRoute(builder: (_) => const ValoracionPaso1Screen()),
+        'No se pudo cargar la encuesta. Intente de nuevo.',
       );
+      _cargarEncuestaPostEvento(idEvento);
       return;
     }
     Navigator.push(
@@ -419,13 +470,22 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
                                           ValoracionStore.eventoValorado,
                                       builder: (_, valorado, _) =>
                                           _BotonesAccion(
-                                            valorado: valorado,
+                                            // Sin encuesta post-evento no hay
+                                            // nada que valorar: queda en gris.
+                                            valorado:
+                                                valorado ||
+                                                (_idEvento != null &&
+                                                    _sinEncuestaPostEvento),
                                             certificadoHabilitado:
                                                 valorado ||
                                                 _sinEncuestaPostEvento,
                                             descargando:
                                                 _descargandoCertificado,
                                             onValorar: _irAValorar,
+                                            onVerRespuestas:
+                                                _encuestaPostEvento != null
+                                                ? _verRespuestas
+                                                : null,
                                             onCertificado: _alTocarCertificado,
                                           ),
                                     ),
@@ -708,6 +768,10 @@ class _BotonesAccion extends StatelessWidget {
   /// Mientras se descarga el PDF el botón no responde a más toques.
   final bool descargando;
   final VoidCallback? onValorar;
+
+  /// Con la encuesta ya respondida, tocar «Valorar evento» (en gris) abre
+  /// las respuestas; `null` = no hace nada, como antes.
+  final VoidCallback? onVerRespuestas;
   final VoidCallback? onCertificado;
 
   const _BotonesAccion({
@@ -715,6 +779,7 @@ class _BotonesAccion extends StatelessWidget {
     required this.certificadoHabilitado,
     this.descargando = false,
     this.onValorar,
+    this.onVerRespuestas,
     this.onCertificado,
   });
 
@@ -739,7 +804,7 @@ class _BotonesAccion extends StatelessWidget {
               fondo: valorado ? _blanco : _azul,
               contenido: valorado ? _gris : _blanco,
               borde: valorado ? _gris : null,
-              onTap: valorado ? null : onValorar,
+              onTap: valorado ? onVerRespuestas : onValorar,
             ),
           ),
           const SizedBox(width: 16),
