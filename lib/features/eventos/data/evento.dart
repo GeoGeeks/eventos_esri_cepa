@@ -15,6 +15,7 @@ class Evento {
     this.lugar,
     this.urlEvento,
     this.imagenUrl,
+    this.imagenCabeceraUrl,
     this.horaInicio,
     this.horaFin,
     this.postEventoHabilitadoDesde,
@@ -73,6 +74,11 @@ class Evento {
   /// tener un asset de respaldo para este caso, no asumir que siempre viene.
   final String? imagenUrl;
 
+  /// Imagen de arriba del detalle y del post-evento, subida desde el panel
+  /// igual que la portada (`POST /admin/eventos/:idEvento/imagen-cabecera`).
+  /// `null` si el evento no tiene una propia - ver [imagenCabecera].
+  final String? imagenCabeceraUrl;
+
   /// `eventosdb.Evento` solo trae fecha, sin hora - estos dos son la
   /// extensión local, también opcionales: quedan `null` hasta que un admin
   /// le ponga hora al evento. Son horas de AGENDA (ver
@@ -107,6 +113,10 @@ class Evento {
   /// Lo que las tarjetas deben usar como `image` - la portada real si ya la
   /// subieron, o el asset generico mientras tanto (nunca un `image` vacio).
   String get imagenParaCarta => imagenUrl ?? Images.esriEventos;
+
+  /// Lo que pinta la cabecera del detalle y del post-evento: la propia del
+  /// evento o, sin ella, la cabecera de siempre.
+  String get imagenCabecera => imagenCabeceraUrl ?? Images.headerInvitados;
 
   /// `true` si el evento ya terminó. `EventosStore` lo usa para no mostrar
   /// un evento ya pasado ni en "Eventos reservados" ni en "Próximos
@@ -156,6 +166,7 @@ class Evento {
       lugar: json['Lugar'] as String?,
       urlEvento: json['UrlEvento'] as String?,
       imagenUrl: json['imagenUrl'] as String?,
+      imagenCabeceraUrl: json['imagenCabeceraUrl'] as String?,
       horaInicio: _parsearHoraDeAgenda(json['horaInicio']),
       horaFin: _parsearHoraDeAgenda(json['horaFin']),
       postEventoHabilitadoDesde: _parsearFechaOpcional(

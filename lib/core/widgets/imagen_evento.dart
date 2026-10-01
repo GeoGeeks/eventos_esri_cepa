@@ -12,6 +12,7 @@ class ImagenEvento extends StatelessWidget {
   final BoxFit fit;
   final double? width;
   final double? height;
+  final Alignment alignment;
 
   const ImagenEvento({
     super.key,
@@ -19,6 +20,7 @@ class ImagenEvento extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.width,
     this.height,
+    this.alignment = Alignment.center,
   });
 
   bool get _esRed => url.startsWith('http://') || url.startsWith('https://');
@@ -31,6 +33,7 @@ class ImagenEvento extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        alignment: alignment,
         // Sin conexión, o la imagen se borró del servidor - no tumba la
         // tarjeta completa, deja un fondo neutro en su lugar.
         errorBuilder: (_, _, _) => ColoredBox(
@@ -46,6 +49,12 @@ class ImagenEvento extends StatelessWidget {
         },
       );
     }
-    return Image.asset(url, width: width, height: height, fit: fit);
+    return Image.asset(
+      url,
+      width: width,
+      height: height,
+      fit: fit,
+      alignment: alignment,
+    );
   }
 }

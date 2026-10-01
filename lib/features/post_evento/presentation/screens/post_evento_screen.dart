@@ -410,8 +410,9 @@ class _PostEventoScreenState extends State<PostEventoScreen> {
               child: SizedBox(
                 height: 122,
                 width: double.infinity,
-                child: Image.asset(
-                  Images.headerInvitados,
+                child: ImagenEvento(
+                  url: widget.evento?.imagenCabecera ??
+                      Images.headerInvitados,
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
                 ),

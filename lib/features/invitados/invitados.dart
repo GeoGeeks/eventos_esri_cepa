@@ -13,6 +13,7 @@ import '../../core/widgets/app_icons.dart';
 import '../../core/widgets/app_snackbar.dart';
 import '../../core/widgets/boton_cupo.dart';
 import '../../core/widgets/boton_reintentar.dart';
+import '../../core/widgets/imagen_evento.dart';
 import '../../core/widgets/tarjeta_experiencia.dart';
 import '../laboratorios/data/laboratorio_data.dart';
 import '../laboratorios/presentation/alertas_laboratorio.dart';
@@ -819,8 +820,9 @@ class _InvitadosScreenState extends State<InvitadosScreen> {
             child: SizedBox(
               height: altoHeader,
               width: double.infinity,
-              child: Image.asset(
-                Images.headerInvitados,
+              child: ImagenEvento(
+                url: widget.eventoReal?.imagenCabecera ??
+                    Images.headerInvitados,
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
               ),
