@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 import 'catalogo_item.dart';
 import 'charla.dart';
@@ -13,7 +13,7 @@ import 'laboratorio.dart';
 /// poder mockearlo en tests sin tocar la red real.
 class AgendaRepository {
   AgendaRepository({Dio? dio, TokenStorage? tokenStorage})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+      : _dio = dio ?? crearDioApi(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;
@@ -33,6 +33,17 @@ class AgendaRepository {
     return (respuesta.data ?? [])
         .map((json) => Charla.fromJson(json as Map<String, dynamic>))
         .toList();
+  }
+
+  /// `GET /charlas/:id` - una charla suelta con su `idEvento` (lo usa
+  /// tocar una notificación que la tiene vinculada).
+  Future<Charla> obtenerCharla(String id) async {
+    final accessToken = await _tokenStorage.leerAccessToken();
+    final respuesta = await _dio.get<Map<String, dynamic>>(
+      '/charlas/$id',
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+    return Charla.fromJson(respuesta.data!);
   }
 
   /// `GET /eventos/:idEvento/laboratorios`.

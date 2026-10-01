@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 import 'speaker.dart';
 
@@ -9,7 +9,7 @@ import 'speaker.dart';
 /// [Dio] para poder mockearlo en tests sin tocar la red real.
 class SpeakerRepository {
   SpeakerRepository({Dio? dio, TokenStorage? tokenStorage})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+      : _dio = dio ?? crearDioApi(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;

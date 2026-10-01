@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 import 'favorito_enriquecido.dart';
 
@@ -8,7 +8,7 @@ import 'favorito_enriquecido.dart';
 /// que el resto de repositorios de este repo.
 class FavoritosRepository {
   FavoritosRepository({Dio? dio, TokenStorage? tokenStorage})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+      : _dio = dio ?? crearDioApi(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;

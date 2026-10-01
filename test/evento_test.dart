@@ -19,6 +19,28 @@ Map<String, dynamic> _json({
 };
 
 void main() {
+  group('Evento.imagenCabecera', () {
+    test('usa la cabecera propia del evento si la API la manda', () {
+      final evento = Evento.fromJson({
+        ..._json(),
+        'imagenCabeceraUrl':
+            'https://appmovilapi.esri.co/uploads/eventos/c.png',
+      });
+
+      expect(
+        evento.imagenCabecera,
+        'https://appmovilapi.esri.co/uploads/eventos/c.png',
+      );
+    });
+
+    test('sin cabecera propia vuelve a la de siempre', () {
+      expect(
+        Evento.fromJson(_json()).imagenCabecera,
+        'assets/images/invitados/invitados.png',
+      );
+    });
+  });
+
   group('Evento.fromJson', () {
     test(
       'las horas de agenda conservan sus dígitos (07:00Z = 7:00 del evento)',

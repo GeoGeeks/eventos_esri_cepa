@@ -1,3 +1,5 @@
+import 'accion_notificacion.dart';
+
 /// Un push ya recibido, tal como lo devuelve
 /// `GET /notificaciones/mis-notificaciones` de `eventos_esri_cepa_api` -
 /// contenido de la campaña ya aplanado sobre el envío puntual del propio
@@ -33,6 +35,11 @@ class NotificacionRecibida {
   final bool leida;
   final DateTime fecha;
 
+  /// Contenido vinculado que abre "Revise los detalles"; `null` si la
+  /// campaña no trae (ver [AccionNotificacion]).
+  AccionNotificacion? get accion =>
+      AccionNotificacion.desde(accionRuta, accionParams);
+
   NotificacionRecibida copyWith({bool? leida}) => NotificacionRecibida(
     id: id,
     notificacionId: notificacionId,
@@ -58,7 +65,8 @@ class NotificacionRecibida {
   /// semana", "Este mes") se puede afinar cuando el diseño lo pida.
   String get grupo {
     final hoy = DateTime.now();
-    final esHoy = fecha.year == hoy.year &&
+    final esHoy =
+        fecha.year == hoy.year &&
         fecha.month == hoy.month &&
         fecha.day == hoy.day;
     return esHoy ? 'Hoy' : 'Semana pasada';

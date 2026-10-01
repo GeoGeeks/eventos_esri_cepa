@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 
 /// Experto de «Agendar con expertos» (`GET /eventos/:idEvento/agendamientos`).
 /// Cada uno tiene su propio [enlace] de agenda externa, que carga el panel.
@@ -37,7 +37,7 @@ class ExpertoAgendamiento {
 /// panel), así que este repositorio no usa `TokenStorage`.
 class AgendamientosRepository {
   AgendamientosRepository({Dio? dio})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+    : _dio = dio ?? crearDioApi();
 
   final Dio _dio;
 

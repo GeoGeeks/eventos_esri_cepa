@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 
 /// Una foto de la galería del post-evento, ya en su orden.
@@ -57,7 +57,7 @@ class GaleriaNoDisponibleException implements Exception {
 /// que `EncuestasRepository`.
 class GaleriaRepository {
   GaleriaRepository({Dio? dio, TokenStorage? tokenStorage})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+    : _dio = dio ?? crearDioApi(),
       _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;

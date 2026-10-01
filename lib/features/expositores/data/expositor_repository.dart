@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 import 'expositor.dart';
 
@@ -8,7 +8,7 @@ import 'expositor.dart';
 /// `eventos_esri_cepa_api` - mismo patrón que [SpeakerRepository].
 class ExpositorRepository {
   ExpositorRepository({Dio? dio, TokenStorage? tokenStorage})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+      : _dio = dio ?? crearDioApi(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;
