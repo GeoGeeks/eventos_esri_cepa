@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 import 'credencial.dart';
 
@@ -18,7 +18,7 @@ class CredencialNoDisponibleException implements Exception {
 /// Comunicación con `/eventos/:idEvento/credencial` de `eventos_esri_cepa_api`.
 class CredencialRepository {
   CredencialRepository({Dio? dio, TokenStorage? tokenStorage})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+    : _dio = dio ?? crearDioApi(),
       _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;

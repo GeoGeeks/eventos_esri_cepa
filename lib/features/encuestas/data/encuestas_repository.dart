@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 import 'encuesta.dart';
 import 'respuesta_encuesta.dart';
@@ -21,7 +21,7 @@ class ResponderEncuestaRechazadaException implements Exception {
 /// tests sin tocar la red real.
 class EncuestasRepository {
   EncuestasRepository({Dio? dio, TokenStorage? tokenStorage})
-      : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+      : _dio = dio ?? crearDioApi(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;

@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/constants/fonts.dart';
+import 'core/network/renovacion_sesion.dart';
+import 'core/widgets/app_snackbar.dart';
 import 'features/login/data/soporte_repository.dart';
 import 'features/login/login_screen.dart';
 import 'features/login/presentation/bloc/auth_cubit.dart';
@@ -61,6 +63,11 @@ Future<void> main() async {
   );
 }
 
+/// Navegador de la app, para volver al inicio de sesión desde fuera del
+/// árbol de widgets cuando la sesión vence del todo (ver
+/// `RenovadorSesion.alExpirarSesion`, conectado en `_Arranque`).
+final GlobalKey<NavigatorState> navegadorRaiz = GlobalKey<NavigatorState>();
+
 class EsriEventosApp extends StatelessWidget {
   /// [authCubit] es un seam para tests (inyectar un Cubit con un
   /// `AuthRepository` mockeado, sin llamadas de red reales); en la app real
@@ -91,6 +98,7 @@ class EsriEventosApp extends StatelessWidget {
         BlocProvider(create: (_) => _authCubit ?? AuthCubit()),
       ],
       child: MaterialApp(
+        navigatorKey: navegadorRaiz,
         debugShowCheckedModeBanner: false,
         title: 'Esri Eventos',
         theme: ThemeData(
@@ -152,7 +160,41 @@ class _ArranqueState extends State<_Arranque> {
   @override
   void initState() {
     super.initState();
+    _conectarVencimientoDeSesion();
     _decidirPantallaInicial();
+  }
+
+  /// Si el refresh token también venció (la API lo rechaza), se cierra la
+  /// sesión local y se vuelve al inicio de sesión con un aviso, en vez de
+  /// dejar todas las pantallas fallando. El cubit y las dependencias se
+  /// capturan aquí porque `_Arranque` sale del árbol al decidir la pantalla.
+  void _conectarVencimientoDeSesion() {
+    final cubit = context.read<AuthCubit>();
+    final onboardingStorage = widget._onboardingStorage;
+    final soporteRepository = widget._soporteRepository;
+    RenovadorSesion.instancia.alExpirarSesion = () async {
+      await cubit.cerrarSesion();
+      final navegador = navegadorRaiz.currentState;
+      if (navegador == null) return;
+      navegador.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => LoginScreen(
+            onboardingStorage: onboardingStorage,
+            soporteRepository: soporteRepository,
+          ),
+        ),
+        (_) => false,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final contexto = navegadorRaiz.currentContext;
+        if (contexto != null && contexto.mounted) {
+          mostrarSnackBar(
+            contexto,
+            'Su sesión venció. Ingrese de nuevo con su documento.',
+          );
+        }
+      });
+    };
   }
 
   Future<void> _decidirPantallaInicial() async {

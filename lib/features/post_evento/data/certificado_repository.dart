@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 
 /// El backend no entregó el certificado por una regla de negocio - post-
@@ -24,7 +24,7 @@ class CertificadoRepository {
     Dio? dio,
     TokenStorage? tokenStorage,
     Future<Directory> Function()? carpetaDestino,
-  }) : _dio = dio ?? Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)),
+  }) : _dio = dio ?? crearDioApi(),
        _tokenStorage = tokenStorage ?? TokenStorage(),
        _carpetaDestino = carpetaDestino ?? getTemporaryDirectory;
 
