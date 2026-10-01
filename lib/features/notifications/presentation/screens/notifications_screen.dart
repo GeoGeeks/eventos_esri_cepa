@@ -4,8 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/fonts.dart';
 import '../../../../core/utils/area_segura.dart';
+import '../../../notificaciones/data/accion_notificacion.dart';
 import '../../../notificaciones/data/notificacion_recibida.dart';
 import '../../../notificaciones/data/notificaciones_repository.dart';
+import '../../../notificaciones/presentation/abrir_contenido_notificacion.dart';
 import '../widgets/empty_notifications.dart';
 import '../widgets/notification_item.dart';
 
@@ -14,7 +16,15 @@ class NotificationsScreen extends StatefulWidget {
   /// `Menu({pushNotificaciones})`.
   final NotificacionesRepository? repository;
 
-  const NotificationsScreen({super.key, this.repository});
+  /// Seam para tests: qué hace "Revise los detalles" con el contenido
+  /// vinculado. `null` = `abrirContenidoNotificacion`.
+  final Future<void> Function(AccionNotificacion accion)? abrirContenido;
+
+  const NotificationsScreen({
+    super.key,
+    this.repository,
+    this.abrirContenido,
+  });
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -91,6 +101,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ];
     });
     _repository.marcarLeido(item.notificacionId);
+  }
+
+  /// "Revise los detalles": solo si la notificación trae contenido
+  /// vinculado, mismo camino que tocar el push del sistema.
+  VoidCallback? _abridor(NotificacionRecibida item) {
+    final accion = item.accion;
+    if (accion == null) return null;
+    return () => _abrirContenido(accion);
+  }
+
+  Future<void> _abrirContenido(AccionNotificacion accion) {
+    final abrir = widget.abrirContenido;
+    if (abrir != null) return abrir(accion);
+    return abrirContenidoNotificacion(Navigator.of(context), accion);
   }
 
   /// También optimista (el `Dismissible` ya animó la salida del ítem) - si
@@ -299,7 +323,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                                   description: item.cuerpo,
                                                   date: item.fechaFormateada,
                                                   isNew: !item.leida,
-                                                  enlace: item.accionRuta,
+                                                  onAbrirContenido:
+                                                      _abridor(item),
                                                   onTap: () =>
                                                       _marcarLeida(item),
                                                 ),

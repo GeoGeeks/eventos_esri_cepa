@@ -16,6 +16,7 @@ import 'features/login/login_screen.dart';
 import 'features/login/presentation/bloc/auth_cubit.dart';
 import 'features/login/presentation/bloc/auth_state.dart';
 import 'features/notificaciones/data/push_notificaciones_service.dart';
+import 'features/notificaciones/presentation/abrir_contenido_notificacion.dart';
 import 'features/onboarding/data/onboarding_storage.dart';
 import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'navigation/menu.dart';
@@ -161,7 +162,19 @@ class _ArranqueState extends State<_Arranque> {
   void initState() {
     super.initState();
     _conectarVencimientoDeSesion();
+    _conectarContenidoDeNotificaciones();
     _decidirPantallaInicial();
+  }
+
+  /// Tocar un push con contenido vinculado lo abre sobre la pantalla que
+  /// esté visible (ver `PushNotificacionesService.alAbrirContenido`).
+  void _conectarContenidoDeNotificaciones() {
+    PushNotificacionesService.alAbrirContenido = (accion) async {
+      final navegador = navegadorRaiz.currentState;
+      if (navegador != null) {
+        await abrirContenidoNotificacion(navegador, accion);
+      }
+    };
   }
 
   /// Si el refresh token también venció (la API lo rechaza), se cierra la

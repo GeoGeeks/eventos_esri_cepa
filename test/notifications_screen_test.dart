@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:url_launcher_platform_interface/link.dart' show LinkDelegate;
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
+import 'package:esri_eventos/features/notificaciones/data/accion_notificacion.dart';
 import 'package:esri_eventos/features/notificaciones/data/notificacion_recibida.dart';
 import 'package:esri_eventos/features/notificaciones/data/notificaciones_repository.dart';
 import 'package:esri_eventos/features/notifications/presentation/screens/notifications_screen.dart';
@@ -16,6 +17,7 @@ NotificacionRecibida _item(
   bool leida = false,
   DateTime? fecha,
   String? accionRuta,
+  String? accionParams,
 }) {
   return NotificacionRecibida(
     id: id,
@@ -25,6 +27,7 @@ NotificacionRecibida _item(
     leida: leida,
     fecha: fecha ?? DateTime.now(),
     accionRuta: accionRuta,
+    accionParams: accionParams,
   );
 }
 
@@ -191,6 +194,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(urlLauncherFalso.urlLanzada, 'https://esri.co/evento-x');
+  });
+
+  testWidgets('con una charla vinculada, "Revise los detalles" la abre', (
+    tester,
+  ) async {
+    AccionNotificacion? abierta;
+    tester.view.physicalSize = const Size(412, 917);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NotificationsScreen(
+          repository: _FakeNotificacionesRepository(
+            iniciales: [
+              _item(
+                '1',
+                accionRuta: 'agenda/detalle',
+                accionParams: '{"idCharla":"C1"}',
+              ),
+            ],
+          ),
+          abrirContenido: (accion) async => abierta = accion,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Revise los detalles'));
+    await tester.pumpAndSettle();
+
+    expect((abierta! as AbrirCharla).idCharla, 'C1');
   });
 
   testWidgets('sin enlace propio, "Revise los detalles" queda deshabilitado', (

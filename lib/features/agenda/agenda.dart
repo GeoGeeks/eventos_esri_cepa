@@ -38,6 +38,10 @@ class AgendaScreen extends StatefulWidget {
   /// de layout/pixel-fidelity.
   final String? idEvento;
 
+  /// Charla que llega desplegada y a la vista (al tocar una notificación
+  /// que la tiene vinculada) - ver [AgendaContenido.idCharlaDestacada].
+  final String? idCharlaDestacada;
+
   /// Seams para tests (inyectar dobles sin red real).
   final AgendaRepository? repository;
   final ValoracionesRepository? valoracionesRepository;
@@ -46,6 +50,7 @@ class AgendaScreen extends StatefulWidget {
     super.key,
     this.actividades = AgendaMockData.actividades,
     this.idEvento,
+    this.idCharlaDestacada,
     this.repository,
     this.valoracionesRepository,
   });
@@ -105,6 +110,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                   child: AgendaContenido(
                     actividades: widget.actividades,
                     idEvento: widget.idEvento,
+                    idCharlaDestacada: widget.idCharlaDestacada,
                     repository: widget.repository,
                     valoracionesRepository: widget.valoracionesRepository,
                     onFavoritoMarcado: (marcada) =>
@@ -155,6 +161,11 @@ class AgendaContenido extends StatefulWidget {
   /// comportamiento mock de siempre.
   final String? idEvento;
 
+  /// Solo con [idEvento]: al cargar, esta charla queda desplegada y se
+  /// desplaza hasta ella. Si ya no está en la agenda, la lista se muestra
+  /// normal.
+  final String? idCharlaDestacada;
+
   /// Seams para tests (inyectar dobles sin red real).
   final AgendaRepository? repository;
   final ValoracionesRepository? valoracionesRepository;
@@ -168,6 +179,7 @@ class AgendaContenido extends StatefulWidget {
     super.key,
     this.actividades = AgendaMockData.actividades,
     this.idEvento,
+    this.idCharlaDestacada,
     this.repository,
     this.valoracionesRepository,
     this.onFavoritoMarcado,
@@ -186,6 +198,11 @@ class _AgendaContenidoState extends State<AgendaContenido> {
   late List<Actividad> _actividades = List.of(widget.actividades);
   final Set<int> _expandidas = {};
   String _busqueda = '';
+
+  /// Índice de [AgendaContenido.idCharlaDestacada] ya cargada, y la llave
+  /// de su tarjeta para desplazarse hasta ella.
+  int? _indiceDestacado;
+  final GlobalKey _claveDestacada = GlobalKey();
   Map<String, Set<String>> _filtros = const {};
 
   /// `null` mientras no se ha resuelto (modo mock, o real sin terminar de
@@ -233,6 +250,7 @@ class _AgendaContenidoState extends State<AgendaContenido> {
         ];
         _gruposFiltro = _gruposFiltroReales(charlas, catalogos);
         _cargando = false;
+        _destacar(charlas);
       });
     } catch (e) {
       // Diagnóstico temporal (ver hilo del 2026-09-18: la agenda de CUE
@@ -370,6 +388,25 @@ class _AgendaContenidoState extends State<AgendaContenido> {
       buffer.write(indice == -1 ? caracter : sinAcento[indice]);
     }
     return buffer.toString();
+  }
+
+  /// Despliega la charla destacada y, ya pintada, la lleva a la vista.
+  void _destacar(List<Charla> charlas) {
+    final id = widget.idCharlaDestacada?.toUpperCase();
+    if (id == null) return;
+    final indice = charlas.indexWhere((c) => c.id.toUpperCase() == id);
+    if (indice == -1) return;
+    _indiceDestacado = indice;
+    _expandidas.add(indice);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final contexto = _claveDestacada.currentContext;
+      if (contexto != null) {
+        Scrollable.ensureVisible(
+          contexto,
+          duration: const Duration(milliseconds: 300),
+        );
+      }
+    });
   }
 
   void _alternarExpandida(int indice) {
@@ -542,6 +579,7 @@ class _AgendaContenidoState extends State<AgendaContenido> {
     return [
       for (final indice in visibles) ...[
         ActividadCard(
+          key: indice == _indiceDestacado ? _claveDestacada : null,
           actividad: _actividades[indice],
           expandida: _expandidas.contains(indice),
           onExpandir: () => _alternarExpandida(indice),

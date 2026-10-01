@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import 'accion_notificacion.dart';
 import 'notificaciones_repository.dart';
 
 /// Handler de mensajes recibidos con la app en segundo plano/terminada.
@@ -29,23 +31,23 @@ Future<void> manejarMensajeEnSegundoPlano(RemoteMessage mensaje) async {}
 /// `GoogleService-Info.plist`, entitlements) ya está lista por separado, ver
 /// `CLAUDE.md`.
 ///
-/// ⚠️ Gap conocido, documentado a propósito: al tocar una notificación
-/// (`_alAbrirNotificacion`) no navega todavía al contenido específico de
-/// `accionRuta`/`accionParams` (ver `Notificacion` en el backend) - esta app
-/// no tiene un sistema de rutas nombradas (navegación es `Navigator.push`
-/// inline, ver `CLAUDE.md`, "Navigation") con el que interpretar un deep
-/// link genérico. Por ahora solo marca la notificación como leída y deja
-/// que la app abra donde le toque (`_Arranque`/`Menu`, sesión ya
-/// autenticada). Retomar cuando se defina esa tabla de rutas.
+/// Al tocar una notificación (la del sistema o la que se pinta con la app
+/// abierta) la marca como leída y, SOLO si la campaña trae contenido
+/// vinculado ([AccionNotificacion]), lo abre con [alAbrirContenido]. Sin
+/// contenido vinculado la app abre donde le toque, como siempre.
 class PushNotificacionesService {
+  /// Quién abre el contenido vinculado - lo conecta `_Arranque` (main.dart)
+  /// con el navegador raíz; este servicio no conoce pantallas.
+  static Future<void> Function(AccionNotificacion accion)? alAbrirContenido;
+
   PushNotificacionesService({
     NotificacionesRepository? repository,
     FirebaseMessaging? messaging,
     FlutterLocalNotificationsPlugin? notificacionesLocales,
-  })  : _repository = repository ?? NotificacionesRepository(),
-        _messaging = messaging ?? FirebaseMessaging.instance,
-        _notificacionesLocales =
-            notificacionesLocales ?? FlutterLocalNotificationsPlugin();
+  }) : _repository = repository ?? NotificacionesRepository(),
+       _messaging = messaging ?? FirebaseMessaging.instance,
+       _notificacionesLocales =
+           notificacionesLocales ?? FlutterLocalNotificationsPlugin();
 
   final NotificacionesRepository _repository;
   final FirebaseMessaging _messaging;
@@ -106,11 +108,33 @@ class PushNotificacionesService {
     );
   }
 
-  Future<void> _alAbrirNotificacion(RemoteMessage mensaje) async {
-    final idNotificacion = mensaje.data['notificacionId'] as String?;
-    if (idNotificacion == null) return;
-    await _repository.marcarLeido(idNotificacion);
-    // Ver el gap de navegación documentado en el comentario de la clase.
+  Future<void> _alAbrirNotificacion(RemoteMessage mensaje) =>
+      _alTocar(mensaje.data);
+
+  /// Marca como leída y abre el contenido vinculado, si lo hay. Que falle
+  /// marcarla no impide abrir el contenido.
+  Future<void> _alTocar(Map<String, dynamic> data) async {
+    final idNotificacion = data['notificacionId'] as String?;
+    if (idNotificacion != null) {
+      try {
+        await _repository.marcarLeido(idNotificacion);
+      } catch (_) {}
+    }
+    final accion = AccionNotificacion.desdeData(data);
+    if (accion != null) await alAbrirContenido?.call(accion);
+  }
+
+  /// Toque a la notificación pintada a mano con la app abierta: su
+  /// `payload` es el `data` del push (ver `_mostrarNotificacionLocal`).
+  void _alTocarNotificacionLocal(NotificationResponse respuesta) {
+    final payload = respuesta.payload;
+    if (payload == null || payload.isEmpty) return;
+    try {
+      final data = jsonDecode(payload);
+      if (data is Map<String, dynamic>) _alTocar(data);
+    } on FormatException {
+      // Payload ajeno: no hay nada que abrir.
+    }
   }
 
   /// Android/iOS solo muestran la notificación del sistema automáticamente
@@ -126,6 +150,7 @@ class PushNotificacionesService {
       id: mensaje.hashCode,
       title: notificacion.title,
       body: notificacion.body,
+      payload: jsonEncode(mensaje.data),
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           _canalId,
@@ -153,11 +178,13 @@ class PushNotificacionesService {
         android: AndroidInitializationSettings('@mipmap/launcher_icon'),
         iOS: DarwinInitializationSettings(),
       ),
+      onDidReceiveNotificationResponse: _alTocarNotificacionLocal,
     );
 
     await _notificacionesLocales
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(
           const AndroidNotificationChannel(
             _canalId,

@@ -35,6 +35,17 @@ class AgendaRepository {
         .toList();
   }
 
+  /// `GET /charlas/:id` - una charla suelta con su `idEvento` (lo usa
+  /// tocar una notificación que la tiene vinculada).
+  Future<Charla> obtenerCharla(String id) async {
+    final accessToken = await _tokenStorage.leerAccessToken();
+    final respuesta = await _dio.get<Map<String, dynamic>>(
+      '/charlas/$id',
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+    return Charla.fromJson(respuesta.data!);
+  }
+
   /// `GET /eventos/:idEvento/laboratorios`.
   Future<List<Laboratorio>> listarLaboratorios(String idEvento) async {
     final accessToken = await _tokenStorage.leerAccessToken();
