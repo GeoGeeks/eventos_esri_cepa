@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../core/widgets/bottom_nav.dart';
+import '../features/encuestas/presentation/screens/mis_encuestas_screen.dart';
 import '../features/eventos/data/evento.dart';
 import '../features/eventos/data/eventos_store.dart';
 import '../features/inicio/inicio.dart';
@@ -37,6 +38,7 @@ class _MenuState extends State<Menu> {
   // Controla sub-vistas especiales
   bool _showEcard = false;
   bool _showPreguntasFrecuentes = false;
+  bool _showMisEncuestas = false;
   bool _showPostEvento = false;
 
   /// Evento cuyo post-evento se está mostrando (ver `_showPostEvento`) -
@@ -99,6 +101,7 @@ class _MenuState extends State<Menu> {
       if (index == 4) {
         _showEcard = false;
         _showPreguntasFrecuentes = false;
+        _showMisEncuestas = false;
       }
     });
 
@@ -159,12 +162,19 @@ class _MenuState extends State<Menu> {
             onContactar: () => ProfileMenuScreen.abrirContactenos(context),
           );
         }
+        if (_showMisEncuestas) {
+          return MisEncuestasScreen(
+            onBack: () => setState(() => _showMisEncuestas = false),
+            onContactar: () => ProfileMenuScreen.abrirContactenos(context),
+          );
+        }
         return ProfileMenuScreen(
           onOpenEcard: () => setState(() => _showEcard = true),
           onGoToReservas: () => _onNavTap(2),
           onGoToNotifications: () => _onNavTap(3),
           onOpenPreguntasFrecuentes: () =>
               setState(() => _showPreguntasFrecuentes = true),
+          onOpenMisEncuestas: () => setState(() => _showMisEncuestas = true),
         );
 
       default:

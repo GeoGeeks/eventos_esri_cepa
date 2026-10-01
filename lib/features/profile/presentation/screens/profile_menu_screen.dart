@@ -29,12 +29,16 @@ class ProfileMenuScreen extends StatelessWidget {
   /// pantalla sola.
   final VoidCallback? onOpenPreguntasFrecuentes;
 
+  /// Sub-vista "Mis encuestas" (mismo patrón). Opcional por el mismo motivo.
+  final VoidCallback? onOpenMisEncuestas;
+
   const ProfileMenuScreen({
     super.key,
     required this.onOpenEcard,
     required this.onGoToReservas,
     required this.onGoToNotifications,
     this.onOpenPreguntasFrecuentes,
+    this.onOpenMisEncuestas,
   });
 
   /// Buzón al que llega "Contáctenos" (pedido de la PO, 2026-09-24).
@@ -255,7 +259,7 @@ class ProfileMenuScreen extends StatelessWidget {
                         ProfileMenuItem(
                           icon: 'assets/icons/encuestas.svg',
                           title: 'Mis encuestas',
-                          onTap: () {},
+                          onTap: onOpenMisEncuestas ?? () {},
                           showBorder: false,
                         ),
 

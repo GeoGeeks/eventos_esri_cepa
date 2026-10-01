@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/network/renovacion_sesion.dart';
 import '../../login/data/token_storage.dart';
 import 'encuesta.dart';
+import 'encuestas_respondidas_de_evento.dart';
 import 'respuesta_encuesta.dart';
 
 /// El backend rechazó `responder()` (ya había respondido, falta una
@@ -21,8 +22,8 @@ class ResponderEncuestaRechazadaException implements Exception {
 /// tests sin tocar la red real.
 class EncuestasRepository {
   EncuestasRepository({Dio? dio, TokenStorage? tokenStorage})
-      : _dio = dio ?? crearDioApi(),
-        _tokenStorage = tokenStorage ?? TokenStorage();
+    : _dio = dio ?? crearDioApi(),
+      _tokenStorage = tokenStorage ?? TokenStorage();
 
   final Dio _dio;
   final TokenStorage _tokenStorage;
@@ -41,6 +42,22 @@ class EncuestasRepository {
     );
     return (respuesta.data ?? [])
         .map((json) => Encuesta.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// `GET /encuestas/respondidas` - todo lo que la persona respondió,
+  /// agrupado por evento ("Mis encuestas").
+  Future<List<EncuestasRespondidasDeEvento>> respondidas() async {
+    final respuesta = await _dio.get<List<dynamic>>(
+      '/encuestas/respondidas',
+      options: await _conToken(),
+    );
+    return (respuesta.data ?? [])
+        .map(
+          (json) => EncuestasRespondidasDeEvento.fromJson(
+            json as Map<String, dynamic>,
+          ),
+        )
         .toList();
   }
 
